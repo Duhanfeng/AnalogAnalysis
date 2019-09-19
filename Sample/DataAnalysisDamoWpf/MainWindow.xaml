@@ -1,0 +1,31 @@
+﻿<Window x:Class="DataAnalysisDamoWpf.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DataAnalysisDamoWpf"
+        xmlns:livedata="clr-namespace:AnalogDataAnalysisWpf.LiveData"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="150"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <livedata:LiveDataView x:Name="LiveDataView1" Margin="5" Grid.Row="0"/>
+        <livedata:LiveDataView x:Name="LiveDataView2" Margin="5" Grid.Row="1"/>
+
+        <GroupBox Grid.Column="1" Grid.RowSpan="2" Margin="5">
+            <StackPanel Margin="10">
+                <Button Margin="0,10,0,0" Content="读取数据" Click="ReadDataButton_Click"/>
+                <Button Margin="0,10,0,0" Content="微分求导" Click="DerivativeDataButton_Click"/>
+
+            </StackPanel>
+        </GroupBox>
+        
+    </Grid>
+</Window>
