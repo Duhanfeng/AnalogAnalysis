@@ -23,7 +23,7 @@
             <StackPanel Margin="10">
                 <Button Margin="0,10,0,0" Content="读取数据" Click="ReadDataButton_Click"/>
                 <Button Margin="0,10,0,0" Content="微分求导" Click="DerivativeDataButton_Click"/>
-
+                <Button Margin="0,10,0,0" Content="查找边沿点" Click="FindEdgeButton_Click"/>
             </StackPanel>
         </GroupBox>
         

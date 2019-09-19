@@ -41,6 +41,12 @@ namespace DataAnalysisDamoWpf
         private double[] derivativeData = new double[0];
 
         /// <summary>
+        /// 滤波后的数据
+        /// </summary>
+        private IntPtr FilterData = IntPtr.Zero;
+        private int FilterDataCount = 0;
+
+        /// <summary>
         /// 数据采样数量
         /// </summary>
         private int sampleCount = 200;
@@ -77,24 +83,33 @@ namespace DataAnalysisDamoWpf
 
             LiveDataViewModel1.Collection = collection;
 
+            if (FilterData != IntPtr.Zero)
+            {
+                Marshal.FreeHGlobal(FilterData);
+                FilterData = IntPtr.Zero;
+                FilterDataCount = 0;
+            }
+
             //数据滤波
             IntPtr source = IntPtr.Zero;
-            IntPtr destination = IntPtr.Zero;
             source = Marshal.AllocHGlobal(sizeof(double) * deviceData.Length);
-            destination = Marshal.AllocHGlobal(sizeof(double) * deviceData.Length);
+            FilterData = Marshal.AllocHGlobal(sizeof(double) * deviceData.Length);
+            FilterDataCount = deviceData.Length;
 
+            //将原始数据从数组转成指针
             Marshal.Copy(deviceData, 0, source, deviceData.Length);
 
+            //均值滤波,得到滤波后的数据FilterData
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Restart();
-            DataFilter.MeanFilter(source, destination, deviceData.Length, 15);
+            DataFilter.MeanFilter(source, FilterData, deviceData.Length, 15);
             stopwatch.Stop();
             Console.WriteLine(stopwatch.Elapsed.TotalMilliseconds);
 
             var collection2 = new System.Collections.ObjectModel.ObservableCollection<Data>();
             unsafe
             {
-                double* destinationIntPtr = (double*)destination.ToPointer();
+                double* destinationIntPtr = (double*)FilterData.ToPointer();
 
                 for (int i = 0; i < deviceData.Length / sampleCount; i++)
                 {
@@ -108,15 +123,7 @@ namespace DataAnalysisDamoWpf
                 source = IntPtr.Zero;
             }
 
-            if (destination != IntPtr.Zero)
-            {
-                Marshal.FreeHGlobal(destination);
-                destination = IntPtr.Zero;
-            }
-
-
             LiveDataViewModel2.Collection = collection2;
-
 
         }
 
@@ -151,6 +158,20 @@ namespace DataAnalysisDamoWpf
 
             LiveDataViewModel2.Collection = collection;
 
+        }
+
+        private void FindEdgeButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (FilterData != IntPtr.Zero)
+            {
+                IntPtr topLocation = Marshal.AllocHGlobal(sizeof(double) * FilterDataCount);
+                IntPtr buttomLocation = Marshal.AllocHGlobal(sizeof(double) * FilterDataCount);
+                int risingCount = 0;
+                int fallingCount = 0;
+
+                DataFilter.FindEdge(FilterData, FilterDataCount, 2, 3, topLocation, buttomLocation, ref risingCount, ref fallingCount);
+
+            }
         }
     }
 }
