@@ -29,5 +29,19 @@ namespace AnalogDataAnalysisWpf.LiveData
                 NotifyOfPropertyChange(() => Collection);
             }
         }
+
+        private ObservableCollection<Data> collection2;
+        public ObservableCollection<Data> Collection2
+        {
+            get
+            {
+                return collection2;
+            }
+            set
+            {
+                collection2 = value;
+                NotifyOfPropertyChange(() => Collection2);
+            }
+        }
     }
 }

@@ -3,6 +3,7 @@ using CsvHelper;
 using DataAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -78,7 +79,7 @@ namespace DataAnalysisDamoWpf
             var collection = new System.Collections.ObjectModel.ObservableCollection<Data>();
             for (int i = 0; i < deviceData.Length / sampleCount; i++)
             {
-                collection.Add(new Data() { Value1 = deviceData[i * sampleCount], Value = i });
+                collection.Add(new Data() { Value1 = deviceData[i * sampleCount], Value = i * sampleCount });
             }
 
             LiveDataViewModel1.Collection = collection;
@@ -113,7 +114,7 @@ namespace DataAnalysisDamoWpf
 
                 for (int i = 0; i < deviceData.Length / sampleCount; i++)
                 {
-                    collection2.Add(new Data() { Value1 = destinationIntPtr[i * sampleCount], Value = i });
+                    collection2.Add(new Data() { Value1 = destinationIntPtr[i * sampleCount], Value = i * sampleCount });
                 }
             }
 
@@ -124,36 +125,18 @@ namespace DataAnalysisDamoWpf
             }
 
             LiveDataViewModel2.Collection = collection2;
-
+            LiveDataViewModel2.Collection2 = new ObservableCollection<Data>();
         }
 
         private void DerivativeDataButton_Click(object sender, RoutedEventArgs e)
         {
-            //double[] source = new double[deviceData.Length / sampleCount];
-
-            //for (int i = 0; i < deviceData.Length / sampleCount; i++)
-            //{
-            //    source[i] = deviceData[i * sampleCount];
-            //}
-
-            ////微分求导
-            //Analysis.Derivative(source, out derivativeData);
-
-            //var collection = new System.Collections.ObjectModel.ObservableCollection<Data>();
-            //for (int i = 0; i < derivativeData.Length; i++)
-            //{
-            //    collection.Add(new Data() { Value1 = derivativeData[i], Value = i });
-            //}
-
-            //LiveDataViewModel2.Collection = collection;
-
             //微分求导
             Analysis.Derivative(deviceData, out derivativeData);
 
             var collection = new System.Collections.ObjectModel.ObservableCollection<Data>();
             for (int i = 1; i < derivativeData.Length / sampleCount; i++)
             {
-                collection.Add(new Data() { Value1 = derivativeData[i * sampleCount], Value = i });
+                collection.Add(new Data() { Value1 = derivativeData[i * sampleCount], Value = i * sampleCount });
             }
 
             LiveDataViewModel2.Collection = collection;
@@ -164,12 +147,41 @@ namespace DataAnalysisDamoWpf
         {
             if (FilterData != IntPtr.Zero)
             {
-                IntPtr topLocation = Marshal.AllocHGlobal(sizeof(double) * FilterDataCount);
-                IntPtr buttomLocation = Marshal.AllocHGlobal(sizeof(double) * FilterDataCount);
+                //IntPtr topLocation = Marshal.AllocHGlobal(sizeof(double) * FilterDataCount);
+                //IntPtr buttomLocation = Marshal.AllocHGlobal(sizeof(double) * FilterDataCount);
+
+                IntPtr topLocation = IntPtr.Zero;
+                IntPtr buttomLocation = IntPtr.Zero;
                 int risingCount = 0;
                 int fallingCount = 0;
 
-                DataFilter.FindEdge(FilterData, FilterDataCount, 2, 3, topLocation, buttomLocation, ref risingCount, ref fallingCount);
+                DataFilter.FindEdge(FilterData, FilterDataCount, 1.5, 3, out topLocation, out buttomLocation, ref risingCount, ref fallingCount);
+
+                unsafe
+                {
+                    ObservableCollection<Data> collection = new ObservableCollection<Data>();
+                    int * topLocationPtr = (int*)topLocation;
+                    //上升沿位置
+                    for (int i = 0; i < risingCount; i++)
+                    {
+                        Console.WriteLine(topLocationPtr[i]);
+                        collection.Add(new Data() { Value1 = LiveDataViewModel2.Collection[topLocationPtr[i] / sampleCount].Value1, Value = topLocationPtr[i] });
+                    }
+
+                    int* buttomLocationPtr = (int*)buttomLocation;
+                    //上升沿位置
+                    for (int i = 0; i < fallingCount; i++)
+                    {
+                        Console.WriteLine(buttomLocationPtr[i]);
+                        collection.Add(new Data() { Value1 = LiveDataViewModel2.Collection[buttomLocationPtr[i] / sampleCount].Value1, Value = buttomLocationPtr[i] });
+                    }
+
+                    LiveDataViewModel2.Collection2 = collection;
+                }
+
+                //释放内存
+                DataFilter.FreeIntPtr(topLocation);
+                DataFilter.FreeIntPtr(buttomLocation);
 
             }
         }

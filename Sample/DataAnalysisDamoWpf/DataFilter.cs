@@ -25,7 +25,9 @@ namespace DataAnalysisDamoWpf
         /// <param name="fallingCount">实际下降沿数量</param>
         /// <returns></returns>
         [DllImport("DataFilter.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern bool FindEdge(IntPtr source, int length, double minThreshold, double maxThreshold, IntPtr topLocation, IntPtr buttomLocation, ref int risingCount, ref int fallingCount);
+        public static extern bool FindEdge(IntPtr source, int length, double minThreshold, double maxThreshold, out IntPtr topLocation, out IntPtr buttomLocation, ref int risingCount, ref int fallingCount);
 
+        [DllImport("DataFilter.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void FreeIntPtr(IntPtr intPtr);
     }
 }

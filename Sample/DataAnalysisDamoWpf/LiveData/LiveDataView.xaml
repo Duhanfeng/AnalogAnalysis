@@ -47,6 +47,8 @@
             </chart:SparrowChart.YAxis>
             <chart:LineSeries PointsSource="{Binding Collection}" Stroke="Yellow" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True">
             </chart:LineSeries>
+            <chart:ScatterSeries PointsSource="{Binding Collection2}" Stroke="Red" XPath="Value" YPath="Value1" ScatterSize="10"  StrokeThickness="2" UseSinglePart="True">
+            </chart:ScatterSeries>
         </chart:SparrowChart>
     </Grid>
 </UserControl>
