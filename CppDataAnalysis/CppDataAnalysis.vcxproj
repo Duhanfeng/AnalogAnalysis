@@ -151,8 +151,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Application.cpp" />
     <ClCompile Include="CppDataAnalysis.cpp" />
     <ClCompile Include="DataAnalysis.cpp" />
+    <ClCompile Include="PlcControl.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="csv.h" />

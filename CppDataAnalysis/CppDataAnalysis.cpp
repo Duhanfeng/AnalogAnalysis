@@ -43,11 +43,9 @@ int main()
         Interpolate(risingIndexs, fallingIndexs, edgeIndexs, isFillingFirst);
 
         bool isFilling = isFillingFirst;
-        string edge;
         for (size_t i = 0; i < edgeIndexs.size(); i++)
         {
-            edge = isFilling ? "↑" : "↓";
-            std::cout << edge << edgeIndexs[i] << std::endl;
+            std::cout << (isFilling ? " ↑" : "↓") << edgeIndexs[i] << std::endl;
             isFilling = !isFilling;
         }
         std::cout << std::endl << std::endl << std::endl;
