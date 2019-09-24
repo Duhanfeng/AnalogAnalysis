@@ -34,5 +34,22 @@ namespace AnalogDataAnalysisWpf
         {
             MessageBox.Show(e.Message);
         }
+
+        private void TextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                TextBox tb = sender as TextBox;
+                BindingExpression be = tb.GetBindingExpression(TextBox.TextProperty);
+                be.UpdateSource();
+            }
+        }
+
+        private void TextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            TextBox tb = sender as TextBox;
+            BindingExpression be = tb.GetBindingExpression(TextBox.TextProperty);
+            be.UpdateSource();
+        }
     }
 }

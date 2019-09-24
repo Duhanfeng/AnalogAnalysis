@@ -282,24 +282,6 @@ namespace DataAnalysis
 
         }
 
-        public static void FindEdgeByDerivative(double[] source, int sampleInterval)
-        {
-            double[] destination;
-            Derivative(source, sampleInterval, out destination);
-
-            double minThreshold = -0.3;
-            double maxThreshold = 0.3;
-
-            for (int i = 0; i < destination.Length; i++)
-            {
-
-            }
-
-
-
-        }
-
-
         /// <summary>
         /// 分析脉冲数据
         /// </summary>

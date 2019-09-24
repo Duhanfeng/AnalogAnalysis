@@ -12,12 +12,14 @@ namespace AnalogDataAnalysisWpf.Hantek66022BE
     /// </summary>
     static class HardwareControl
     {
+        private const CallingConvention callingConvention = CallingConvention.StdCall;
+
         /// <summary>
         /// 打开设备
         /// </summary>
         /// <param name="index">设备索引</param>
         /// <returns>0-没有连接 1-连接成功</returns>
-        [DllImport("HTMarch.dll")]
+        [DllImport("HTMarch.dll", CallingConvention = callingConvention)]
         public static extern Int16 dsoOpenDevice(UInt16 index);
 
         /// <summary>
@@ -36,7 +38,7 @@ namespace AnalogDataAnalysisWpf.Hantek66022BE
         /// 7-5V/DIV
         /// </param>
         /// <returns>0-失败 1-成功</returns>
-        [DllImport("HTMarch.dll")]
+        [DllImport("HTMarch.dll", CallingConvention = callingConvention)]
         public static extern short dsoSetVoltDIV(ushort index, int channel, int voltDIV);
 
         /// <summary>
@@ -54,7 +56,7 @@ namespace AnalogDataAnalysisWpf.Hantek66022BE
         /// 27-100KSa/s
         /// </param>
         /// <returns>0-失败 1-成功</returns>
-        [DllImport("HTMarch.dll")]
+        [DllImport("HTMarch.dll", CallingConvention = callingConvention)]
         public static extern short dsoSetTimeDIV(ushort index, int timeDIV);
 
         /// <summary>
@@ -77,7 +79,7 @@ namespace AnalogDataAnalysisWpf.Hantek66022BE
         /// <param name="trigPointIndex">返回的触发点的索引值</param>
         /// <param name="nInsertMode">差值方式 0-Step差值 1-Line差值 2-SinX/X差值</param>
         /// <returns>0-失败 1-成功</returns>
-        [DllImport("HTMarch.dll")]
+        [DllImport("HTMarch.dll", CallingConvention = callingConvention)]
         public static extern short dsoReadHardData(ushort index, IntPtr channel1, IntPtr channel2, uint readLength, IntPtr pCalLevel, int nCH1VoltDIV, int nCH2VoltDIV, short nTrigSweep, short nTrigSrc, short nTrigLevel, short nSlope, int timeDIV, short nHTrigPos, uint nDisLen, ref UInt32 trigPointIndex, short nInsertMode);
 
         /// <summary>
@@ -87,7 +89,7 @@ namespace AnalogDataAnalysisWpf.Hantek66022BE
         /// <param name="level">校正数据缓冲区</param>
         /// <param name="length">缓冲区长度(为32)</param>
         /// <returns>0-失败 非0-成功</returns>
-        [DllImport("HTMarch.dll")]
+        [DllImport("HTMarch.dll", CallingConvention = callingConvention)]
         public static extern ushort dsoGetCalLevel(ushort index, IntPtr level, short length = 32);
 
         ///// <summary>

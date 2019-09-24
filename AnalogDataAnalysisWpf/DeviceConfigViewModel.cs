@@ -165,6 +165,19 @@ namespace AnalogDataAnalysisWpf
             }
         }
 
+        public int SampleTime
+        {
+            get
+            {
+                return VirtualOscilloscope.SampleTime;
+            }
+            set
+            {
+                VirtualOscilloscope.SampleTime = value;
+                NotifyOfPropertyChange(() => SampleTime);
+            }
+        }
+
         #endregion
 
         #region 事件

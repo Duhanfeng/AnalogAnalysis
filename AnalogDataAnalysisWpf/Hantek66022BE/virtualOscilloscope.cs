@@ -53,6 +53,7 @@ namespace AnalogDataAnalysisWpf.Hantek66022BE
             CH1VoltageDIV = EVoltageDIV.DIV_1V;
             CH2VoltageDIV = EVoltageDIV.DIV_1V;
             TimeDIV = ETimeDIV.DIV_1MSaS;
+            SampleTime = 100;
 
         }
 
@@ -61,9 +62,9 @@ namespace AnalogDataAnalysisWpf.Hantek66022BE
         /// </summary>
         /// <param name="deviceIndex">设备索引</param>
         /// <param name="defaultSampleCount">默认采样数量</param>
-        public VirtualOscilloscope(int deviceIndex, int defaultSampleCount) : this(deviceIndex)
+        public VirtualOscilloscope(int deviceIndex, int sampleTime) : this(deviceIndex)
         {
-            DefaultSampleCount = defaultSampleCount;
+            SampleTime = sampleTime;
         }
 
         /// <summary>
@@ -153,6 +154,7 @@ namespace AnalogDataAnalysisWpf.Hantek66022BE
                 }
 
                 timeDIV = value;
+                SampleCount = TimeDIVToSampleRate(TimeDIV) / 1000 * sampleTime;
             }
         }
 
@@ -232,10 +234,85 @@ namespace AnalogDataAnalysisWpf.Hantek66022BE
 
         #endregion
 
+        private int sampleTime;
+
+        /// <summary>
+        /// 采集时长(MS)
+        /// </summary>
+        public int SampleTime
+        {
+            get
+            {
+                return sampleTime;
+            }
+            set
+            {
+                sampleTime = value;
+                SampleCount = TimeDIVToSampleRate(TimeDIV) / 1000 * sampleTime;
+            }
+        }
+
         /// <summary>
         /// 默认采样数量
         /// </summary>
-        public int DefaultSampleCount { get; set; } = 10240;
+        public int SampleCount { get; set; }
+
+        /// <summary>
+        /// 采样率
+        /// </summary>
+        public int SampleRate
+        {
+            get
+            {
+                return TimeDIVToSampleRate(TimeDIV);
+            }
+        }
+
+        /// <summary>
+        /// 比例系数
+        /// </summary>
+        public double Scale = 2.0 / 67;
+
+        /// <summary>
+        /// 采样档位转采样率
+        /// </summary>
+        /// <param name="timeDIV"></param>
+        /// <returns>采样率</returns>
+        private static int TimeDIVToSampleRate(ETimeDIV timeDIV)
+        {
+            int sampleRate = 0;
+            switch (timeDIV)
+            {
+                case ETimeDIV.DIV_48MSaS:
+                    sampleRate = 48 * 1000 * 1000;
+                    break;
+                case ETimeDIV.DIV_16MSaS:
+                    sampleRate = 16 * 1000 * 1000;
+                    break;
+                case ETimeDIV.DIV_8MSaS:
+                    sampleRate = 8 * 1000 * 1000;
+                    break;
+                case ETimeDIV.DIV_4MSaS:
+                    sampleRate = 4 * 1000 * 1000;
+                    break;
+                case ETimeDIV.DIV_1MSaS:
+                    sampleRate = 1 * 1000 * 1000;
+                    break;
+                case ETimeDIV.DIV_500KSaS:
+                    sampleRate = 500 * 1000;
+                    break;
+                case ETimeDIV.DIV_200KSaS:
+                    sampleRate = 200 * 1000;
+                    break;
+                case ETimeDIV.DIV_100KSaS:
+                    sampleRate = 100 * 1000;
+                    break;
+                default:
+                    break;
+            }
+
+            return sampleRate;
+        }
 
         /// <summary>
         /// 设备锁
@@ -243,18 +320,26 @@ namespace AnalogDataAnalysisWpf.Hantek66022BE
         private object deviceLock = new object();
 
         /// <summary>
+        /// 最大采样数据
+        /// </summary>
+        private readonly int maxSampleCount = 100*1000;
+
+        /// <summary>
         /// 读取设备数据
         /// </summary>
+        /// <param name="sampleCount">采样数据</param>
         /// <param name="channel1Array">通道1数据</param>
         /// <param name="channel2Array">通道2数据</param>
         /// <param name="triggerPointIndex">触发点位置</param>
-        public void ReadDeviceData(out ushort[] channel1Array, out ushort[] channel2Array, out uint triggerPointIndex)
+        public void ReadDeviceData(int sampleCount, out short[] channel1Array, out short[] channel2Array, out uint triggerPointIndex)
         {
             //加线程锁
             lock (deviceLock)
             {
-                channel1Array = new ushort[0];
-                channel2Array = new ushort[0];
+                //提取数据
+                channel1Array = new short[sampleCount];
+                channel2Array = new short[sampleCount];
+
                 triggerPointIndex = 0;
 
                 //创建内存空间
@@ -263,36 +348,59 @@ namespace AnalogDataAnalysisWpf.Hantek66022BE
 
                 try
                 {
-                    channel1Data = Marshal.AllocHGlobal(sizeof(ushort) * DefaultSampleCount);
-                    channel2Data = Marshal.AllocHGlobal(sizeof(ushort) * DefaultSampleCount);
+                    channel1Data = Marshal.AllocHGlobal(sizeof(short) * sampleCount);
+                    channel2Data = Marshal.AllocHGlobal(sizeof(short) * sampleCount);
 
-                    //获取硬件采样数据
-                    if (HardwareControl.dsoReadHardData((ushort)DeviceIndex, channel1Data, channel2Data,
-                        (uint)DefaultSampleCount, calData,
-                        (int)CH1VoltageDIV, (int)CH2VoltageDIV, 
-                        (short)TriggerSweep, (short)TriggerSource,
-                        TriggerLevel, (short)TriggerSlope, 
-                        (int)TimeDIV, HorizontalTriggerPosition, 
-                        (uint)DefaultSampleCount, ref triggerPointIndex,
-                        (short)InsertMode) != -1)
+                    for (int i = 0; i < sampleCount / maxSampleCount; i++)
                     {
-                        //提取数据
-                        channel1Array = new ushort[DefaultSampleCount];
-                        channel2Array = new ushort[DefaultSampleCount];
-
-                        //内存拷贝
-                        unsafe
+                        //获取硬件采样数据
+                        if (HardwareControl.dsoReadHardData((ushort)DeviceIndex, 
+                            IntPtr.Add(channel1Data, i * maxSampleCount * sizeof(short)),
+                            IntPtr.Add(channel2Data, i * maxSampleCount * sizeof(short)),
+                            (uint)maxSampleCount, calData,
+                            (int)CH1VoltageDIV, (int)CH2VoltageDIV,
+                            (short)TriggerSweep, (short)TriggerSource,
+                            TriggerLevel, (short)TriggerSlope,
+                            (int)TimeDIV, HorizontalTriggerPosition,
+                            (uint)maxSampleCount, ref triggerPointIndex,
+                            (short)InsertMode) != -1)
                         {
-                            ushort* channnel1DataIntPtr = (ushort*)channel1Data.ToPointer();
-                            ushort* channnel2DataIntPtr = (ushort*)channel2Data.ToPointer();
 
-                            for (int i = 0; i < DefaultSampleCount; i++)
-                            {
-                                channel1Array[i] = channnel1DataIntPtr[i];
-                                channel2Array[i] = channnel2DataIntPtr[i];
-                            }
                         }
                     }
+                    if ((sampleCount % maxSampleCount) != 0)
+                    {
+                        int surplusCount = sampleCount % maxSampleCount;
+
+                        //获取硬件采样数据
+                        if (HardwareControl.dsoReadHardData((ushort)DeviceIndex,
+                            IntPtr.Add(channel1Data, (sampleCount - surplusCount) * sizeof(short)),
+                            IntPtr.Add(channel2Data, (sampleCount - surplusCount) * sizeof(short)),
+                            (uint)surplusCount, calData,
+                            (int)CH1VoltageDIV, (int)CH2VoltageDIV,
+                            (short)TriggerSweep, (short)TriggerSource,
+                            TriggerLevel, (short)TriggerSlope,
+                            (int)TimeDIV, HorizontalTriggerPosition,
+                            (uint)surplusCount, ref triggerPointIndex,
+                            (short)InsertMode) != -1)
+                        {
+
+                        }
+                    }
+
+                    //数据拷贝
+                    unsafe
+                    {
+                        short* ch1 = (short*)channel1Data.ToPointer();
+                        short* ch2 = (short*)channel2Data.ToPointer();
+
+                        for (int i = 0; i < sampleCount; i++)
+                        {
+                            channel1Array[i] = ch1[i];
+                            channel2Array[i] = ch2[i];
+                        }
+                    }
+                    
                 }
                 catch (Exception)
                 {
@@ -314,6 +422,50 @@ namespace AnalogDataAnalysisWpf.Hantek66022BE
 
                 }
             }
+        }
+
+        /// <summary>
+        /// 读取设备数据
+        /// </summary>
+        /// <param name="source">数据源</param>
+        public void ReadDeviceData(out double[] source)
+        {
+            source = new double[SampleCount];
+
+            short[] channel1Array;
+            short[] channel2Array;
+            uint triggerPointIndex;
+            ReadDeviceData(SampleCount, out channel1Array, out channel2Array, out triggerPointIndex);
+
+            for (int i = 0; i < SampleCount; i++)
+            {
+                source[i] = channel1Array[i] * Scale;
+            }
+
+            //for (int i = 0; i < SampleCount / maxSampleCount; i++)
+            //{
+            //    short[] channel1Array;
+            //    short[] channel2Array;
+            //    uint triggerPointIndex;
+            //    ReadDeviceData(maxSampleCount, out channel1Array, out channel2Array, out triggerPointIndex);
+
+            //    for (int j = 0; j < maxSampleCount; j++)
+            //    {
+            //        source[i * maxSampleCount + j] = channel1Array[j] * Scale;
+            //    }
+            //}
+            //if ((SampleCount % maxSampleCount) != 0)
+            //{
+            //    short[] channel1Array;
+            //    short[] channel2Array;
+            //    uint triggerPointIndex;
+            //    ReadDeviceData(SampleCount % maxSampleCount, out channel1Array, out channel2Array, out triggerPointIndex);
+
+            //    for (int i = 0; i < SampleCount % maxSampleCount; i++)
+            //    {
+            //        source[(SampleCount /  maxSampleCount) * maxSampleCount + i] = channel1Array[i] * Scale;
+            //    }
+            //}
         }
     }
 }

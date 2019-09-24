@@ -5,7 +5,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:AnalogDataAnalysisWpf"
              mc:Ignorable="d" 
+             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:cal="http://www.caliburnproject.org"
              TextElement.FontWeight="Regular"
              TextElement.FontSize="13"
              TextOptions.TextFormattingMode="Ideal" 
@@ -15,40 +17,44 @@
     <Grid>
         <StackPanel Margin="10">
             <DockPanel Margin="0,10,0,0">
-                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="75">CH1电压档位</TextBlock>
+                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="70">CH1电压</TextBlock>
                 <ComboBox ItemsSource="{Binding VoltageDIVCollection}" SelectedItem="{Binding CH1VoltageDIV}"/>
             </DockPanel>
             <DockPanel Margin="0,10,0,0">
-                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="75">CH2电压档位</TextBlock>
+                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="70">CH2电压</TextBlock>
                 <ComboBox ItemsSource="{Binding VoltageDIVCollection}" SelectedItem="{Binding CH2VoltageDIV}"/>
             </DockPanel>
             <DockPanel Margin="0,10,0,0">
-                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="75">采样率</TextBlock>
+                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="70">采样率</TextBlock>
                 <ComboBox ItemsSource="{Binding TimeDIVCollection}" SelectedItem="{Binding TimeDIV}"/>
             </DockPanel>
             <DockPanel Margin="0,10,0,0">
-                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="75">扫频模式</TextBlock>
+                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="70">扫频模式</TextBlock>
                 <ComboBox ItemsSource="{Binding TriggerSweepCollection}" SelectedItem="{Binding TriggerSweep}"/>
             </DockPanel>
             <DockPanel Margin="0,10,0,0">
-                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="75">触发源</TextBlock>
+                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="70">触发源</TextBlock>
                 <ComboBox ItemsSource="{Binding TriggerSourceCollection}" SelectedItem="{Binding TriggerSource}"/>
             </DockPanel>
             <DockPanel Margin="0,10,0,0">
-                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="75">触发电平</TextBlock>
-                <TextBox Text="{Binding TriggerLevel}"/>
+                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="70">触发电平</TextBlock>
+                <TextBox Text="{Binding TriggerLevel, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
             </DockPanel>
             <DockPanel Margin="0,10,0,0">
-                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="75">触发边沿</TextBlock>
+                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="70">触发边沿</TextBlock>
                 <ComboBox ItemsSource="{Binding TriggerSlopeCollectione}" SelectedItem="{Binding TriggerSlope}"/>
             </DockPanel>
             <DockPanel Margin="0,10,0,0">
-                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="75">水平触发位置</TextBlock>
-                <TextBox Text="{Binding HorizontalTriggerPosition}"/>
+                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="70">水平位置</TextBlock>
+                <TextBox Text="{Binding HorizontalTriggerPosition, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
             </DockPanel>
             <DockPanel Margin="0,10,0,0">
-                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="75">差值方式</TextBlock>
+                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="70">差值方式</TextBlock>
                 <ComboBox ItemsSource="{Binding InsertModeCollection}" SelectedItem="{Binding InsertMode}"/>
+            </DockPanel>
+            <DockPanel Margin="0,10,0,0">
+                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="70">时长(MS)</TextBlock>
+                <TextBox Text="{Binding SampleTime, UpdateSourceTrigger=Explicit}" KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
             </DockPanel>
         </StackPanel>
     </Grid>

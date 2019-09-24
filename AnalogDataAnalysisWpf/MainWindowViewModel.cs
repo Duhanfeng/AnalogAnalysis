@@ -1,12 +1,15 @@
 ﻿using AnalogDataAnalysisWpf.Hantek66022BE;
 using AnalogDataAnalysisWpf.LiveData;
 using Caliburn.Micro;
+using DataAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using static DataAnalysis.Analysis;
 
 namespace AnalogDataAnalysisWpf
 {
@@ -19,7 +22,8 @@ namespace AnalogDataAnalysisWpf
         {
             try
             {
-                VirtualOscilloscope = new VirtualOscilloscope(0, 10240);
+                VirtualOscilloscope = new VirtualOscilloscope(0, 100);
+                deviceConfigView = new DeviceConfigView(VirtualOscilloscope);
             }
             catch (Exception ex)
             {
@@ -28,8 +32,6 @@ namespace AnalogDataAnalysisWpf
         }
 
         public VirtualOscilloscope VirtualOscilloscope { get; set; }
-
-        //public LiveDataViewModel
 
         private LiveDataViewModel liveDataViewModel1 = new LiveDataViewModel();
 
@@ -45,15 +47,58 @@ namespace AnalogDataAnalysisWpf
             set
             {
                 liveDataViewModel1 = value;
-
-                if (value is LiveDataViewModel)
-                {
-                    liveDataViewModel1 = value as LiveDataViewModel;
-                }
-
                 NotifyOfPropertyChange(() => LiveDataViewModel1);
             }
         }
+
+
+        private LiveDataViewModel liveDataViewModel2 = new LiveDataViewModel();
+
+        /// <summary>
+        /// LiveData显示模型
+        /// </summary>
+        public LiveDataViewModel LiveDataViewModel2
+        {
+            get
+            {
+                return liveDataViewModel2;
+            }
+            set
+            {
+                liveDataViewModel2 = value;
+                NotifyOfPropertyChange(() => LiveDataViewModel2);
+            }
+        }
+
+        private DeviceConfigView deviceConfigView;
+
+        public DeviceConfigView DeviceConfigView
+        {
+            get
+            {
+                return deviceConfigView;
+            }
+            set
+            {
+                deviceConfigView = value;
+                NotifyOfPropertyChange(() => DeviceConfigView);
+            }
+        }
+
+        /// <summary>
+        /// 滤波数据
+        /// </summary>
+        public double[] FilterData;
+
+        /// <summary>
+        /// 数据采样间隔
+        /// </summary>
+        public int SampleInterval = 1;
+
+        public List<int> EdgeIndexs = new List<int>();
+
+        public DigitEdgeType DigitEdgeType = DigitEdgeType.CriticalLevel;
+
 
         #region 事件
 
@@ -83,19 +128,42 @@ namespace AnalogDataAnalysisWpf
             
             try
             {
-                ushort[] channel1Array;
-                ushort[] channel2Array;
-                uint triggerPointIndex;
+                double[] source;
+                VirtualOscilloscope.ReadDeviceData(out source);
+                int sampleRate = VirtualOscilloscope.SampleRate;
 
-                VirtualOscilloscope.ReadDeviceData(out channel1Array, out channel2Array, out triggerPointIndex);
+                //数据滤波
+                Analysis.MeanFilter(source, out FilterData, 21);
 
+                //显示数据
                 var collection = new System.Collections.ObjectModel.ObservableCollection<Data>();
-                for (int i = 0; i < channel1Array.Length; i++)
+                for (int i = 0; i < source.Length / SampleInterval; i++)
                 {
-                    collection.Add(new Data() { Value1 = channel1Array[i], Value = i });
+                    collection.Add(new Data() { Value1 = FilterData[i * SampleInterval], Value = i * 1000.0 / sampleRate * SampleInterval });
                 }
 
                 LiveDataViewModel1.Collection = collection;
+
+                //提取边沿
+                if (FilterData?.Length > 0)
+                {
+
+                    Analysis.FindEdgeByThreshold(FilterData, 0.4, 1.6, out EdgeIndexs, out DigitEdgeType);
+
+                    if ((DigitEdgeType == DigitEdgeType.FirstFillingEdge) || (DigitEdgeType == DigitEdgeType.FirstRisingEdge))
+                    {
+                        collection = new ObservableCollection<Data>();
+
+                        foreach (var item in EdgeIndexs)
+                        {
+                            collection.Add(new Data() { Value1 = LiveDataViewModel1.Collection[item / SampleInterval].Value1, Value = item * 1000.0 / sampleRate * SampleInterval });
+
+                        }
+                        LiveDataViewModel1.Collection2 = collection;
+                    }
+
+                }
+
             }
             catch (Exception ex)
             {
@@ -104,32 +172,32 @@ namespace AnalogDataAnalysisWpf
 
         }
 
-        /// <summary>
-        /// 打开窗口配置窗口
-        /// </summary>
-        public void OpenDeviceConfigWindow()
-        {
-            //ScenesListView.SelectedItem
-            var view = new DeviceConfigView(VirtualOscilloscope)
-            {
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                VerticalAlignment = VerticalAlignment.Stretch
-            };
+        ///// <summary>
+        ///// 打开窗口配置窗口
+        ///// </summary>
+        //public void OpenDeviceConfigWindow()
+        //{
+        //    //ScenesListView.SelectedItem
+        //    var view = new DeviceConfigView(VirtualOscilloscope)
+        //    {
+        //        HorizontalAlignment = HorizontalAlignment.Stretch,
+        //        VerticalAlignment = VerticalAlignment.Stretch
+        //    };
 
-            //将控件嵌入窗口之中
-            var window = new Window();
-            window.MinWidth = view.MinWidth + 50;
-            window.MinHeight = view.MinHeight + 50;
-            window.MaxWidth = view.MaxWidth;
-            window.MaxHeight = view.MaxHeight;
-            window.Width = view.MinWidth + 50;
-            window.Height = view.MinHeight + 50;
-            window.Content = view;
-            window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-            //window.Owner = Window.GetWindow(this);
-            window.Title = "设备配置窗口";
-            window.Show();
-        }
+        //    //将控件嵌入窗口之中
+        //    var window = new MahApps.Metro.Controls.MetroWindow();
+        //    window.MinWidth = view.MinWidth + 50;
+        //    window.MinHeight = view.MinHeight + 50;
+        //    window.MaxWidth = view.MaxWidth;
+        //    window.MaxHeight = view.MaxHeight;
+        //    window.Width = view.MinWidth + 50;
+        //    window.Height = view.MinHeight + 50;
+        //    window.Content = view;
+        //    window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+        //    //window.Owner = Window.GetWindow(this);
+        //    window.Title = "设备配置窗口";
+        //    window.Show();
+        //}
 
     }
 }

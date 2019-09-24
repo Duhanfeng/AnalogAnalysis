@@ -101,27 +101,19 @@ namespace DataAnalysisDamoWpf
         {
             if (FilterData?.Length > 0)
             {
-                int sampleCount = 10 * 1000;
+                int K = 20;
+                int sampleRatio = 20 * 1000;
+                int sampleCount = sampleRatio / K;
                 Analysis.Derivative(FilterData, sampleCount, out var derivativeData);
 
                 ObservableCollection<Data> collection = new ObservableCollection<Data>();
 
                 for (int i = 0; i < derivativeData.Length; i++)
                 {
-                    collection.Add(new Data() { Value1 = derivativeData[i], Value = i * sampleCount });
+                    collection.Add(new Data() { Value1 = derivativeData[i] + 3.0, Value = i * sampleCount });
                 }
 
-                LiveDataViewModel2.Collection3 = collection;
-
-                //对导数的导数再次求导
-                Analysis.Derivative(derivativeData, out var derivativeData2);
-                collection = new ObservableCollection<Data>();
-                for (int i = 0; i < derivativeData2.Length; i++)
-                {
-                    collection.Add(new Data() { Value1 = derivativeData2[i], Value = i * sampleCount });
-                }
-
-                LiveDataViewModel2.Collection = collection;
+                LiveDataViewModel1.Collection3 = collection;
             }
                 
         }

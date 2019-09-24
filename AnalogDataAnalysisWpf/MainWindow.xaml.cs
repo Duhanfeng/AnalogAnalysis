@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MahApps.Metro.Controls;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,7 +19,7 @@ namespace AnalogDataAnalysisWpf
     /// <summary>
     /// MainWindow.xaml 的交互逻辑
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : MetroWindow
     {
         public MainWindow()
         {
@@ -32,6 +33,12 @@ namespace AnalogDataAnalysisWpf
         private void ViewModel_MessageRaised(object sender, MessageRaisedEventArgs e)
         {
             MessageBox.Show(e.Message);
+        }
+
+        private void MetroWindow_Closed(object sender, EventArgs e)
+        {
+            //强制退出进程
+            Environment.Exit(0);
         }
     }
 }
