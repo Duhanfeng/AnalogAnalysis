@@ -45,7 +45,9 @@
                 <chart:LinearYAxis CrossLineStyle="{StaticResource crossLineStyle}"  MinorLineStyle="{StaticResource minorcrossLineStyle}" MajorLineStyle="{StaticResource crossLineStyle}" AxisLineStyle="{StaticResource axisLineStyle}" MinorTicksCount="3" MaxValue="5"  ShowCrossLines="True" StringFormat="0.0" Header="Voltage(mV)" >
                 </chart:LinearYAxis>
             </chart:SparrowChart.YAxis>
-            <chart:LineSeries PointsSource="{Binding Collection}" Stroke="Yellow" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True">
+            <chart:LineSeries PointsSource="{Binding Collection}" Stroke="Yellow" XPath="Value" YPath="Value1" StrokeThickness="1" UseSinglePart="True">
+            </chart:LineSeries>
+            <chart:LineSeries PointsSource="{Binding Collection3}" Stroke="Red" XPath="Value" YPath="Value1" StrokeThickness="1" UseSinglePart="True">
             </chart:LineSeries>
             <chart:ScatterSeries PointsSource="{Binding Collection2}" Stroke="Red" XPath="Value" YPath="Value1" ScatterSize="10"  StrokeThickness="2" UseSinglePart="True">
             </chart:ScatterSeries>
