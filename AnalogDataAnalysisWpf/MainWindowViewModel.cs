@@ -133,7 +133,7 @@ namespace AnalogDataAnalysisWpf
                 int sampleRate = VirtualOscilloscope.SampleRate;
 
                 //数据滤波
-                Analysis.MeanFilter(source, out FilterData, 21);
+                Analysis.MeanFilter(source, 21, out FilterData);
 
                 //显示数据
                 var collection = new System.Collections.ObjectModel.ObservableCollection<Data>();

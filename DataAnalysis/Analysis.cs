@@ -7,6 +7,35 @@ using MathNet.Filtering;
 
 namespace DataAnalysis
 {
+
+    public enum DigitEdgeType
+    {
+        /// <summary>
+        /// 临界电平(小于最大阈值而大于最小阈值)
+        /// </summary>
+        CriticalLevel = 0,
+
+        /// <summary>
+        /// 高电平
+        /// </summary>
+        HeightLevel,
+
+        /// <summary>
+        /// 低电平
+        /// </summary>
+        LowLevel,
+
+        /// <summary>
+        /// 第一个边沿为上升沿的边沿
+        /// </summary>
+        FirstRisingEdge,
+
+        /// <summary>
+        /// 第一个边沿为下降沿沿的边沿
+        /// </summary>
+        FirstFillingEdge,
+    }
+
     public class Analysis
     {
         #region 求导/滤波
@@ -74,7 +103,7 @@ namespace DataAnalysis
         /// <param name="source">数据源</param>
         /// <param name="destination">结果数据</param>
         /// <param name="kernelSize">内核大小</param>
-        public static void MedianFilter(double[] source, out double[] destination, int kernelSize)
+        public static void MedianFilter(double[] source, int kernelSize, out double[] destination)
         {
             var filter = new MathNet.Filtering.Median.OnlineMedianFilter(kernelSize);
 
@@ -88,7 +117,7 @@ namespace DataAnalysis
         /// <param name="source">数据源</param>
         /// <param name="destination">结果数据</param>
         /// <param name="kernelSize">内核大小</param>
-        public static void MeanFilter(double[] source, out double[] destination, int kernelSize)
+        public static void MeanFilter(double[] source, int kernelSize, out double[] destination)
         {
             destination = new double[0];
             if (source == null || source.Length == 0)
@@ -153,34 +182,6 @@ namespace DataAnalysis
         #endregion
 
         #region 脉冲解析
-
-        public enum DigitEdgeType
-        {
-            /// <summary>
-            /// 临界电平(小于最大阈值而大于最小阈值)
-            /// </summary>
-            CriticalLevel = 0,
-
-            /// <summary>
-            /// 高电平
-            /// </summary>
-            HeightLevel,
-
-            /// <summary>
-            /// 低电平
-            /// </summary>
-            LowLevel,
-
-            /// <summary>
-            /// 第一个边沿为上升沿的边沿
-            /// </summary>
-            FirstRisingEdge,
-
-            /// <summary>
-            /// 第一个边沿为下降沿沿的边沿
-            /// </summary>
-            FirstFillingEdge,
-        }
 
         /// <summary>
         /// 通过阈值查找边沿

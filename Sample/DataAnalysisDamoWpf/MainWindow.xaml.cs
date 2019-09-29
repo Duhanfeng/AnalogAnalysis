@@ -80,7 +80,7 @@ namespace DataAnalysisDamoWpf
             }
 
             //数据滤波
-            Analysis.MeanFilter(deviceData, out FilterData, 15);
+            Analysis.MeanFilter(deviceData, 15, out FilterData);
 
             //显示数据
             var collection = new System.Collections.ObjectModel.ObservableCollection<Data>();
