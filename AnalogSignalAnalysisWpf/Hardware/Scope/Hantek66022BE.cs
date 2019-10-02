@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AnalogSignalAnalysisWpf.Hardware.PLC
+namespace AnalogSignalAnalysisWpf.Hardware.Scope
 {
-    class PLC : IPLC
+    public class Hantek66022BE : IScope
     {
         /// <summary>
         /// 设备连接标志
@@ -33,68 +33,73 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
         }
 
         /// <summary>
-        /// 写参数
+        /// 读取数据
         /// </summary>
-        /// <param name="register">寄存器位置</param>
-        /// <param name="value">数值</param>
-        /// <returns>执行结果</returns>
-        public bool Write(int register, byte value)
+        /// <param name="channelIndex">通道索引</param>
+        /// <param name="channelData">通道数据</param>
+        public void ReadData(int channelIndex, out double[] channelData)
         {
-            throw new NotImplementedException();
+            throw new InvalidOperationException();
         }
 
         /// <summary>
-        /// 写参数
+        /// 读取数据
         /// </summary>
-        /// <param name="register">寄存器位置</param>
-        /// <param name="values">数值数值</param>
-        /// <returns>执行结果</returns>
-        public bool Write(int register, byte[] values)
+        /// <param name="channelData1">通道1数据</param>
+        /// <param name="channelData2">通道2数据</param>
+        public void ReadData(out double[] channelData1, out double channelData2)
         {
-            throw new NotImplementedException();
+            throw new InvalidOperationException();
         }
 
-        /// <summary>
-        /// 读参数
-        /// </summary>
-        /// <param name="register">寄存器位置</param>
-        /// <param name="value">数值</param>
-        /// <returns>执行结果</returns>
-        public bool Read(int register, out byte value)
-        {
-            throw new NotImplementedException();
-        }
+        #region 设备参数设置
 
         /// <summary>
-        /// 读参数
+        /// 通道1电压档位
         /// </summary>
-        /// <param name="register">寄存器位置</param>
-        /// <param name="values">数值数值</param>
-        /// <returns>执行结果</returns>
-        public bool Read(int register, out byte[] values)
-        {
-            throw new NotImplementedException();
-        }
+        public EVoltageDIV CH1VoltageDIV { get; set; }
 
         /// <summary>
-        /// 比例系数
+        /// 通道2电压档位
         /// </summary>
-        public readonly int Scale = 1000;
+        public EVoltageDIV CH2VoltageDIV { get; set; }
 
         /// <summary>
-        /// 电压值
+        /// 采样率
         /// </summary>
-        public double Voltage { get; set; }
+        public ESampleRate SampleRate { get; set; }
 
         /// <summary>
-        /// 电流值
+        /// 扫频模式
         /// </summary>
-        public double Current { get; set; }
+        public ETriggerSweep TriggerSweep { get; set; }
 
         /// <summary>
-        /// 开关频率
+        /// 触发源
         /// </summary>
-        public int Frequency { get; set; }
+        public ETriggerSource TriggerSource { get; set; }
+
+        /// <summary>
+        /// 触发电平
+        /// </summary>
+        public int TriggerLevel { get; set; }
+
+        /// <summary>
+        /// 触发边沿
+        /// </summary>
+        public ETriggerSlope TriggerSlope { get; set; }
+
+        /// <summary>
+        /// 差值方式
+        /// </summary>
+        public EInsertMode InsertMode { get; set; }
+
+        /// <summary>
+        /// 采集时长
+        /// </summary>
+        public int SampleTime { get; set; }
+
+        #endregion
 
         #region IDisposable Support
         private bool disposedValue = false; // 要检测冗余调用
@@ -116,7 +121,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
         }
 
         // TODO: 仅当以上 Dispose(bool disposing) 拥有用于释放未托管资源的代码时才替代终结器。
-        // ~PLC()
+        // ~Hantek66022BE()
         // {
         //   // 请勿更改此代码。将清理代码放入以上 Dispose(bool disposing) 中。
         //   Dispose(false);

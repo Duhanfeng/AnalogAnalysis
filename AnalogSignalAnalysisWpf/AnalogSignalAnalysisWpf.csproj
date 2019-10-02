@@ -128,8 +128,13 @@
     <Compile Include="Hardware\PLC\IPLC.cs" />
     <Compile Include="Hardware\PLC\IPLCCommunication.cs" />
     <Compile Include="Hardware\PLC\PLC.cs" />
+    <Compile Include="Hardware\Scope\Hantek66022BE.cs" />
     <Compile Include="Hardware\Scope\IScope.cs" />
     <Compile Include="Measurement\FrequencyMeasurement.cs" />
+    <Compile Include="PLCControlView.xaml.cs">
+      <DependentUpon>PLCControlView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="PLCControlViewModel.cs" />
     <Compile Include="ScopeControlView.xaml.cs">
       <DependentUpon>ScopeControlView.xaml</DependentUpon>
     </Compile>
@@ -159,6 +164,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="PLCControlView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="ScopeControlView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

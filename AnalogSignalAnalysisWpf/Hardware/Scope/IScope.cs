@@ -138,6 +138,9 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         DIV_200KSaS = 200 * 1000,
         [Description("100KSa/s")]
         DIV_100KSaS = 100 * 1000,
+        [Description("0Sa/s")]
+        DIV_0Sas = 0
+
     }
 
     /// <summary>

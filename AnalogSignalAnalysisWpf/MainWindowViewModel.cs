@@ -13,6 +13,8 @@ using AnalogSignalAnalysisWpf.Event;
 using MahApps.Metro.Controls.Dialogs;
 using System.Threading;
 using MahApps.Metro.Controls;
+using AnalogSignalAnalysisWpf.Hardware.Scope;
+using AnalogSignalAnalysisWpf.Hardware.PLC;
 
 namespace AnalogSignalAnalysisWpf
 {
@@ -49,29 +51,43 @@ namespace AnalogSignalAnalysisWpf
 
     public class MainWindowViewModel : Screen, IDisposable
     {
-        //private readonly IDialogCoordinator _dialogCoordinator;
-
+        /// <summary>
+        /// 创建MainWindowViewModel新实例
+        /// </summary>
         public MainWindowViewModel()
         {
-            
+            //配置窗口
             ShowTitleBar = false;
             IgnoreTaskbarOnMaximize = true;
             Topmost = false;
             QuitConfirmationEnabled = true;
 
-            // create accent color menu items for the demo
+            //获取所有颜色的集合
             this.AccentColors = ThemeManager.ColorSchemes
                                             .Select(a => new AccentColorMenuData { Name = a.Name, ColorBrush = a.ShowcaseBrush })
                                             .ToList();
 
-            // create metro theme color menu items for the demo
+            //获取所有主题的集合
             this.AppThemes = ThemeManager.Themes
                                          .GroupBy(x => x.BaseColorScheme)
                                          .Select(x => x.First())
                                          .Select(a => new AppThemeMenuData() { Name = a.BaseColorScheme, BorderColorBrush = a.Resources["MahApps.Brushes.BlackColor"] as Brush, ColorBrush = a.Resources["MahApps.Brushes.WhiteColor"] as Brush })
                                          .ToList();
 
+            //创建示波器控件实例
+            Scope = new Hantek66022BE();
+            ScopeControlView = new ScopeControlView();
+            ScopeControlView.DataContext = new ScopeControlViewModel(Scope);
+
+            //创建PLC控件实例
+            PLC = new PLC();
+            PLCControlView = new PLCControlView();
+            PLCControlView.DataContext = new PLCControlViewModel(PLC);
+
         }
+
+        #region 窗口控制
+
 
         private bool showTitleBar;
 
@@ -80,11 +96,11 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public bool ShowTitleBar
         {
-            get 
-            { 
+            get
+            {
                 return showTitleBar;
             }
-            set 
+            set
             {
                 showTitleBar = value;
                 NotifyOfPropertyChange(() => ShowTitleBar);
@@ -134,11 +150,11 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public bool QuitConfirmationEnabled
         {
-            get 
+            get
             {
                 return quitConfirmationEnabled;
             }
-            set 
+            set
             {
                 quitConfirmationEnabled = value;
                 NotifyOfPropertyChange(() => QuitConfirmationEnabled);
@@ -154,6 +170,62 @@ namespace AnalogSignalAnalysisWpf
         /// 主题
         /// </summary>
         public List<AppThemeMenuData> AppThemes { get; set; }
+
+        #endregion
+
+        #region 硬件
+
+        /// <summary>
+        /// 示波器
+        /// </summary>
+        public IScope Scope { get; set; }
+
+        /// <summary>
+        /// PLC
+        /// </summary>
+        public IPLC PLC { get; set; }
+
+        #endregion
+
+        #region 子窗口
+
+        private ScopeControlView scopeControlView;
+
+        /// <summary>
+        /// 示波器配置控件
+        /// </summary>
+        public ScopeControlView ScopeControlView
+        {
+            get 
+            { 
+                return scopeControlView;
+            }
+            set
+            { 
+                scopeControlView = value;
+                NotifyOfPropertyChange(() => ScopeControlView);
+            }
+        }
+
+        private PLCControlView plcControlView;
+
+        /// <summary>
+        /// PLC配置控件
+        /// </summary>
+        public PLCControlView PLCControlView
+        {
+            get
+            {
+                return plcControlView;
+            }
+            set
+            {
+                plcControlView = value;
+                NotifyOfPropertyChange(() => PLCControlView);
+            }
+        }
+
+        #endregion
 
         #region 事件
 

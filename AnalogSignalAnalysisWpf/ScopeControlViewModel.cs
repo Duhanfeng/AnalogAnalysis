@@ -13,7 +13,6 @@ namespace AnalogSignalAnalysisWpf
 {
     class ScopeControlViewModel : Screen
     {
-
         #region 构造函数
 
         public ScopeControlViewModel(IScope scope)
@@ -36,6 +35,17 @@ namespace AnalogSignalAnalysisWpf
         /// 示波器
         /// </summary>
         public IScope Scope { get; set; }
+
+        /// <summary>
+        /// 连接标志位
+        /// </summary>
+        public bool IsConnect 
+        { 
+            get
+            {
+                return Scope?.IsConnect ?? false;
+            }
+        }
 
         #endregion
 
@@ -157,7 +167,6 @@ namespace AnalogSignalAnalysisWpf
             }
         }
 
-
         public int SampleTime
         {
             get
@@ -189,6 +198,28 @@ namespace AnalogSignalAnalysisWpf
         protected void OnMessageRaised(MessageLevel messageLevel, string message, Exception exception = null)
         {
             MessageRaised?.Invoke(this, new MessageRaisedEventArgs(messageLevel, message, exception));
+        }
+
+        #endregion
+
+        #region 方法
+
+        /// <summary>
+        /// 连接设备
+        /// </summary>
+        public void Connect()
+        {
+            Scope?.Connect(0);
+            NotifyOfPropertyChange(() => IsConnect);
+        }
+
+        /// <summary>
+        /// 断开连接
+        /// </summary>
+        public void Disconnect()
+        {
+            Scope?.Disconnect();
+            NotifyOfPropertyChange(() => IsConnect);
         }
 
         #endregion

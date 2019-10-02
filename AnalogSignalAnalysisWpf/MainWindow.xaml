@@ -17,6 +17,7 @@
                       Topmost="{Binding Topmost, Mode=TwoWay}"
                       WindowStartupLocation="CenterScreen"
                       xmlns:cal="http://www.caliburnproject.org"
+                      WindowState="Maximized"
                       Closing="MetroWindow_Closing">
 
     <Window.Resources>
@@ -56,7 +57,7 @@
     </Controls:MetroWindow.WindowButtonCommands>
 
     <Controls:MetroWindow.Flyouts>
-        <Controls:FlyoutsControl x:Name="flyoutsControl">
+        <Controls:FlyoutsControl x:Name="flyoutsControl" >
             <Controls:Flyout Header="示波器配置"
                              Position="Right"
                              Theme="Inverse">
@@ -128,7 +129,6 @@
                 <MenuItem Header="触发消息" cal:Message.Attach="ThrowMessage"/>
             </MenuItem>
         </Menu>
-
         <TabControl Margin="10" TabStripPlacement="Left" Grid.Row="1" Visibility="Collapsed">
             <TabItem Header="测试1">
                 <ContentControl Margin="10,0" Content="{Binding Test1View}"/>
@@ -148,10 +148,7 @@
             <TabItem Header="结果结果">
                 <ContentControl Margin="10,0" Content="{Binding TestResultView}"/>
             </TabItem>
-
         </TabControl>
-
         <local:HamburgerMenuRipple Grid.Row="1" DataContext="{Binding}"/>
-
     </Grid>
 </Controls:MetroWindow>
