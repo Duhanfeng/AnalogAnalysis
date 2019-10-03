@@ -114,13 +114,17 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Converters\BoolToColorConverter.cs" />
     <Compile Include="EnumHelper.cs" />
     <Compile Include="Event\MessageRaisedEventArgs.cs" />
-    <Compile Include="HamburgerMenuRipple\FrequencyTestView.xaml.cs">
-      <DependentUpon>FrequencyTestView.xaml</DependentUpon>
+    <Compile Include="HamburgerMenuRipple\FrequencyMeasurementView.xaml.cs">
+      <DependentUpon>FrequencyMeasurementView.xaml</DependentUpon>
     </Compile>
     <Compile Include="HamburgerMenuRipple\HamburgerMenuRipple.xaml.cs">
       <DependentUpon>HamburgerMenuRipple.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="HamburgerMenuRipple\PositiveAndNegativeVoltageMeasurementView.xaml.cs">
+      <DependentUpon>PositiveAndNegativeVoltageMeasurementView.xaml</DependentUpon>
     </Compile>
     <Compile Include="HamburgerMenuRipple\SettingsView.xaml.cs">
       <DependentUpon>SettingsView.xaml</DependentUpon>
@@ -130,16 +134,23 @@
     <Compile Include="Hardware\PLC\PLC.cs" />
     <Compile Include="Hardware\Scope\Hantek66022BE.cs" />
     <Compile Include="Hardware\Scope\IScope.cs" />
+    <Compile Include="LiveData\Data.cs" />
+    <Compile Include="LiveData\LiveDataView.xaml.cs">
+      <DependentUpon>LiveDataView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="LiveData\LiveDataViewModel.cs" />
     <Compile Include="Measurement\FrequencyMeasurement.cs" />
+    <Compile Include="Measurement\NegativeVoltageMeasurement.cs" />
     <Compile Include="PLCControlView.xaml.cs">
       <DependentUpon>PLCControlView.xaml</DependentUpon>
     </Compile>
     <Compile Include="PLCControlViewModel.cs" />
+    <Compile Include="Measurement\PositiveVoltageMeasurement.cs" />
     <Compile Include="ScopeControlView.xaml.cs">
       <DependentUpon>ScopeControlView.xaml</DependentUpon>
     </Compile>
     <Compile Include="ScopeControlViewModel.cs" />
-    <Page Include="HamburgerMenuRipple\FrequencyTestView.xaml">
+    <Page Include="HamburgerMenuRipple\FrequencyMeasurementView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -147,7 +158,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="HamburgerMenuRipple\PositiveAndNegativeVoltageMeasurementView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="HamburgerMenuRipple\SettingsView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="LiveData\LiveDataView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

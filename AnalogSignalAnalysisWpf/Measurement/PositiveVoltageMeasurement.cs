@@ -1,5 +1,4 @@
-﻿using AnalogSignalAnalysisWpf.Hardware;
-using AnalogSignalAnalysisWpf.Hardware.PLC;
+﻿using AnalogSignalAnalysisWpf.Hardware.PLC;
 using AnalogSignalAnalysisWpf.Hardware.Scope;
 using DataAnalysis;
 using System;
@@ -9,16 +8,18 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AnalogSignalAnalysisWpf.Measurement
+namespace AnalogSignalAnalysisWpf
 {
-    public class FrequencyMeasurement
-    {
-        /// <summary>
-        /// 创建频率测量新实例
-        /// </summary>
-        /// <param name="scope">示波器接口</param>
-        /// <param name="plc">PLC接口</param>
-        public FrequencyMeasurement(IScope scope, IPLC plc)
+    /// <summary>
+    /// 有效电压测量(从关闭到开启的电压)
+    /// </summary>
+    public class PositiveVoltageMeasurement
+    {/// <summary>
+     /// 创建频率测量新实例
+     /// </summary>
+     /// <param name="scope">示波器接口</param>
+     /// <param name="plc">PLC接口</param>
+        public PositiveVoltageMeasurement(IScope scope, IPLC plc)
         {
             if (scope?.IsConnect != true)
             {
@@ -55,11 +56,6 @@ namespace AnalogSignalAnalysisWpf.Measurement
         public double MaxThreshold { get; set; }
 
         /// <summary>
-        /// 频率误差
-        /// </summary>
-        public double FrequencyErrLimit { get; set; } = 0.2;
-
-        /// <summary>
         /// 测量线程
         /// </summary>
         private Thread measureThread;
@@ -69,13 +65,13 @@ namespace AnalogSignalAnalysisWpf.Measurement
         /// </summary>
         public void Start()
         {
-            if ((Scope?.IsConnect != true) || 
+            if ((Scope?.IsConnect != true) ||
                 (PLC?.IsConnect != true))
             {
                 throw new Exception("scope/plc invalid");
             }
 
-            int[] frequencies1 = new int[] { 1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100};
+            int[] frequencies1 = new int[] { 1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100 };
 
             int[] trueFrequencies = frequencies1.ToList().ConvertAll(x => x * 1000).ToArray();
 
@@ -94,7 +90,7 @@ namespace AnalogSignalAnalysisWpf.Measurement
                     //读取scope数据
                     Scope.ReadData(0, out originalData);
                     Analysis.MeanFilter(originalData, 7, out filterData);
-                    
+
                     //阈值查找边沿
                     Analysis.FindEdgeByThreshold(filterData, MinThreshold, MaxThreshold, out edgeIndexs, out digitEdgeType);
 
@@ -103,22 +99,11 @@ namespace AnalogSignalAnalysisWpf.Measurement
                     List<double> dutyRatios;
                     Analysis.AnalysePulseData(edgeIndexs, digitEdgeType, (int)Scope.SampleRate, out pulseFrequencies, out dutyRatios);
 
-                    //检测脉冲是否异常
-                    double minFrequency = trueFrequencies[i] * (1 - FrequencyErrLimit);
-                    double maxFrequency = trueFrequencies[i] * (1 + FrequencyErrLimit);
-
-                    if (Analysis.CheckFrequency(pulseFrequencies, minFrequency, maxFrequency) == false)
-                    {
-                        //失败
-
-                    }
-
                 }
 
             });
 
             measureThread.Start();
         }
-
     }
 }

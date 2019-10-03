@@ -248,24 +248,24 @@
                 <!--  Items  -->
                 <Controls:HamburgerMenu.ItemsSource>
                     <Controls:HamburgerMenuItemCollection>
-                        <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="测试1">
+                        <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="极限频率测试">
                             <Controls:HamburgerMenuIconItem.Tag>
-                                <local:FrequencyTestView />
+                                <local:FrequencyMeasurementView />
                             </Controls:HamburgerMenuIconItem.Tag>
                         </Controls:HamburgerMenuIconItem>
-                        <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="测试2">
+                        <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="吸合电压与释放电压测量">
                             <Controls:HamburgerMenuIconItem.Tag>
-                                <local:FrequencyTestView />
+                                <local:PositiveAndNegativeVoltageMeasurementView />
                             </Controls:HamburgerMenuIconItem.Tag>
                         </Controls:HamburgerMenuIconItem>
-                        <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="测试3">
+                        <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="通气量测试">
                             <Controls:HamburgerMenuIconItem.Tag>
-                                <local:FrequencyTestView />
+                                <local:PositiveAndNegativeVoltageMeasurementView />
                             </Controls:HamburgerMenuIconItem.Tag>
                         </Controls:HamburgerMenuIconItem>
                         <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="测试4">
                             <Controls:HamburgerMenuIconItem.Tag>
-                                <local:FrequencyTestView />
+                                <local:PositiveAndNegativeVoltageMeasurementView />
                             </Controls:HamburgerMenuIconItem.Tag>
                         </Controls:HamburgerMenuIconItem>
                     </Controls:HamburgerMenuItemCollection>

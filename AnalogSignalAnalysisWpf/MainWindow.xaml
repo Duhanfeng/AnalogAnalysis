@@ -17,11 +17,14 @@
                       Topmost="{Binding Topmost, Mode=TwoWay}"
                       WindowStartupLocation="CenterScreen"
                       xmlns:cal="http://www.caliburnproject.org"
+                      xmlns:converters="clr-namespace:AnalogSignalAnalysisWpf.Converters"
                       WindowState="Maximized"
                       Closing="MetroWindow_Closing">
 
     <Window.Resources>
         <ResourceDictionary>
+            <converters:BoolToColorConverter x:Key="BoolToColorConverter" />
+
             <Ellipse x:Key="AppThemeMenuIcon"
                      Width="16"
                      Height="16"
@@ -82,73 +85,65 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <Menu Grid.Row="0"
-              Margin="5"
-              HorizontalAlignment="Left"
-              VerticalAlignment="Stretch"
-              Background="{Binding ElementName=MainWindow, Path=WindowTitleBrush}">
-            <MenuItem Header="文件">
-                <MenuItem Header="加载"/>
-                <MenuItem Header="保存"/>
-                <MenuItem Header="另存为..."/>
-            </MenuItem>
-            <MenuItem Header="设备">
-                <MenuItem Header="示波器" Click="ScopeMenuItem_Click"/>
-                <MenuItem Header="PLC" Click="PLCMenuItem_Click"/>
-                <MenuItem Header="异步" Click="ShowDynamicFlyout"/>
-            </MenuItem>
-            <MenuItem Header="设置">
-                <MenuItem Header="首选项..."/>
-                <MenuItem Header="窗口">
-                    <MenuItem Header="显示标题条"
+        <DockPanel Grid.Row="0">
+            <Menu Margin="5"
+                  HorizontalAlignment="Left"
+                  VerticalAlignment="Stretch"
+                  Background="{Binding ElementName=MainWindow, Path=WindowTitleBrush}">
+                <MenuItem Header="文件">
+                    <MenuItem Header="加载"/>
+                    <MenuItem Header="保存"/>
+                    <MenuItem Header="另存为..."/>
+                </MenuItem>
+                <MenuItem Header="设备">
+                    <MenuItem Header="示波器" Click="ScopeMenuItem_Click"/>
+                    <MenuItem Header="PLC" Click="PLCMenuItem_Click"/>
+                    <MenuItem Header="异步" Click="ShowDynamicFlyout"/>
+                </MenuItem>
+                <MenuItem Header="设置">
+                    <MenuItem Header="首选项..."/>
+                    <MenuItem Header="窗口">
+                        <MenuItem Header="显示标题条"
                           IsCheckable="True"
                           IsChecked="{Binding Path=ShowTitleBar, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    <MenuItem Header="最大化时忽略任务栏"
+                        <MenuItem Header="最大化时忽略任务栏"
                           IsCheckable="True"
                           IsChecked="{Binding Path=IgnoreTaskbarOnMaximize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    <MenuItem Header="置顶"
+                        <MenuItem Header="置顶"
                           IsCheckable="True"
                           IsChecked="{Binding Path=Topmost, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <!--<MenuItem Header="最大化时忽略任务栏"
+                        <!--<MenuItem Header="最大化时忽略任务栏"
                           IsCheckable="True"
                           IsChecked="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Controls:MetroWindow}}, Path=IgnoreTaskbarOnMaximize}" />-->
-                </MenuItem>
-                <MenuItem Header="界面">
-                    <MenuItem Header="主题"
+                    </MenuItem>
+                    <MenuItem Header="界面">
+                        <MenuItem Header="主题"
                       ItemContainerStyle="{StaticResource AppThemeMenuItemStyle}"
                       ItemsSource="{Binding AppThemes, Mode=OneWay}" />
-                    <MenuItem Header="颜色"
+                        <MenuItem Header="颜色"
                       ItemContainerStyle="{StaticResource AccentColorMenuItemStyle}"
                       ItemsSource="{Binding AccentColors, Mode=OneWay}" />
+                    </MenuItem>
                 </MenuItem>
-            </MenuItem>
-            <MenuItem Header="调试">
-                <MenuItem Header="抛异常" cal:Message.Attach="ThrowException"/>
-                <MenuItem Header="抛警告" cal:Message.Attach="ThrowWarning"/>
-                <MenuItem Header="触发消息" cal:Message.Attach="ThrowMessage"/>
-            </MenuItem>
-        </Menu>
-        <TabControl Margin="10" TabStripPlacement="Left" Grid.Row="1" Visibility="Collapsed">
-            <TabItem Header="测试1">
-                <ContentControl Margin="10,0" Content="{Binding Test1View}"/>
-            </TabItem>
-            <TabItem Header="测试2">
-                <ContentControl Margin="10,0" Content="{Binding Test2View}"/>
-            </TabItem>
-            <TabItem Header="测试3">
-                <ContentControl Margin="10,0" Content="{Binding Test3View}"/>
-            </TabItem>
-            <TabItem Header="测试4">
-                <ContentControl Margin="10,0" Content="{Binding Test4View}"/>
-            </TabItem>
-            <TabItem Header="测试5">
-                <ContentControl Margin="10,0" Content="{Binding Test5View}"/>
-            </TabItem>
-            <TabItem Header="结果结果">
-                <ContentControl Margin="10,0" Content="{Binding TestResultView}"/>
-            </TabItem>
-        </TabControl>
+                <MenuItem Header="调试">
+                    <MenuItem Header="抛异常" cal:Message.Attach="ThrowException"/>
+                    <MenuItem Header="抛警告" cal:Message.Attach="ThrowWarning"/>
+                    <MenuItem Header="触发消息" cal:Message.Attach="ThrowMessage"/>
+                </MenuItem>
+            </Menu>
+            <StackPanel MinWidth="50"/>
+            <StackPanel Orientation="Horizontal" Margin="10,0">
+                <iconPacks:PackIconMaterial Kind="AppleKeyboardOption" VerticalAlignment="Center" Margin="10,0,0,0" />
+                <Label VerticalAlignment="Center" FontSize="13">示波器:</Label>
+                <Ellipse Width="20" Height="20" Fill="{Binding IsScopeValid, Converter={StaticResource BoolToColorConverter}}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="10,0">
+                <iconPacks:PackIconMaterial Kind="BoomGate" VerticalAlignment="Center" Margin="10,0,0,0" />
+                <Label VerticalAlignment="Center" FontSize="13">PLC:</Label>
+                <Ellipse Width="20" Height="20" Fill="{Binding IsPLCValid, Converter={StaticResource BoolToColorConverter}}"/>
+            </StackPanel>
+        </DockPanel>
         <local:HamburgerMenuRipple Grid.Row="1" DataContext="{Binding}"/>
     </Grid>
 </Controls:MetroWindow>

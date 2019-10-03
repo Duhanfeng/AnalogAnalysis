@@ -181,9 +181,31 @@ namespace AnalogSignalAnalysisWpf
         public IScope Scope { get; set; }
 
         /// <summary>
+        /// 示波器有效标志
+        /// </summary>
+        public bool IsScopeValid
+        {
+            get
+            {
+                return Scope?.IsConnect ?? false;
+            }
+        }
+
+        /// <summary>
         /// PLC
         /// </summary>
         public IPLC PLC { get; set; }
+
+        /// <summary>
+        /// PLC有效标志
+        /// </summary>
+        public bool IsPLCValid
+        {
+            get
+            {
+                return PLC?.IsConnect ?? false;
+            }
+        }
 
         #endregion
 

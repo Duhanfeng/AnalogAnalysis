@@ -13,16 +13,17 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace AnalogSignalAnalysisWpf
+namespace AnalogSignalAnalysisWpf.LiveData
 {
     /// <summary>
-    /// FrequencyTestView.xaml 的交互逻辑
+    /// LiveDataView.xaml 的交互逻辑
     /// </summary>
-    public partial class FrequencyTestView : UserControl
+    public partial class LiveDataView : UserControl
     {
-        public FrequencyTestView()
+        public LiveDataView()
         {
             InitializeComponent();
+            DataContext = new LiveDataViewModel(); 
         }
     }
 }
