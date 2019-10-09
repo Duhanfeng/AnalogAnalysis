@@ -15,7 +15,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         /// <summary>
         /// 设备连接标志
         /// </summary>
-        bool IsConnect { get; set; }
+        bool IsConnect { get; }
 
         /// <summary>
         /// 连接设备
@@ -86,7 +86,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         EInsertMode InsertMode { get; set; }
 
         /// <summary>
-        /// 采集时长
+        /// 采集时长(MS)
         /// </summary>
         int SampleTime { get; set; }
 

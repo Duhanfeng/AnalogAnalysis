@@ -134,6 +134,7 @@
     <Compile Include="Hardware\PLC\PLC.cs" />
     <Compile Include="Hardware\Scope\Hantek66022BE.cs" />
     <Compile Include="Hardware\Scope\IScope.cs" />
+    <Compile Include="Hardware\Scope\SigrokCli_Hantek6xxx.cs" />
     <Compile Include="LiveData\Data.cs" />
     <Compile Include="LiveData\LiveDataView.xaml.cs">
       <DependentUpon>LiveDataView.xaml</DependentUpon>
