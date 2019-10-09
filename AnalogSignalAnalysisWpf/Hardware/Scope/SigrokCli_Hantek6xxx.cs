@@ -1,5 +1,7 @@
-﻿using System;
+﻿using CsvHelper;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -59,6 +61,48 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
 
             return output;
         }
+
+        private class CHData
+        {
+            public string CH { get; set; }
+        }
+
+        private static void GetData(string file, out double[] Data)
+        {
+            if (!File.Exists(file))
+            {
+                throw new FileNotFoundException($"{nameof(file)}:{file} not found!");
+            }
+
+            try
+            {
+                using (var reader = new StreamReader(file))
+                {
+                    using (var csv = new CsvReader(reader))
+                    {
+                        csv.Configuration.HasHeaderRecord = false;
+                        csv.Configuration.Comment = ';';
+                        csv.Configuration.AllowComments = true;
+                        //csv.Configuration.RegisterClassMap<FooMap>();
+                        var records = csv.GetRecords<CHData>();
+                        //deviceData = records.ToArray();
+                        var str = records.ToList().ConvertAll(x => x.CH);
+
+                        Data = (
+                        from val in str
+                        where !val.Contains("CH")
+                        select val).ToList().ConvertAll(x => double.Parse(x)).ToArray();
+                    }
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+           
+        }
+
 
         #endregion
         /// <summary>
