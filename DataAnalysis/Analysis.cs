@@ -293,20 +293,17 @@ namespace DataAnalysis
         /// <param name="dutyRatios"></param>
         public static void AnalysePulseData(List<int> edgeIndexs, DigitEdgeType digitEdgeType, int sampleRate, out List<double> frequencies, out List<double> dutyRatios)
         {
-            if (edgeIndexs == null || edgeIndexs.Count == 0)
-            {
-                throw new ArgumentException($"{nameof(edgeIndexs)}无效");
-            }
+            frequencies = new List<double>();
+            dutyRatios = new List<double>();
 
-            if ((digitEdgeType == DigitEdgeType.CriticalLevel) ||
+            if ((edgeIndexs == null) || 
+                (edgeIndexs.Count == 0) ||
+                (digitEdgeType == DigitEdgeType.CriticalLevel) ||
                 (digitEdgeType == DigitEdgeType.HeightLevel) || 
                 (digitEdgeType == DigitEdgeType.LowLevel))
             {
-                throw new ArgumentException($"{nameof(digitEdgeType)}无效");
+                return;
             }
-
-            frequencies = new List<double>();
-            dutyRatios = new List<double>();
 
             int firstRisingIndex = (digitEdgeType == DigitEdgeType.FirstRisingEdge) ? 0 : 1;
             int tempCount1 = 0;
