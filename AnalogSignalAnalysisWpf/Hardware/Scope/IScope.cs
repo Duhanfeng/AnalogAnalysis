@@ -41,7 +41,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         /// </summary>
         /// <param name="channelData1">通道1数据</param>
         /// <param name="channelData2">通道2数据</param>
-        void ReadData(out double[] channelData1, out double channelData2);
+        void ReadData(out double[] channelData1, out double[] channelData2);
 
         #region 设备参数设置
 

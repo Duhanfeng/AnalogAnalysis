@@ -12,6 +12,9 @@ using System.Threading.Tasks;
 
 namespace AnalogSignalAnalysisWpf.Measurement
 {
+    /// <summary>
+    /// 极限频率测试
+    /// </summary>
     public class FrequencyMeasurement
     {
         #region 构造函数

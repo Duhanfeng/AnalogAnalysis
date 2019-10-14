@@ -147,6 +147,12 @@
     <Reference Include="Microsoft.Xaml.Behaviors, Version=1.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Xaml.Behaviors.Wpf.1.0.1\lib\net45\Microsoft.Xaml.Behaviors.dll</HintPath>
     </Reference>
+    <Reference Include="NModbus, Version=3.0.58.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\NModbus.3.0.58\lib\net46\NModbus.dll</HintPath>
+    </Reference>
+    <Reference Include="NModbus.Serial, Version=3.0.58.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\NModbus.Serial.3.0.58\lib\net46\NModbus.Serial.dll</HintPath>
+    </Reference>
     <Reference Include="Sparrow.Chart.Wpf.40, Version=13.1.0.118, Culture=neutral, PublicKeyToken=50f33fb8697e9a92, processorArchitecture=MSIL">
       <HintPath>..\packages\Sparrow.Chart.Wpf.13.1.0.118\lib\net40\Sparrow.Chart.Wpf.40.dll</HintPath>
     </Reference>
@@ -180,6 +186,9 @@
     </ApplicationDefinition>
     <Compile Include="Converters\BoolToColorConverter.cs" />
     <Compile Include="EnumHelper.cs" />
+    <Compile Include="EventArgs\FrequencyMeasurementCompletedEventArgs.cs" />
+    <Compile Include="EventArgs\PositiveAndNegativeVoltageMeasurementCompletedEventArgs.cs" />
+    <Compile Include="EventArgs\ThroughputMeasurementCompletedEventArgs.cs" />
     <Compile Include="Event\MessageRaisedEventArgs.cs" />
     <Compile Include="HamburgerMenuRipple\FrequencyMeasurementView.xaml.cs">
       <DependentUpon>FrequencyMeasurementView.xaml</DependentUpon>
@@ -195,7 +204,9 @@
     </Compile>
     <Compile Include="Hardware\PLC\IPLC.cs" />
     <Compile Include="Hardware\PLC\IPLCCommunication.cs" />
-    <Compile Include="Hardware\PLC\PLC.cs" />
+    <Compile Include="Hardware\PLC\ModbusPLC.cs" />
+    <Compile Include="Hardware\PWM\IPWM.cs" />
+    <Compile Include="Hardware\PWM\SerialPortPWM.cs" />
     <Compile Include="Hardware\Scope\Hantek66022BE.cs" />
     <Compile Include="Hardware\Scope\IScope.cs" />
     <Compile Include="Hardware\Scope\SigrokCli_Hantek6xxx.cs" />
@@ -205,12 +216,12 @@
     </Compile>
     <Compile Include="LiveData\LiveDataViewModel.cs" />
     <Compile Include="Measurement\FrequencyMeasurement.cs" />
-    <Compile Include="Measurement\NegativeVoltageMeasurement.cs" />
+    <Compile Include="Measurement\PositiveAndNegativeVoltageMeasurement.cs" />
+    <Compile Include="Measurement\ThroughputMeasurement.cs" />
     <Compile Include="PLCControlView.xaml.cs">
       <DependentUpon>PLCControlView.xaml</DependentUpon>
     </Compile>
     <Compile Include="PLCControlViewModel.cs" />
-    <Compile Include="Measurement\PositiveVoltageMeasurement.cs" />
     <Compile Include="ScopeControlView.xaml.cs">
       <DependentUpon>ScopeControlView.xaml</DependentUpon>
     </Compile>

@@ -46,14 +46,14 @@ namespace AnalogSignalAnalysisWpf.Measurement
         public IPLC PLC { get; set; }
 
         /// <summary>
-        /// 最小阈值
+        /// 最小电压阈值(单位:V)
         /// </summary>
-        public double MinThreshold { get; set; }
+        public double MinVoltageThreshold { get; set; } = 1.5;
 
         /// <summary>
-        /// 最大阈值
+        /// 最大电压阈值(单位:V)
         /// </summary>
-        public double MaxThreshold { get; set; }
+        public double MaxVoltageThreshold { get; set; } = 8.0;
 
         /// <summary>
         /// 测量线程
@@ -92,7 +92,7 @@ namespace AnalogSignalAnalysisWpf.Measurement
                     Analysis.MeanFilter(originalData, 7, out filterData);
 
                     //阈值查找边沿
-                    Analysis.FindEdgeByThreshold(filterData, MinThreshold, MaxThreshold, out edgeIndexs, out digitEdgeType);
+                    Analysis.FindEdgeByThreshold(filterData, MinVoltageThreshold, MaxVoltageThreshold, out edgeIndexs, out digitEdgeType);
 
                     //分析脉冲数据
                     List<double> pulseFrequencies;

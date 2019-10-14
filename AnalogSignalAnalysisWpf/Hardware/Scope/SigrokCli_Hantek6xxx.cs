@@ -105,12 +105,26 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
 
         #endregion
 
-        private string filePath = $"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}\\ScopeData\\1.csv";
+        private string filePath = $"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}ScopeData\\1.csv";
 
         /// <summary>
         /// 设备连接标志
         /// </summary>
         public bool IsConnect { get; private set; }
+
+        /// <summary>
+        /// 创建SigrokCli_Hantek6xxx新实例
+        /// </summary>
+        public SigrokCli_Hantek6xxx()
+        {
+            string directory = Path.GetDirectoryName(filePath);
+
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+        }
 
         /// <summary>
         /// 连接设备
@@ -121,8 +135,8 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         {
             //搜索设备
             string result = ExecuteCmd("--scan");
-
             IsConnect = result.Contains("hantek-6xxx");
+            IsConnect = true;   //调试代码
 
             return IsConnect;
         }
@@ -166,7 +180,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         /// </summary>
         /// <param name="channelData1">通道1数据</param>
         /// <param name="channelData2">通道2数据</param>
-        public void ReadData(out double[] channelData1, out double channelData2)
+        public void ReadData(out double[] channelData1, out double[] channelData2)
         {
             throw new InvalidOperationException();
         }
@@ -186,7 +200,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         /// <summary>
         /// 采样率
         /// </summary>
-        public ESampleRate SampleRate { get; set; }
+        public ESampleRate SampleRate { get; set; } = ESampleRate.DIV_8MSaS;
 
         /// <summary>
         /// 扫频模式

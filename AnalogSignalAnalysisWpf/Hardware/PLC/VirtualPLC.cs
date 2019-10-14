@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AnalogSignalAnalysisWpf.Hardware.Scope
+namespace AnalogSignalAnalysisWpf.Hardware.PLC
 {
-    public class Hantek66022BE : IScope
+    class VirtualPLC : IPLC
     {
         /// <summary>
         /// 设备连接标志
@@ -33,73 +33,70 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         }
 
         /// <summary>
-        /// 读取数据
+        /// 写参数
         /// </summary>
-        /// <param name="channelIndex">通道索引</param>
-        /// <param name="channelData">通道数据</param>
-        public void ReadData(int channelIndex, out double[] channelData)
+        /// <param name="register">寄存器位置</param>
+        /// <param name="value">数值</param>
+        /// <returns>执行结果</returns>
+        public bool Write(ushort register, ushort value)
         {
-            throw new InvalidOperationException();
+            return true;
         }
 
         /// <summary>
-        /// 读取数据
+        /// 写参数
         /// </summary>
-        /// <param name="channelData1">通道1数据</param>
-        /// <param name="channelData2">通道2数据</param>
-        public void ReadData(out double[] channelData1, out double[] channelData2)
+        /// <param name="register">寄存器位置</param>
+        /// <param name="values">数值数值</param>
+        /// <returns>执行结果</returns>
+        public bool Write(ushort register, ushort[] values)
         {
-            throw new InvalidOperationException();
+            return true;
         }
 
-        #region 设备参数设置
+        /// <summary>
+        /// 读参数
+        /// </summary>
+        /// <param name="register">寄存器位置</param>
+        /// <param name="value">数值</param>
+        /// <returns>执行结果</returns>
+        public bool Read(ushort register, out ushort value)
+        {
+            value = 0;
+            return true; 
+        }
 
         /// <summary>
-        /// 通道1电压档位
+        /// 读参数
         /// </summary>
-        public EVoltageDIV CH1VoltageDIV { get; set; }
+        /// <param name="register">寄存器位置</param>
+        /// <param name="values">数值数值</param>
+        /// <returns>执行结果</returns>
+        public bool Read(ushort register, ushort count, out ushort[] values)
+        {
+            values = new ushort[0];
+            return true;
+        }
 
         /// <summary>
-        /// 通道2电压档位
+        /// 比例系数
         /// </summary>
-        public EVoltageDIV CH2VoltageDIV { get; set; }
+        public readonly int Scale = 1000;
 
         /// <summary>
-        /// 采样率
+        /// 电压值
         /// </summary>
-        public ESampleRate SampleRate { get; set; }
+        public double Voltage { get; set; } = 0;
 
         /// <summary>
-        /// 扫频模式
+        /// 电流值
         /// </summary>
-        public ETriggerSweep TriggerSweep { get; set; }
+        public double Current { get; set; } = 0;
 
         /// <summary>
-        /// 触发源
+        /// 开关频率
         /// </summary>
-        public ETriggerSource TriggerSource { get; set; }
-
-        /// <summary>
-        /// 触发电平
-        /// </summary>
-        public int TriggerLevel { get; set; }
-
-        /// <summary>
-        /// 触发边沿
-        /// </summary>
-        public ETriggerSlope TriggerSlope { get; set; }
-
-        /// <summary>
-        /// 差值方式
-        /// </summary>
-        public EInsertMode InsertMode { get; set; }
-
-        /// <summary>
-        /// 采集时长
-        /// </summary>
-        public int SampleTime { get; set; }
-
-        #endregion
+        public int Frequency { get; set; } = 1;
 
         #region IDisposable Support
         private bool disposedValue = false; // 要检测冗余调用
@@ -121,7 +118,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         }
 
         // TODO: 仅当以上 Dispose(bool disposing) 拥有用于释放未托管资源的代码时才替代终结器。
-        // ~Hantek66022BE()
+        // ~PLC()
         // {
         //   // 请勿更改此代码。将清理代码放入以上 Dispose(bool disposing) 中。
         //   Dispose(false);

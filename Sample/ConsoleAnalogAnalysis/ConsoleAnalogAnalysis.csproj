@@ -101,6 +101,7 @@
   <ItemGroup>
     <Compile Include="EventArgs\FrequencyMeasurementCompletedEventArgs.cs" />
     <Compile Include="EventArgs\PositiveAndNegativeVoltageMeasurementCompletedEventArgs.cs" />
+    <Compile Include="EventArgs\ThroughputMeasurementCompletedEventArgs.cs" />
     <Compile Include="Hardware\PLC\IPLC.cs" />
     <Compile Include="Hardware\PLC\IPLCCommunication.cs" />
     <Compile Include="Hardware\PLC\ModbusPLC.cs" />
@@ -111,6 +112,7 @@
     <Compile Include="Hardware\Scope\SigrokCli_Hantek6xxx.cs" />
     <Compile Include="Measurement\FrequencyMeasurement.cs" />
     <Compile Include="Measurement\PositiveAndNegativeVoltageMeasurement.cs" />
+    <Compile Include="Measurement\ThroughputMeasurement.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

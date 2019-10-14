@@ -80,7 +80,7 @@ namespace AnalogSignalAnalysisWpf
             ScopeControlView.DataContext = new ScopeControlViewModel(Scope);
 
             //创建PLC控件实例
-            PLC = new PLC();
+            PLC = new ModbusPLC("COM1");
             PLCControlView = new PLCControlView();
             PLCControlView.DataContext = new PLCControlViewModel(PLC);
 
