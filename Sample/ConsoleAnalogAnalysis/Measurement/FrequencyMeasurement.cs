@@ -1,5 +1,6 @@
 ﻿using AnalogSignalAnalysisWpf.Hardware;
 using AnalogSignalAnalysisWpf.Hardware.PLC;
+using AnalogSignalAnalysisWpf.Hardware.PWM;
 using AnalogSignalAnalysisWpf.Hardware.Scope;
 using DataAnalysis;
 using System;
@@ -20,20 +21,20 @@ namespace AnalogSignalAnalysisWpf.Measurement
         /// </summary>
         /// <param name="scope">示波器接口</param>
         /// <param name="plc">PLC接口</param>
-        public FrequencyMeasurement(IScope scope, IPLC plc)
+        public FrequencyMeasurement(IScope scope, IPWM pwm)
         {
             if (scope?.IsConnect != true)
             {
                 throw new ArgumentException("scope invalid");
             }
 
-            if (plc?.IsConnect != true)
+            if (pwm == null)
             {
                 throw new ArgumentException("plc invalid");
             }
 
             Scope = scope;
-            PLC = plc;
+            PWM = pwm;
         }
 
         #endregion
@@ -48,7 +49,7 @@ namespace AnalogSignalAnalysisWpf.Measurement
         /// <summary>
         /// PLC接口
         /// </summary>
-        public IPLC PLC { get; set; }
+        public IPWM PWM { get; set; }
 
         #endregion
 
@@ -101,10 +102,9 @@ namespace AnalogSignalAnalysisWpf.Measurement
         /// </summary>
         public void Start()
         {
-            if ((Scope?.IsConnect != true) ||
-                (PLC?.IsConnect != true))
+            if (Scope?.IsConnect != true)
             {
-                throw new Exception("scope/plc invalid");
+                throw new Exception("scope invalid");
             }
 
             //频率列表(单位:Hz)
@@ -118,10 +118,12 @@ namespace AnalogSignalAnalysisWpf.Measurement
                     return;
                 }
 
+                int lastFrequency = -1;
+
                 for (int i = 0; i < frequencies1.Length; i++)
                 {
                     //设置PLC频率
-                    PLC.Frequency = frequencies1[i];
+                    PWM.Frequency = frequencies1[i];
                     Thread.Sleep(500);
 
                     //设置Scope采集时长
@@ -152,21 +154,41 @@ namespace AnalogSignalAnalysisWpf.Measurement
                         double maxFrequency = frequencies1[i] * (1 + FrequencyErrLimit);
                         if (!Analysis.CheckFrequency(pulseFrequencies, minFrequency, maxFrequency))
                         {
-                            //失败
-                            OnFrequencyMeasurementCompleted(new FrequencyMeasurementCompletedEventArgs(true, frequencies1[i]));
+                            if (lastFrequency != -1)
+                            {
+                                //测试完成
+                                OnMeasurementCompleted(new FrequencyMeasurementCompletedEventArgs(true, lastFrequency));
+                            }
+                            else
+                            {
+                                //测试失败
+                                OnMeasurementCompleted(new FrequencyMeasurementCompletedEventArgs(false));
+                            }
                             return;
+                        }
+                        else
+                        {
+                            lastFrequency = frequencies1[i];
                         }
                     }
                     else
                     {
-                        //失败
-                        OnFrequencyMeasurementCompleted(new FrequencyMeasurementCompletedEventArgs(true, frequencies1[i]));
+                        if (lastFrequency != -1)
+                        {
+                            //测试完成
+                            OnMeasurementCompleted(new FrequencyMeasurementCompletedEventArgs(true, lastFrequency));
+                        }
+                        else
+                        {
+                            //测试失败
+                            OnMeasurementCompleted(new FrequencyMeasurementCompletedEventArgs(false));
+                        }
                         return;
                     }
 
                 }
 
-                OnFrequencyMeasurementCompleted(new FrequencyMeasurementCompletedEventArgs(false));
+                OnMeasurementCompleted(new FrequencyMeasurementCompletedEventArgs(false));
                 return;
             });
 

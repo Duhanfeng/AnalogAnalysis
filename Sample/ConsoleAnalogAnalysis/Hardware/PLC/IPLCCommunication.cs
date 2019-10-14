@@ -8,6 +8,37 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
 {
     public interface IPLCCommunication: IDisposable
     {
+        #region Modbus配置参数
+
+        /// <summary>
+        /// 串口号
+        /// </summary>
+        string PrimarySerialPortName { get; set; }
+
+        /// <summary>
+        /// 串口波特率
+        /// </summary>
+        int SerialPortBaudRate { get; set; }
+
+        /// <summary>
+        /// 从站地址
+        /// </summary>
+        byte SlaveAddress { get; set; }
+
+        /// <summary>
+        /// 写超时
+        /// </summary>
+        int WriteTimeout { get; set; }
+
+        /// <summary>
+        /// 读超时
+        /// </summary>
+        int ReadTimeout { get; set; }
+
+        #endregion
+
+        #region Modbus控制接口
+
         /// <summary>
         /// 设备连接标志
         /// </summary>
@@ -16,9 +47,9 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
         /// <summary>
         /// 连接设备
         /// </summary>
-        /// <param name="baudrate">波特率</param>
+        /// <param name="devIndex"></param>
         /// <returns></returns>
-        bool Connect(int baudrate);
+        bool Connect(int devIndex);
 
         /// <summary>
         /// 断开连接
@@ -31,7 +62,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
         /// <param name="register">寄存器位置</param>
         /// <param name="value">数值</param>
         /// <returns>执行结果</returns>
-        bool Write(int register, byte value);
+        bool Write(ushort register, ushort value);
 
         /// <summary>
         /// 写参数
@@ -39,7 +70,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
         /// <param name="register">寄存器位置</param>
         /// <param name="values">数值数值</param>
         /// <returns>执行结果</returns>
-        bool Write(int register, byte[] values);
+        bool Write(ushort register, ushort[] values);
 
         /// <summary>
         /// 读参数
@@ -47,7 +78,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
         /// <param name="register">寄存器位置</param>
         /// <param name="value">数值</param>
         /// <returns>执行结果</returns>
-        bool Read(int register, out byte value);
+        bool Read(ushort register, out ushort value);
 
         /// <summary>
         /// 读参数
@@ -55,7 +86,9 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
         /// <param name="register">寄存器位置</param>
         /// <param name="values">数值数值</param>
         /// <returns>执行结果</returns>
-        bool Read(int register, out byte[] values);
+        bool Read(ushort register, ushort count, out ushort[] values);
+
+        #endregion
 
     }
 }

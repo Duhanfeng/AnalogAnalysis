@@ -38,7 +38,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
         /// <param name="register">寄存器位置</param>
         /// <param name="value">数值</param>
         /// <returns>执行结果</returns>
-        public bool Write(int register, byte value)
+        public bool Write(ushort register, ushort value)
         {
             return true;
         }
@@ -49,7 +49,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
         /// <param name="register">寄存器位置</param>
         /// <param name="values">数值数值</param>
         /// <returns>执行结果</returns>
-        public bool Write(int register, byte[] values)
+        public bool Write(ushort register, ushort[] values)
         {
             return true;
         }
@@ -60,7 +60,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
         /// <param name="register">寄存器位置</param>
         /// <param name="value">数值</param>
         /// <returns>执行结果</returns>
-        public bool Read(int register, out byte value)
+        public bool Read(ushort register, out ushort value)
         {
             value = 0;
             return true; 
@@ -72,9 +72,9 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
         /// <param name="register">寄存器位置</param>
         /// <param name="values">数值数值</param>
         /// <returns>执行结果</returns>
-        public bool Read(int register, out byte[] values)
+        public bool Read(ushort register, ushort count, out ushort[] values)
         {
-            values = new byte[0];
+            values = new ushort[0];
             return true;
         }
 

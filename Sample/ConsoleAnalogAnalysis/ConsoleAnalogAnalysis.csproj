@@ -8,9 +8,10 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>ConsoleAnalogAnalysis</RootNamespace>
     <AssemblyName>ConsoleAnalogAnalysis</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -79,6 +80,12 @@
     <Reference Include="CsvHelper, Version=12.0.0.0, Culture=neutral, PublicKeyToken=8c4959082be5c823, processorArchitecture=MSIL">
       <HintPath>..\..\packages\CsvHelper.12.1.2\lib\net45\CsvHelper.dll</HintPath>
     </Reference>
+    <Reference Include="NModbus, Version=3.0.58.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\NModbus.3.0.58\lib\net46\NModbus.dll</HintPath>
+    </Reference>
+    <Reference Include="NModbus.Serial, Version=3.0.58.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\NModbus.Serial.3.0.58\lib\net46\NModbus.Serial.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.ValueTuple, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
@@ -97,7 +104,8 @@
     <Compile Include="Hardware\PLC\IPLC.cs" />
     <Compile Include="Hardware\PLC\IPLCCommunication.cs" />
     <Compile Include="Hardware\PLC\ModbusPLC.cs" />
-    <Compile Include="Hardware\PLC\VirtualPLC.cs" />
+    <Compile Include="Hardware\PWM\IPWM.cs" />
+    <Compile Include="Hardware\PWM\SerialPortPWM.cs" />
     <Compile Include="Hardware\Scope\Hantek66022BE.cs" />
     <Compile Include="Hardware\Scope\IScope.cs" />
     <Compile Include="Hardware\Scope\SigrokCli_Hantek6xxx.cs" />

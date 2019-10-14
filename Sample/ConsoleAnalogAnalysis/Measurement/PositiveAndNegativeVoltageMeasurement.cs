@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AnalogSignalAnalysisWpf
+namespace AnalogSignalAnalysisWpf.Measurement
 {
     /// <summary>
     /// 吸合电压与释放电压测试
@@ -111,6 +111,7 @@ namespace AnalogSignalAnalysisWpf
         /// <param name="e"></param>
         protected void OnMeasurementCompleted(PositiveAndNegativeVoltageMeasurementCompletedEventArgs e)
         {
+            PLC.Enable = false;
             MeasurementCompleted?.Invoke(this, e);
         }
 
@@ -149,7 +150,9 @@ namespace AnalogSignalAnalysisWpf
                 Scope.SampleTime = SampleTime;
 
                 double currentVoltage = MinVoltage;
-                while (currentVoltage < MaxVoltage)
+                PLC.Voltage = currentVoltage;
+                PLC.Enable = true;
+                while (currentVoltage <= MaxVoltage)
                 {
                     //设置当前电压
                     PLC.Voltage = currentVoltage;
