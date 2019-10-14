@@ -111,8 +111,8 @@ namespace AnalogSignalAnalysisWpf.Measurement
             }
 
             //频率列表(单位:Hz)
-            int[] frequencies1 = new int[] { 1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100 };
-            int[] sampleTime = new int[] { 3000, 2000, 1000, 1000, 1000, 1000, 1000, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500 };
+            int[] frequencies1 = new int[] { 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100 };
+            int[] sampleTime = new int[] { 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 200, 200, 200, 200, 200, 200, 200 };
 
             measureThread = new Thread(() =>
             {
@@ -127,7 +127,7 @@ namespace AnalogSignalAnalysisWpf.Measurement
                 {
                     //设置PLC频率
                     PWM.Frequency = frequencies1[i];
-                    Thread.Sleep(500);
+                    Thread.Sleep(50);
 
                     //设置Scope采集时长
                     Scope.SampleTime = sampleTime[i];
@@ -155,7 +155,7 @@ namespace AnalogSignalAnalysisWpf.Measurement
                         //检测脉冲是否异常
                         double minFrequency = frequencies1[i] * (1 - FrequencyErrLimit);
                         double maxFrequency = frequencies1[i] * (1 + FrequencyErrLimit);
-                        if (!Analysis.CheckFrequency(pulseFrequencies, minFrequency, maxFrequency))
+                        if (!Analysis.CheckFrequency(pulseFrequencies, minFrequency, maxFrequency, 1))
                         {
                             if (lastFrequency != -1)
                             {
@@ -191,7 +191,16 @@ namespace AnalogSignalAnalysisWpf.Measurement
 
                 }
 
-                OnMeasurementCompleted(new FrequencyMeasurementCompletedEventArgs(false));
+                if (lastFrequency != -1)
+                {
+                    //测试完成
+                    OnMeasurementCompleted(new FrequencyMeasurementCompletedEventArgs(true, lastFrequency));
+                }
+                else
+                {
+                    //测试失败
+                    OnMeasurementCompleted(new FrequencyMeasurementCompletedEventArgs(false));
+                }
                 return;
             });
 

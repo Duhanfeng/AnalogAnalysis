@@ -46,6 +46,120 @@ namespace DataAnalysisDamoWpf
         /// </summary>
         public int SampleInterval = 200;
 
+
+        private class CHData
+        {
+            public string CH { get; set; }
+        }
+
+        private static void GetData(string file, out double[] Data)
+        {
+            if (!File.Exists(file))
+            {
+                throw new FileNotFoundException($"{nameof(file)}:{file} not found!");
+            }
+
+            try
+            {
+                using (var reader = new StreamReader(file))
+                {
+                    using (var csv = new CsvReader(reader))
+                    {
+                        csv.Configuration.HasHeaderRecord = false;
+                        csv.Configuration.Comment = ';';
+                        csv.Configuration.AllowComments = true;
+                        //csv.Configuration.RegisterClassMap<FooMap>();
+                        var records = csv.GetRecords<CHData>();
+                        //deviceData = records.ToArray();
+                        var str = records.ToList().ConvertAll(x => x.CH);
+
+                        Data = (
+                        from val in str
+                        where !val.Contains("CH")
+                        select val).ToList().ConvertAll(x => double.Parse(x)).ToArray();
+                    }
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+        }
+
+
+        //800MS
+        private static void GetData2(string file, out double[] Data)
+        {
+            Data = new double[0];
+
+            if (!File.Exists(file))
+            {
+                throw new FileNotFoundException($"{nameof(file)}:{file} not found!");
+            }
+
+            try
+            {
+                List<string> datas2 = new List<string>();
+
+                using (var reader = new StreamReader(file))
+                {
+
+                    while (true)
+                    {
+                        var row = reader.ReadLine(); // row 是个字符串
+                        if (row == null)
+                        {
+                            break;
+                        }
+                        datas2.Add(row);
+                    }
+
+                    Data = (
+                    from val in datas2
+                    where !val.Contains("CH")
+                    select val).ToList().ConvertAll(x => double.Parse(x)).ToArray();
+
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+        }
+
+
+        //600MS
+        private static void GetData3(string file, out double[] Data)
+        {
+            Data = new double[0];
+
+            if (!File.Exists(file))
+            {
+                throw new FileNotFoundException($"{nameof(file)}:{file} not found!");
+            }
+
+            try
+            {
+                using (var reader = new StreamReader(file))
+                {
+                    var allString = reader.ReadToEnd();
+                    var d1 = allString.Split('\n').ToList();
+                    var d2 = d1.GetRange(d1.Count / 2 + 2, d1.Count / 2 - 4);
+                    Data = d2.ConvertAll(x => double.Parse(x)).ToArray();
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+        }
+
         /// <summary>
         /// 读取文件
         /// </summary>
@@ -69,15 +183,17 @@ namespace DataAnalysisDamoWpf
 
             //从CSV中获取数据
             double[] deviceData;
-            using (var reader = new StreamReader(ofd.FileName))
-            {
-                using (var csv = new CsvReader(reader))
-                {
-                    csv.Configuration.HasHeaderRecord = false;
-                    var records = csv.GetRecords<double>();
-                    deviceData = records.ToArray();
-                }
-            }
+            GetData(ofd.FileName, out deviceData);
+            //using (var reader = new StreamReader(ofd.FileName))
+            //{
+            //    using (var csv = new CsvReader(reader))
+            //    {
+            //        csv.Configuration.HasHeaderRecord = false;
+            //        var records = csv.GetRecords<double>();
+            //        deviceData = records.ToArray();
+            //    }
+            //}
+            int sampleRatio = 8 * 1000;
 
             //数据滤波
             Analysis.MeanFilter(deviceData, 15, out FilterData);
@@ -86,7 +202,7 @@ namespace DataAnalysisDamoWpf
             var collection = new System.Collections.ObjectModel.ObservableCollection<Data>();
             for (int i = 0; i < FilterData.Length / SampleInterval; i++)
             {
-                collection.Add(new Data() { Value1 = FilterData[i * SampleInterval], Value = i * SampleInterval });
+                collection.Add(new Data() { Value1 = FilterData[i * SampleInterval], Value = i * 1000.0 / sampleRatio * SampleInterval });
             }
             LiveDataViewModel1.Collection = collection;
 
@@ -102,7 +218,7 @@ namespace DataAnalysisDamoWpf
             if (FilterData?.Length > 0)
             {
                 int K = 20;
-                int sampleRatio = 20 * 1000;
+                int sampleRatio = 8 * 1000;
                 int sampleCount = sampleRatio / K;
                 Analysis.Derivative(FilterData, sampleCount, out var derivativeData);
 

@@ -17,9 +17,10 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
         /// 创建ModbusPLC新实例
         /// </summary>
         /// <param name="portName"></param>
-        public ModbusPLC(string portName)
+        public ModbusPLC(string portName, int baudRate = 115200)
         {
             PrimarySerialPortName = portName;
+            SerialPortBaudRate = baudRate;
         }
 
         #endregion
@@ -190,9 +191,8 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
         /// <summary>
         /// 连接设备
         /// </summary>
-        /// <param name="devIndex"></param>
-        /// <returns></returns>
-        public bool Connect(int devIndex)
+        /// <returns>执行结果</returns>
+        public bool Connect()
         {
             IsConnect = true;
             return true;
@@ -334,7 +334,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
         /// <summary>
         /// 电压比例系数
         /// </summary>
-        public readonly int VoltageScale = 10;
+        public readonly int VoltageScale = 100;
 
         /// <summary>
         /// 电流比例系数
