@@ -88,6 +88,7 @@ namespace AnalogSignalAnalysisWpf
             PLCControlView.DataContext = this;
 
             //创建PWM控件实例
+            PWM = new SerialPortPWM();
             PWMControlView = new PWMControlView();
             PWMControlView.DataContext = this;
 
@@ -301,6 +302,10 @@ namespace AnalogSignalAnalysisWpf
             }
         }
 
+        private object plcLock = new object();
+
+        private bool isPLCThreadRunning = false;
+
         #region COM配置
 
         /// <summary>
@@ -390,7 +395,7 @@ namespace AnalogSignalAnalysisWpf
         public void ConnectPLC()
         {
             PLC?.Connect();
-            NotifyOfPropertyChange(() => IsPLCValid);
+            UpdatePLCStatus();
         }
 
         /// <summary>
@@ -399,7 +404,7 @@ namespace AnalogSignalAnalysisWpf
         public void DisconnectPLC()
         {
             PLC?.Disconnect();
-            NotifyOfPropertyChange(() => IsPLCValid);
+            UpdatePLCStatus();
         }
 
         #endregion
@@ -426,7 +431,8 @@ namespace AnalogSignalAnalysisWpf
                     PLC.Voltage = value;
                 }
 
-                NotifyOfPropertyChange(() => PLCVoltage);
+                //NotifyOfPropertyChange(() => PLCVoltage);
+                UpdatePLCStatus();
             }
         }
 
@@ -450,7 +456,8 @@ namespace AnalogSignalAnalysisWpf
                     PLC.Current = value;
                 }
                 
-                NotifyOfPropertyChange(() => PLCCurrent);
+                //NotifyOfPropertyChange(() => PLCCurrent);
+                UpdatePLCStatus();
             }
         }
 
@@ -474,7 +481,8 @@ namespace AnalogSignalAnalysisWpf
                     PLC.Enable = value;
                 }
 
-                NotifyOfPropertyChange(() => PLCEnable);
+                //NotifyOfPropertyChange(() => PLCEnable);
+                UpdatePLCStatus();
             }
         }
 
@@ -528,10 +536,39 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public void UpdatePLCStatus()
         {
-            NotifyOfPropertyChange(() => PLCRealityVoltage);
-            NotifyOfPropertyChange(() => PLCRealityCurrent);
-            NotifyOfPropertyChange(() => PLCRealityTemperature);
+            lock (plcLock)
+            {
+                if (isPLCThreadRunning)
+                {
+                    return;
+                }
+            }
 
+            new Thread(() =>
+            {
+                lock (plcLock)
+                {
+                    isPLCThreadRunning = true;
+                }
+
+                for (int i = 0; i < 20; i++)
+                {
+                    Thread.Sleep(50);
+                    NotifyOfPropertyChange(() => IsPLCValid);
+                    NotifyOfPropertyChange(() => PLCVoltage);
+                    NotifyOfPropertyChange(() => PLCCurrent);
+                    NotifyOfPropertyChange(() => PLCEnable);
+                    NotifyOfPropertyChange(() => PLCRealityVoltage);
+                    NotifyOfPropertyChange(() => PLCRealityCurrent);
+                    NotifyOfPropertyChange(() => PLCRealityTemperature);
+                }
+
+                lock (plcLock)
+                {
+                    isPLCThreadRunning = false;
+                }
+
+            }).Start();
         }
 
         /// <summary>
@@ -541,7 +578,7 @@ namespace AnalogSignalAnalysisWpf
         {
             if (IsPLCValid)
             {
-                PLC.Enable = !PLC.Enable;
+                PLCEnable = !PLCEnable;
             }
         }
 
@@ -555,6 +592,17 @@ namespace AnalogSignalAnalysisWpf
         /// PWM
         /// </summary>
         IPWM PWM { get; set; }
+
+        /// <summary>
+        /// PWM有效标志
+        /// </summary>
+        public bool IsPWMValid
+        {
+            get
+            {
+                return PWM?.IsConnect ?? false;
+            }
+        }
 
         #region COM配置
 
@@ -578,6 +626,35 @@ namespace AnalogSignalAnalysisWpf
             }
         }
 
+        /// <summary>
+        /// 连接到PLC
+        /// </summary>
+        public void ConnectPWM()
+        {
+            PWM?.Connect();
+            UpdatePWMStatus();
+        }
+
+        /// <summary>
+        /// 断开连接
+        /// </summary>
+        public void DisconnectPWM()
+        {
+            PWM?.Disconnect();
+            UpdatePWMStatus();
+        }
+
+
+        /// <summary>
+        /// 更新PLC状态
+        /// </summary>
+        public void UpdatePWMStatus()
+        {
+            NotifyOfPropertyChange(() => IsPWMValid);
+            NotifyOfPropertyChange(() => PWMSerialPort);
+            NotifyOfPropertyChange(() => PWMFrequency);
+            NotifyOfPropertyChange(() => PWMDutyRatio);
+        }
 
         #endregion
 
@@ -603,7 +680,7 @@ namespace AnalogSignalAnalysisWpf
                     PWM.Frequency = value;
                 }
 
-                NotifyOfPropertyChange(() => PWMFrequency);
+                UpdatePWMStatus();
             }
         }
 
@@ -627,7 +704,7 @@ namespace AnalogSignalAnalysisWpf
                     PWM.DutyRatio = value;
                 }
 
-                NotifyOfPropertyChange(() => PWMDutyRatio);
+                UpdatePWMStatus();
             }
         }
 

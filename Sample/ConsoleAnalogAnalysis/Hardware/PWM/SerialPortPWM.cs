@@ -13,7 +13,15 @@ namespace AnalogSignalAnalysisWpf.Hardware.PWM
         /// <summary>
         /// 创建SerialPortPWM新实例
         /// </summary>
-        /// <param name="portName"></param>
+        public SerialPortPWM()
+        {
+
+        }
+
+        /// <summary>
+        /// 创建SerialPortPWM新实例
+        /// </summary>
+        /// <param name="portName">串口号</param>
         public SerialPortPWM(string portName)
         {
             PrimarySerialPortName = portName;
@@ -37,6 +45,11 @@ namespace AnalogSignalAnalysisWpf.Hardware.PWM
             }
             set
             {
+                if (string.IsNullOrEmpty(PrimarySerialPortName))
+                {
+                    return;
+                }
+
                 string configData = "";
 
                 if (value < 1000)
@@ -94,13 +107,15 @@ namespace AnalogSignalAnalysisWpf.Hardware.PWM
             }
             set 
             {
-                if (value > 1)
+                if (string.IsNullOrEmpty(PrimarySerialPortName))
                 {
-                    throw new ArgumentException("数据超限(0.01-1)");
+                    return;
                 }
 
-                string configData = "";
-                configData = $"D{value * 100:D3}";
+                value = (value > 1) ? 1 : value;
+                value = (value < 0.01) ? 0.01 : value;
+
+                string configData = $"D{(int)(value * 100):D3}";
 
                 dutyRatio = value;
                 using (SerialPort port = new SerialPort(PrimarySerialPortName))

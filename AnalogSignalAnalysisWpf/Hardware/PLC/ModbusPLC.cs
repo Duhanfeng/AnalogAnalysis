@@ -27,6 +27,8 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
 
         #region Modbus接口
 
+        private object plcLock = new object();
+
         /// <summary>
         /// 写单个寄存器
         /// </summary>
@@ -46,13 +48,17 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
 
                 //创建Modbus主机
                 var adapter = new SerialPortAdapter(port);
-                adapter.WriteTimeout = 500;
-                adapter.ReadTimeout = 500;
+                adapter.ReadTimeout = ReadTimeout;
+                adapter.WriteTimeout = WriteTimeout;
                 var factory = new ModbusFactory();
                 IModbusMaster master = factory.CreateRtuMaster(adapter);
 
-                //写到寄存器
-                master.WriteSingleRegister(slaveAddress, registerAddress, value);
+                lock (plcLock)
+                {
+                    //写到寄存器
+                    master.WriteSingleRegister(slaveAddress, registerAddress, value);
+                }
+                
             }
         }
 
@@ -80,8 +86,11 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
                 var factory = new ModbusFactory();
                 IModbusMaster master = factory.CreateRtuMaster(adapter);
 
-                //写到寄存器
-                master.WriteMultipleRegisters(slaveAddress, registerAddress, data);
+                lock (plcLock)
+                {
+                    //写到寄存器
+                    master.WriteMultipleRegisters(slaveAddress, registerAddress, data);
+                }
             }
         }
 
@@ -105,18 +114,20 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
 
                 //创建Modbus主机
                 var adapter = new SerialPortAdapter(port);
-                adapter.WriteTimeout = 500;
-                adapter.ReadTimeout = 500;
+                adapter.ReadTimeout = ReadTimeout;
+                adapter.WriteTimeout = WriteTimeout;
                 var factory = new ModbusFactory();
                 IModbusMaster master = factory.CreateRtuMaster(adapter);
 
-                //读寄存器
-                var values = master.ReadInputRegisters(slaveAddress, registerAddress, 1);
-                if (values?.Length >= 1)
+                lock (plcLock)
                 {
-                    value = values[0];
+                    //读寄存器
+                    var values = master.ReadHoldingRegisters(slaveAddress, registerAddress, 1);
+                    if (values?.Length >= 1)
+                    {
+                        value = values[0];
+                    }
                 }
-
             }
         }
 
@@ -145,8 +156,12 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
                 var factory = new ModbusFactory();
                 IModbusMaster master = factory.CreateRtuMaster(adapter);
 
-                //读寄存器
-                data = master.ReadInputRegisters(slaveAddress, registerAddress, numberOfPoints);
+                lock (plcLock)
+                {
+                    //读寄存器
+                    data = master.ReadHoldingRegisters(slaveAddress, registerAddress, numberOfPoints);
+                }
+                
             }
         }
 
@@ -194,8 +209,8 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
         /// <returns>执行结果</returns>
         public bool Connect()
         {
-            ushort data;
-            if (Read(VoltageAddress, out data))
+            ushort[] data;
+            if (Read(VoltageAddress, 1, out data))
             {
                 IsConnect = true;
                 return true;
@@ -296,7 +311,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
                 return false;
             }
             return true;
-            
+
         }
 
         #endregion
@@ -350,25 +365,27 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
         /// <summary>
         /// 电流比例系数
         /// </summary>
-        public readonly int CurrentScale = 100;
+        public readonly int CurrentScale = 1000;
 
         /// <summary>
         /// 温度比例系数
         /// </summary>
-        public readonly int TemperatureScale = 100;
+        public readonly int TemperatureScale = 1;
 
         /// <summary>
         /// 电压值
         /// </summary>
         public double Voltage
-        { 
+        {
             get
             {
                 if (IsConnect)
                 {
-                    ushort data;
-                    Read(VoltageAddress, out data);
-                    return (double)data / VoltageScale;
+                    ushort[] data;
+                    if (Read(VoltageAddress, 1, out data))
+                    {
+                        return (double)data[0] / VoltageScale;
+                    }
                 }
                 return -1;
             }
@@ -394,9 +411,11 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
             {
                 if (IsConnect)
                 {
-                    ushort data;
-                    Read(CurrentAddress, out data);
-                    return (double)data / CurrentScale;
+                    ushort[] data;
+                    if (Read(CurrentAddress, 1, out data))
+                    {
+                        return (double)data[0] / CurrentScale;
+                    }
                 }
                 return -1;
             }
@@ -422,9 +441,11 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
             {
                 if (IsConnect)
                 {
-                    ushort data;
-                    Read(SwitchStatusAddress, out data);
-                    return (data != 0) ? true : false;
+                    ushort[] data;
+                    if (Read(SwitchStatusAddress, 1, out data))
+                    {
+                        return (data[0] != 0) ? true : false;
+                    }
                 }
                 return false;
             }
@@ -451,9 +472,11 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
             {
                 if (IsConnect)
                 {
-                    ushort data;
-                    Read(RealityVoltageAddress, out data);
-                    return (double)data / VoltageScale;
+                    ushort[] data;
+                    if (Read(RealityVoltageAddress, 1, out data))
+                    {
+                        return (double)data[0] / VoltageScale;
+                    }
                 }
                 return -1;
             }
@@ -468,9 +491,11 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
             {
                 if (IsConnect)
                 {
-                    ushort data;
-                    Read(RealityCurrentAddress, out data);
-                    return (double)data / CurrentScale;
+                    ushort[] data;
+                    if (Read(RealityCurrentAddress, 1, out data))
+                    {
+                        return (double)data[0] / CurrentScale;
+                    }
                 }
                 return -1;
             }
@@ -485,9 +510,11 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
             {
                 if (IsConnect)
                 {
-                    ushort data;
-                    Read(RealityTemperatureAddress, out data);
-                    return (double)data / TemperatureScale;
+                    ushort[] data;
+                    if (Read(RealityTemperatureAddress, 1, out data))
+                    {
+                        return (double)data[0] / TemperatureScale;
+                    }
                 }
                 return -1;
             }

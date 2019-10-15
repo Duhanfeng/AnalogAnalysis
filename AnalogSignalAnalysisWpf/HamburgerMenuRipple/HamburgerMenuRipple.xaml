@@ -238,7 +238,7 @@
 
             <Controls:HamburgerMenu x:Name="HamburgerMenuControl"
                                     HamburgerWidth="48"
-                                    IsPaneOpen="True"
+                                    IsPaneOpen="False"
                                     ItemInvoked="HamburgerMenuControl_OnItemInvoked"
                                     ItemTemplate="{StaticResource MenuItemTemplate}"
                                     OptionsItemTemplate="{StaticResource MenuItemTemplate}"
@@ -250,7 +250,9 @@
                     <Controls:HamburgerMenuItemCollection>
                         <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="极限频率测试">
                             <Controls:HamburgerMenuIconItem.Tag>
-                                <local:FrequencyMeasurementView />
+                                <DockPanel>
+                                    <local:FrequencyMeasurementView />
+                                </DockPanel>
                             </Controls:HamburgerMenuIconItem.Tag>
                         </Controls:HamburgerMenuIconItem>
                         <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="吸合电压与释放电压测量">

@@ -36,12 +36,12 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
         double RealityVoltage { get; }
 
         /// <summary>
-        /// 实际电压值
+        /// 实际电流值
         /// </summary>
         double RealityCurrent { get; }
 
         /// <summary>
-        /// 实际电压值
+        /// 实际温度值
         /// </summary>
         double RealityTemperature { get; }
 

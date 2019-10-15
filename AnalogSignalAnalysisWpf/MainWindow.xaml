@@ -149,6 +149,11 @@
                 <Label VerticalAlignment="Center" FontSize="13">PLC:</Label>
                 <Ellipse Width="20" Height="20" Fill="{Binding IsPLCValid, Converter={StaticResource BoolToColorConverter}}"/>
             </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="10,0">
+                <iconPacks:PackIconFontAwesome Kind="WaveSquareSolid" VerticalAlignment="Center" Margin="10,0,0,0" />
+                <Label VerticalAlignment="Center" FontSize="13">PWM:</Label>
+                <Ellipse Width="20" Height="20" Fill="{Binding IsPWMValid, Converter={StaticResource BoolToColorConverter}}"/>
+            </StackPanel>
         </DockPanel>
         <local:HamburgerMenuRipple Grid.Row="1" DataContext="{Binding}"/>
     </Grid>

@@ -44,6 +44,7 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <OutputPath>bin\x86\Release\</OutputPath>
@@ -212,6 +213,7 @@
     <Compile Include="Hardware\PWM\SerialPortPWM.cs" />
     <Compile Include="Hardware\Scope\Hantek66022BE.cs" />
     <Compile Include="Hardware\Scope\IScope.cs" />
+    <Compile Include="Hardware\Scope\LOTOA02.cs" />
     <Compile Include="Hardware\Scope\SigrokCli_Hantek6xxx.cs" />
     <Compile Include="LiveData\Data.cs" />
     <Compile Include="LiveData\LiveDataView.xaml.cs">

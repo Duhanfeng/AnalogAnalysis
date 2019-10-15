@@ -1,10 +1,7 @@
-﻿using NModbus.Serial;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO.Ports;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace AnalogSignalAnalysisWpf.Hardware.PWM
 {
@@ -32,7 +29,37 @@ namespace AnalogSignalAnalysisWpf.Hardware.PWM
         /// </summary>
         public string PrimarySerialPortName { get; set; }
 
-        private int frequency;
+        /// <summary>
+        /// 设备连接标志
+        /// </summary>
+        public bool IsConnect { get; private set; }
+
+        /// <summary>
+        /// 连接设备
+        /// </summary>
+        /// <returns>执行结果</returns>
+        public bool Connect()
+        {
+            if (DutyRatio >= 0)
+            {
+                IsConnect = true;
+            }
+            else
+            {
+                IsConnect = false;
+            }
+
+            return IsConnect;
+        }
+
+        /// <summary>
+        /// 断开连接
+        /// </summary>
+        public void Disconnect()
+        {
+            IsConnect = false;
+
+        }
 
         /// <summary>
         /// 频率(Hz)
@@ -41,10 +68,79 @@ namespace AnalogSignalAnalysisWpf.Hardware.PWM
         {
             get
             {
+                if (string.IsNullOrEmpty(PrimarySerialPortName))
+                {
+                    return -1;
+                }
+
+                int frequency = -1;
+
+                try
+                {
+
+                    using (SerialPort port = new SerialPort(PrimarySerialPortName))
+                    {
+                        //配置串口
+                        port.BaudRate = 9600;
+                        port.DataBits = 8;
+                        port.Parity = Parity.None;
+                        port.StopBits = StopBits.One;
+                        port.Open();
+
+                        //读取数据
+                        byte[] byteArray = System.Text.Encoding.Default.GetBytes("read");
+                        port.Write(byteArray, 0, byteArray.Length);
+                        Thread.Sleep(100);
+                        var recvCmd = port.ReadExisting();
+
+                        if (string.IsNullOrEmpty(recvCmd))
+                        {
+                            return -1;
+                        }
+
+                        //解析数据
+                        var r1 = recvCmd.Split('\n').ToList();
+                        var r2 = (from val in r1
+                                  where val.Contains("F")
+                                  select val).ToList();
+                        if (r2?.Count == 1)
+                        {
+                            var r3 = r2[0].TrimStart('F');
+
+                            switch (r3.Length)
+                            {
+                                case 3:
+                                    frequency = int.Parse(r3);
+                                    break;
+                                case 4:
+                                    frequency = (int)(double.Parse(r3) * 1000);
+                                    break;
+                                case 5:
+                                    frequency = int.Parse(r3.ToCharArray()[0].ToString()) * 100 * 1000 +
+                                                int.Parse(r3.ToCharArray()[2].ToString()) * 10 * 1000 +
+                                                int.Parse(r3.ToCharArray()[4].ToString()) * 10 * 1000;
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    frequency = -1;
+                }
+
                 return frequency;
             }
             set
             {
+                if (string.IsNullOrEmpty(PrimarySerialPortName))
+                {
+                    return;
+                }
+
                 string configData = "";
 
                 if (value < 1000)
@@ -66,8 +162,6 @@ namespace AnalogSignalAnalysisWpf.Hardware.PWM
                     return;
                 }
 
-                frequency = value;
-
                 using (SerialPort port = new SerialPort(PrimarySerialPortName))
                 {
                     //配置串口
@@ -77,40 +171,81 @@ namespace AnalogSignalAnalysisWpf.Hardware.PWM
                     port.StopBits = StopBits.One;
                     port.Open();
 
-                    //创建Modbus主机
-                    var adapter = new SerialPortAdapter(port);
-                    adapter.WriteTimeout = 500;
-                    adapter.ReadTimeout = 500;
-
                     byte[] byteArray = System.Text.Encoding.Default.GetBytes(configData);
-                    adapter.Write(byteArray, 0, byteArray.Length);
+                    port.Write(byteArray, 0, byteArray.Length);
                 }
 
             }
         }
-
-        private double dutyRatio;
 
         /// <summary>
         /// 占空比(0.01-1)
         /// </summary>
         public double DutyRatio
         {
-            get 
-            { 
-                return dutyRatio; 
-            }
-            set 
+            get
             {
-                if (value > 1)
+                if (string.IsNullOrEmpty(PrimarySerialPortName))
                 {
-                    throw new ArgumentException("数据超限(0.01-1)");
+                    return -1;
                 }
 
-                string configData = "";
-                configData = $"D{value * 100:D3}";
+                int dutyRatio = -1;
 
-                dutyRatio = value;
+                try
+                {
+                    using (SerialPort port = new SerialPort(PrimarySerialPortName))
+                    {
+                        //配置串口
+                        port.BaudRate = 9600;
+                        port.DataBits = 8;
+                        port.Parity = Parity.None;
+                        port.StopBits = StopBits.One;
+                        port.Open();
+
+                        //读取数据
+                        byte[] byteArray = System.Text.Encoding.Default.GetBytes("read");
+                        port.Write(byteArray, 0, byteArray.Length);
+                        Thread.Sleep(100);
+                        var recvCmd = port.ReadExisting();
+
+                        if (string.IsNullOrEmpty(recvCmd))
+                        {
+                            return -1;
+                        }
+
+                        //解析数据
+                        var r1 = recvCmd.Split('\n').ToList();
+                        var r2 = (from val in r1
+                                  where val.Contains("D")
+                                  select val).ToList();
+                        if (r2?.Count == 1)
+                        {
+                            var r3 = r2[0].TrimStart('D');
+                            dutyRatio = int.Parse(r3);
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    dutyRatio = -1;
+                }
+
+
+                return dutyRatio;
+            }
+            set
+            {
+                if (string.IsNullOrEmpty(PrimarySerialPortName))
+                {
+                    return;
+                }
+
+                value = (value > 100) ? 100 : value;
+                value = (value < 1) ? 1 : value;
+
+                string configData = $"D{(int)value:D3}";
+
                 using (SerialPort port = new SerialPort(PrimarySerialPortName))
                 {
                     //配置串口
@@ -120,13 +255,8 @@ namespace AnalogSignalAnalysisWpf.Hardware.PWM
                     port.StopBits = StopBits.One;
                     port.Open();
 
-                    //创建Modbus主机
-                    var adapter = new SerialPortAdapter(port);
-                    adapter.WriteTimeout = 500;
-                    adapter.ReadTimeout = 500;
-
                     byte[] byteArray = System.Text.Encoding.Default.GetBytes(configData);
-                    adapter.Write(byteArray, 0, byteArray.Length);
+                    port.Write(byteArray, 0, byteArray.Length);
                 }
 
             }
