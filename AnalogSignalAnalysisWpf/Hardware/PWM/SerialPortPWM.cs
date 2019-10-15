@@ -13,7 +13,15 @@ namespace AnalogSignalAnalysisWpf.Hardware.PWM
         /// <summary>
         /// 创建SerialPortPWM新实例
         /// </summary>
-        /// <param name="portName"></param>
+        public SerialPortPWM()
+        {
+
+        }
+
+        /// <summary>
+        /// 创建SerialPortPWM新实例
+        /// </summary>
+        /// <param name="portName">串口号</param>
         public SerialPortPWM(string portName)
         {
             PrimarySerialPortName = portName;

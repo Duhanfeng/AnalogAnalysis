@@ -68,12 +68,18 @@
                     <ContentControl Content="{Binding ScopeControlView}"/>
                 </Grid>
             </Controls:Flyout>
-
             <Controls:Flyout Header="PLC控制"
                              Position="Right"
                              Theme="Inverse">
                 <Grid MinWidth="400" Margin="10">
                     <ContentControl Content="{Binding PLCControlView}"/>
+                </Grid>
+            </Controls:Flyout>
+            <Controls:Flyout Header="PWM控制"
+                             Position="Right"
+                             Theme="Inverse">
+                <Grid MinWidth="400" Margin="10">
+                    <ContentControl Content="{Binding PWMControlView}"/>
                 </Grid>
             </Controls:Flyout>
         </Controls:FlyoutsControl>
@@ -98,7 +104,7 @@
                 <MenuItem Header="设备">
                     <MenuItem Header="示波器" Click="ScopeMenuItem_Click"/>
                     <MenuItem Header="PLC" Click="PLCMenuItem_Click"/>
-                    <MenuItem Header="异步" Click="ShowDynamicFlyout"/>
+                    <MenuItem Header="PWM" Click="PWMMenuItem_Click"/>
                 </MenuItem>
                 <MenuItem Header="设置">
                     <MenuItem Header="首选项..."/>

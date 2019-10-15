@@ -86,7 +86,7 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public void Connect()
         {
-            PLC?.Connect(0);
+            PLC?.Connect();
             NotifyOfPropertyChange(() => IsConnect);
         }
 

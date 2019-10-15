@@ -68,7 +68,7 @@ namespace AnalogSignalAnalysisWpf.Measurement
         public double MaxVoltageThreshold { get; set; } = 8.0;
 
         /// <summary>
-        /// 输出电压
+        /// 输出电压(V)
         /// </summary>
         public double OutputVoltage { get; set; } = 12.0;
 

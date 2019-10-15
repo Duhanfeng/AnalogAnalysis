@@ -15,6 +15,9 @@ using System.Threading;
 using MahApps.Metro.Controls;
 using AnalogSignalAnalysisWpf.Hardware.Scope;
 using AnalogSignalAnalysisWpf.Hardware.PLC;
+using System.Collections.ObjectModel;
+using System.IO.Ports;
+using AnalogSignalAnalysisWpf.Hardware.PWM;
 
 namespace AnalogSignalAnalysisWpf
 {
@@ -82,12 +85,19 @@ namespace AnalogSignalAnalysisWpf
             //创建PLC控件实例
             PLC = new ModbusPLC("COM1");
             PLCControlView = new PLCControlView();
-            PLCControlView.DataContext = new PLCControlViewModel(PLC);
+            PLCControlView.DataContext = this;
+
+            //创建PWM控件实例
+            PWMControlView = new PWMControlView();
+            PWMControlView.DataContext = this;
+
+            //更新串口
+            SerialPorts = new ObservableCollection<string>(SerialPort.GetPortNames());
+            PLC.PrimarySerialPortName = SerialPorts[0] ?? "";
 
         }
 
         #region 窗口控制
-
 
         private bool showTitleBar;
 
@@ -173,6 +183,28 @@ namespace AnalogSignalAnalysisWpf
 
         #endregion
 
+        #region 串口
+
+        private ObservableCollection<string> serialPorts;
+
+        /// <summary>
+        /// 串口列表
+        /// </summary>
+        public ObservableCollection<string> SerialPorts
+        {
+            get
+            {
+                return serialPorts;
+            }
+            set
+            {
+                serialPorts = value;
+                NotifyOfPropertyChange(() => SerialPorts);
+            }
+        }
+
+        #endregion
+
         #region 硬件
 
         /// <summary>
@@ -188,22 +220,6 @@ namespace AnalogSignalAnalysisWpf
             get
             {
                 return Scope?.IsConnect ?? false;
-            }
-        }
-
-        /// <summary>
-        /// PLC
-        /// </summary>
-        public IPLC PLC { get; set; }
-
-        /// <summary>
-        /// PLC有效标志
-        /// </summary>
-        public bool IsPLCValid
-        {
-            get
-            {
-                return PLC?.IsConnect ?? false;
             }
         }
 
@@ -247,6 +263,376 @@ namespace AnalogSignalAnalysisWpf
             }
         }
 
+        private PWMControlView pwmControlView;
+
+        /// <summary>
+        /// PWM配置控件
+        /// </summary>
+        public PWMControlView PWMControlView
+        {
+            get
+            {
+                return pwmControlView;
+            }
+            set
+            {
+                pwmControlView = value;
+                NotifyOfPropertyChange(() => PWMControlView);
+            }
+        }
+
+        #endregion
+
+        #region PLC
+
+        /// <summary>
+        /// PLC
+        /// </summary>
+        public IPLC PLC { get; set; }
+
+        /// <summary>
+        /// PLC有效标志
+        /// </summary>
+        public bool IsPLCValid
+        {
+            get
+            {
+                return PLC?.IsConnect ?? false;
+            }
+        }
+
+        #region COM配置
+
+        /// <summary>
+        /// 串口号
+        /// </summary>
+        public string PLCSerialPort
+        {
+            get
+            {
+                return PLC?.PrimarySerialPortName ?? "Nana";
+            }
+            set
+            {
+                if (PLC != null)
+                {
+                    PLC.PrimarySerialPortName = value;
+                }
+
+                NotifyOfPropertyChange(() => PLCSerialPort);
+            }
+        }
+
+        /// <summary>
+        /// 串口波特率
+        /// </summary>
+        public int PLCSerialPortBaudRate 
+        { 
+            get
+            {
+                return PLC?.SerialPortBaudRate ?? 115200;
+            }
+            set
+            {
+                if (PLC != null)
+                {
+                    PLC.SerialPortBaudRate = value;
+                }
+
+                NotifyOfPropertyChange(() => PLCSerialPortBaudRate);
+            }
+        }
+
+        /// <summary>
+        /// 从站地址
+        /// </summary>
+        public byte PLCSlaveAddress
+        {
+            get
+            {
+                return PLC?.SlaveAddress ?? 0xFF;
+            }
+            set
+            {
+                if (PLC != null)
+                {
+                    PLC.SlaveAddress = value;
+                }
+
+                NotifyOfPropertyChange(() => PLCSlaveAddress);
+            }
+        }
+
+        /// <summary>
+        /// 超时
+        /// </summary>
+        public int PLCTimeout
+        {
+            get
+            {
+                return PLC?.ReadTimeout ?? -1;
+            }
+            set
+            {
+                if (PLC != null)
+                {
+                    PLC.ReadTimeout = value;
+                    PLC.WriteTimeout = value;
+                }
+
+                NotifyOfPropertyChange(() => PLCTimeout);
+            }
+        }
+
+        /// <summary>
+        /// 连接到PLC
+        /// </summary>
+        public void ConnectPLC()
+        {
+            PLC?.Connect();
+            NotifyOfPropertyChange(() => IsPLCValid);
+        }
+
+        /// <summary>
+        /// 断开连接
+        /// </summary>
+        public void DisconnectPLC()
+        {
+            PLC?.Disconnect();
+            NotifyOfPropertyChange(() => IsPLCValid);
+        }
+
+        #endregion
+
+        #region 输出参数控制
+
+        /// <summary>
+        /// PLC电压
+        /// </summary>
+        public double PLCVoltage
+        {
+            get
+            {
+                if (IsPLCValid)
+                {
+                    return PLC.Voltage;
+                }
+                return -1;
+            }
+            set
+            {
+                if (IsPLCValid == true)
+                {
+                    PLC.Voltage = value;
+                }
+
+                NotifyOfPropertyChange(() => PLCVoltage);
+            }
+        }
+
+        /// <summary>
+        /// PLC电流
+        /// </summary>
+        public double PLCCurrent
+        {
+            get
+            {
+                if (IsPLCValid)
+                {
+                    return PLC.Current;
+                }
+                return -1;
+            }
+            set
+            {
+                if (IsPLCValid == true)
+                {
+                    PLC.Current = value;
+                }
+                
+                NotifyOfPropertyChange(() => PLCCurrent);
+            }
+        }
+
+        /// <summary>
+        /// PLC电流
+        /// </summary>
+        public bool PLCEnable
+        {
+            get
+            {
+                if (IsPLCValid)
+                {
+                    return PLC.Enable;
+                }
+                return false;
+            }
+            set
+            {
+                if (IsPLCValid == true)
+                {
+                    PLC.Enable = value;
+                }
+
+                NotifyOfPropertyChange(() => PLCEnable);
+            }
+        }
+
+        /// <summary>
+        /// 实际电压值
+        /// </summary>
+        public double PLCRealityVoltage
+        {
+            get
+            {
+                if (IsPLCValid)
+                {
+                    return PLC.RealityVoltage;
+                }
+                return -1;
+            }
+        }
+
+        /// <summary>
+        /// 实际电流值
+        /// </summary>
+        public double PLCRealityCurrent
+        {
+            get
+            {
+                if (IsPLCValid)
+                {
+                    return PLC.RealityCurrent;
+                }
+                return -1;
+            }
+        }
+
+        /// <summary>
+        /// 实际温度值
+        /// </summary>
+        public double PLCRealityTemperature
+        {
+            get
+            {
+                if (IsPLCValid)
+                {
+                    return PLC.RealityTemperature;
+                }
+                return -1;
+            }
+        }
+
+        /// <summary>
+        /// 更新PLC状态
+        /// </summary>
+        public void UpdatePLCStatus()
+        {
+            NotifyOfPropertyChange(() => PLCRealityVoltage);
+            NotifyOfPropertyChange(() => PLCRealityCurrent);
+            NotifyOfPropertyChange(() => PLCRealityTemperature);
+
+        }
+
+        /// <summary>
+        /// 使能PLC输出
+        /// </summary>
+        public void EnablePLC()
+        {
+            if (IsPLCValid)
+            {
+                PLC.Enable = !PLC.Enable;
+            }
+        }
+
+        #endregion
+
+        #endregion
+
+        #region PWM
+
+        /// <summary>
+        /// PWM
+        /// </summary>
+        IPWM PWM { get; set; }
+
+        #region COM配置
+
+        /// <summary>
+        /// 串口号
+        /// </summary>
+        public string PWMSerialPort
+        {
+            get
+            {
+                return PWM?.PrimarySerialPortName ?? "Nana";
+            }
+            set
+            {
+                if (PWM != null)
+                {
+                    PWM.PrimarySerialPortName = value;
+                }
+
+                NotifyOfPropertyChange(() => PWMSerialPort);
+            }
+        }
+
+
+        #endregion
+
+        #region 输出参数控制
+
+        /// <summary>
+        /// PWM频率
+        /// </summary>
+        public int PWMFrequency
+        {
+            get
+            {
+                if (PWM != null)
+                {
+                    return PWM.Frequency;
+                }
+                return -1;
+            }
+            set
+            {
+                if (PWM != null)
+                {
+                    PWM.Frequency = value;
+                }
+
+                NotifyOfPropertyChange(() => PWMFrequency);
+            }
+        }
+
+        /// <summary>
+        /// PWM占空比
+        /// </summary>
+        public double PWMDutyRatio
+        {
+            get
+            {
+                if (PWM != null)
+                {
+                    return PWM.DutyRatio;
+                }
+                return -1;
+            }
+            set
+            {
+                if (PWM != null)
+                {
+                    PWM.DutyRatio = value;
+                }
+
+                NotifyOfPropertyChange(() => PWMDutyRatio);
+            }
+        }
+
+        #endregion
+
         #endregion
 
         #region 事件
@@ -268,6 +654,8 @@ namespace AnalogSignalAnalysisWpf
         }
 
         #endregion
+
+        #region 测试
 
         /// <summary>
         /// 抛异常
@@ -293,6 +681,8 @@ namespace AnalogSignalAnalysisWpf
         {
             OnMessageRaised(MessageLevel.Message, "提示信息");
         }
+
+        #endregion
 
         #region IDisposable Support
         private bool disposedValue = false; // 要检测冗余调用

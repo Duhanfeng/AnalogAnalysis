@@ -5,7 +5,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:AnalogSignalAnalysisWpf"
              xmlns:chart="http://sparrowtoolkit.codeplex.com/wpf"
+             xmlns:cal="http://www.caliburnproject.org"
              mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance local:MainWindowViewModel}"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <Style x:Key="containerStyle" TargetType="Border">
@@ -84,5 +86,41 @@
                 <chart:LineSeries Label="传感器电压" PointsSource="{Binding Collection2}" Stroke="Green" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
             </chart:SparrowChart>
         </DockPanel>
+        
+        <StackPanel Grid.Column="1" Grid.RowSpan="3" Margin="10" MinWidth="150">
+            <DockPanel Margin="0,10,0,0">
+                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">最小电压阈值(V)</TextBlock>
+                <TextBox Text="{Binding MinVoltageThreshold, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+            </DockPanel>
+            <DockPanel Margin="0,10,0,0">
+                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">最大电压阈值(V)</TextBlock>
+                <TextBox Text="{Binding MaxVoltageThreshold, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+            </DockPanel>
+            <DockPanel Margin="0,10,0,0">
+                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">频率误差</TextBlock>
+                <TextBox Text="{Binding FrequencyErrLimit, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+            </DockPanel>
+            <DockPanel Margin="0,10,0,0">
+                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">最小测试电压(V)</TextBlock>
+                <TextBox Text="{Binding FrequencyErrLimit, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+            </DockPanel>
+            <DockPanel Margin="0,10,0,0">
+                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">最大测试电压(V)</TextBlock>
+                <TextBox Text="{Binding FrequencyErrLimit, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+            </DockPanel>
+            <DockPanel Margin="0,10,0,0">
+                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">电压间隔(V)</TextBlock>
+                <TextBox Text="{Binding FrequencyErrLimit, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+            </DockPanel>
+            <DockPanel Margin="0,10,0,0">
+                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">采样时间(MS)</TextBlock>
+                <TextBox Text="{Binding FrequencyErrLimit, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+            </DockPanel>
+            <DockPanel Margin="0,10,0,0">
+                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">通信延迟(MS)</TextBlock>
+                <TextBox Text="{Binding FrequencyErrLimit, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+            </DockPanel>
+            <Button cal:Message.Attach="Start" Margin="0,10,0,0">运行</Button>
+        </StackPanel>
     </Grid>
 </UserControl>

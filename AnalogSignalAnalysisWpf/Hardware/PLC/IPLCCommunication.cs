@@ -42,14 +42,13 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
         /// <summary>
         /// 设备连接标志
         /// </summary>
-        bool IsConnect { get; set; }
+        bool IsConnect { get; }
 
         /// <summary>
         /// 连接设备
         /// </summary>
-        /// <param name="devIndex"></param>
-        /// <returns></returns>
-        bool Connect(int devIndex);
+        /// <returns>执行结果</returns>
+        bool Connect();
 
         /// <summary>
         /// 断开连接

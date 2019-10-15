@@ -8,7 +8,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
 {
     public interface IPLC : IPLCCommunication
     {
-        #region 输出参数控制接口
+        #region 控制接口
 
         /// <summary>
         /// 电压值

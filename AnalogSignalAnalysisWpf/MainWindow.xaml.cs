@@ -106,6 +106,18 @@ namespace AnalogSignalAnalysisWpf
         /// <param name="e"></param>
         private void ScopeMenuItem_Click(object sender, RoutedEventArgs e)
         {
+            for (int i = 0; i < Flyouts.Items.Count; i++)
+            {
+                if (i != 0)
+                {
+                    var flyout2 = Flyouts.Items[i] as Flyout;
+                    if (flyout2 == null)
+                    {
+                        return;
+                    }
+                    flyout2.IsOpen = false;
+                }
+            }
             var flyout = Flyouts.Items[0] as Flyout;
             if (flyout == null)
             {
@@ -122,6 +134,18 @@ namespace AnalogSignalAnalysisWpf
         /// <param name="e"></param>
         private void PLCMenuItem_Click(object sender, RoutedEventArgs e)
         {
+            for (int i = 0; i < Flyouts.Items.Count; i++)
+            {
+                if (i != 1)
+                {
+                    var flyout2 = Flyouts.Items[i] as Flyout;
+                    if (flyout2 == null)
+                    {
+                        return;
+                    }
+                    flyout2.IsOpen = false;
+                }
+            }
             var flyout = Flyouts.Items[1] as Flyout;
             if (flyout == null)
             {
@@ -131,6 +155,34 @@ namespace AnalogSignalAnalysisWpf
             flyout.IsOpen = !flyout.IsOpen;
         }
 
+        /// <summary>
+        /// PLC配置界面
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void PWMMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            for (int i = 0; i < Flyouts.Items.Count; i++)
+            {
+                if (i != 2)
+                {
+                    var flyout2 = Flyouts.Items[i] as Flyout;
+                    if (flyout2 == null)
+                    {
+                        return;
+                    }
+                    flyout2.IsOpen = false;
+                }
+            }
+            var flyout = Flyouts.Items[2] as Flyout;
+            if (flyout == null)
+            {
+                return;
+            }
+
+            flyout.IsOpen = !flyout.IsOpen;
+        }
+        
         private void ShowDynamicFlyout(object sender, RoutedEventArgs e)
         {
             var flyout = new Flyout

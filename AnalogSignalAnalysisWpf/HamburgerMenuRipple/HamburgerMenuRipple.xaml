@@ -260,12 +260,12 @@
                         </Controls:HamburgerMenuIconItem>
                         <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="通气量测试">
                             <Controls:HamburgerMenuIconItem.Tag>
-                                <local:PositiveAndNegativeVoltageMeasurementView />
+                                <local:ThroughputMeasurementView />
                             </Controls:HamburgerMenuIconItem.Tag>
                         </Controls:HamburgerMenuIconItem>
                         <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="测试4">
                             <Controls:HamburgerMenuIconItem.Tag>
-                                <local:PositiveAndNegativeVoltageMeasurementView />
+                                <local:ThroughputMeasurementView />
                             </Controls:HamburgerMenuIconItem.Tag>
                         </Controls:HamburgerMenuIconItem>
                     </Controls:HamburgerMenuItemCollection>

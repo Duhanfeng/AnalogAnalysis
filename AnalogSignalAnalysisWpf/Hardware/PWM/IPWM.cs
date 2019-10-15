@@ -9,6 +9,11 @@ namespace AnalogSignalAnalysisWpf.Hardware.PWM
     public interface IPWM
     {
         /// <summary>
+        /// 串口号
+        /// </summary>
+        string PrimarySerialPortName { get; set; }
+
+        /// <summary>
         /// 频率(Hz)
         /// </summary>
         int Frequency { get; set; }

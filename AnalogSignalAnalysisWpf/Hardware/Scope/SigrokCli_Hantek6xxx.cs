@@ -103,6 +103,78 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
            
         }
 
+
+        //800MS
+        private static void GetData2(string file, out double[] Data)
+        {
+            Data = new double[0];
+
+            if (!File.Exists(file))
+            {
+                throw new FileNotFoundException($"{nameof(file)}:{file} not found!");
+            }
+
+            try
+            {
+                List<string> datas2 = new List<string>();
+
+                using (var reader = new StreamReader(file))
+                {
+
+                    while (true)
+                    {
+                        var row = reader.ReadLine(); // row 是个字符串
+                        if (row == null)
+                        {
+                            break;
+                        }
+                        datas2.Add(row);
+                    }
+
+                    Data = (
+                    from val in datas2
+                    where !val.Contains("CH")
+                    select val).ToList().ConvertAll(x => double.Parse(x)).ToArray();
+
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+        }
+
+
+        //600MS
+        private static void GetData3(string file, out double[] Data)
+        {
+            Data = new double[0];
+
+            if (!File.Exists(file))
+            {
+                throw new FileNotFoundException($"{nameof(file)}:{file} not found!");
+            }
+
+            try
+            {
+                using (var reader = new StreamReader(file))
+                {
+                    var allString = reader.ReadToEnd();
+                    var d1 = allString.Split('\n').ToList();
+                    var d2 = d1.GetRange(d1.Count / 2 + 2, d1.Count / 2 - 4);
+                    Data = d2.ConvertAll(x => double.Parse(x)).ToArray();
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+        }
+
         #endregion
 
         private string filePath = $"{System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase}ScopeData\\1.csv";
@@ -166,12 +238,10 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
             }
 
             string channel = (channelIndex == 0) ? "CH1" : "CH2";
-
-            string result = ExecuteCmd($"-d hantek-6xxx --time {SampleTime} -C {channel} -o {filePath} -O csv:dedup:header=true");
-            Console.WriteLine(result);
+            string result = ExecuteCmd($"-d hantek-6xxx --time {SampleTime} -C {channel} -o {filePath} -O csv:dedup=false:header=false:trigger=false:time=false:scale=true:label=channel");
 
             //读取数据
-            GetData(filePath, out channelData);
+            GetData2(filePath, out channelData);
 
         }
 
