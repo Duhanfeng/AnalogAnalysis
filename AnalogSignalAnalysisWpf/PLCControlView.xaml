@@ -17,7 +17,7 @@
     <Grid>
         <StackPanel Margin="10">
             <StackPanel>
-                <TextBlock Margin="0,10,0,0" FontSize="16">COM通信配置</TextBlock>
+                <TextBlock Margin="0,10,0,0" FontSize="14">COM通信配置</TextBlock>
                 <DockPanel Margin="0,10,0,0">
                     <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">串口号</TextBlock>
                     <ComboBox ItemsSource="{Binding SerialPorts}" SelectedItem="{Binding PLCSerialPort}" />
@@ -41,7 +41,7 @@
             </StackPanel>
 
             <StackPanel IsEnabled="{Binding IsPLCValid}">
-                <TextBlock Margin="0,20,0,0" FontSize="16">输出控制</TextBlock>
+                <TextBlock Margin="0,20,0,0" FontSize="14">输出控制</TextBlock>
                 <DockPanel Margin="0,10,0,0">
                     <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">电压(V)</TextBlock>
                     <TextBox Text="{Binding PLCVoltage, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>

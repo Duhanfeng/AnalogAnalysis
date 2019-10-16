@@ -93,6 +93,10 @@ namespace AnalogSignalAnalysisWpf
             PWMControlView = new PWMControlView();
             PWMControlView.DataContext = this;
 
+            //设置窗口
+            SettingsView = new SettingsView();
+            SettingsView.DataContext = this;
+
             //更新串口
             SerialPorts = new ObservableCollection<string>(SerialPort.GetPortNames());
             PLC.PrimarySerialPortName = SerialPorts[0] ?? "";
@@ -267,6 +271,25 @@ namespace AnalogSignalAnalysisWpf
                 NotifyOfPropertyChange(() => PWMControlView);
             }
         }
+
+        private SettingsView settingsView;
+
+        /// <summary>
+        /// 设置窗口
+        /// </summary>
+        public SettingsView SettingsView
+        {
+            get
+            {
+                return settingsView;
+            }
+            set
+            {
+                settingsView = value;
+                NotifyOfPropertyChange(() => SettingsView);
+            }
+        }
+
 
         #endregion
 
