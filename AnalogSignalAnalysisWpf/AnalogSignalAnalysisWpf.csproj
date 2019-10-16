@@ -24,6 +24,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -188,9 +189,10 @@
     <Compile Include="Converters\BoolToColorConverter.cs" />
     <Compile Include="EnumHelper.cs" />
     <Compile Include="EventArgs\FrequencyMeasurementCompletedEventArgs.cs" />
+    <Compile Include="EventArgs\InputOutputMeasurementCompletedEventArgs.cs" />
     <Compile Include="EventArgs\PositiveAndNegativeVoltageMeasurementCompletedEventArgs.cs" />
     <Compile Include="EventArgs\ThroughputMeasurementCompletedEventArgs.cs" />
-    <Compile Include="Event\MessageRaisedEventArgs.cs" />
+    <Compile Include="EventArgs\MessageRaisedEventArgs.cs" />
     <Compile Include="HamburgerMenuRipple\FrequencyMeasurementView.xaml.cs">
       <DependentUpon>FrequencyMeasurementView.xaml</DependentUpon>
     </Compile>
@@ -203,6 +205,9 @@
     <Compile Include="HamburgerMenuRipple\SettingsView.xaml.cs">
       <DependentUpon>SettingsView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="HamburgerMenuRipple\InputOutputMeasurementView.xaml.cs">
+      <DependentUpon>InputOutputMeasurementView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="HamburgerMenuRipple\ThroughputMeasurementView.xaml.cs">
       <DependentUpon>ThroughputMeasurementView.xaml</DependentUpon>
     </Compile>
@@ -213,6 +218,7 @@
     <Compile Include="Hardware\PWM\SerialPortPWM.cs" />
     <Compile Include="Hardware\Scope\Hantek66022BE.cs" />
     <Compile Include="Hardware\Scope\IScope.cs" />
+    <Compile Include="Hardware\Scope\IScopeBase.cs" />
     <Compile Include="Hardware\Scope\LOTOA02.cs" />
     <Compile Include="Hardware\Scope\SigrokCli_Hantek6xxx.cs" />
     <Compile Include="LiveData\Data.cs" />
@@ -221,6 +227,7 @@
     </Compile>
     <Compile Include="LiveData\LiveDataViewModel.cs" />
     <Compile Include="Measurement\FrequencyMeasurement.cs" />
+    <Compile Include="Measurement\InputOutputMeasurement.cs" />
     <Compile Include="Measurement\PositiveAndNegativeVoltageMeasurement.cs" />
     <Compile Include="Measurement\ThroughputMeasurement.cs" />
     <Compile Include="PLCControlView.xaml.cs">
@@ -232,6 +239,9 @@
     </Compile>
     <Compile Include="ScopeControlView.xaml.cs">
       <DependentUpon>ScopeControlView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ScopeControlView2.xaml.cs">
+      <DependentUpon>ScopeControlView2.xaml</DependentUpon>
     </Compile>
     <Compile Include="ScopeControlViewModel.cs" />
     <Page Include="HamburgerMenuRipple\FrequencyMeasurementView.xaml">
@@ -247,6 +257,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="HamburgerMenuRipple\SettingsView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="HamburgerMenuRipple\InputOutputMeasurementView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -283,6 +297,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="ScopeControlView2.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MainWindowViewModel.cs" />
@@ -303,6 +321,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="Hardware\Scope\LOTOA02LIB\USBInterFace.lib" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -326,6 +345,10 @@
       <Project>{83311218-3a84-44ca-a510-f61cf57bc86c}</Project>
       <Name>DataAnalysis</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Hardware\Scope\LOTOA02LIB\USBInterFace.dll" />
+    <Content Include="Hardware\Scope\LOTOA02LIB\USBinterface.h" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

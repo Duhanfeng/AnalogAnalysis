@@ -1,5 +1,4 @@
-﻿using AnalogSignalAnalysisWpf.Event;
-using AnalogSignalAnalysisWpf.Hardware;
+﻿using AnalogSignalAnalysisWpf.Hardware;
 using AnalogSignalAnalysisWpf.Hardware.Scope;
 using Caliburn.Micro;
 using System;

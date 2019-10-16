@@ -1,23 +1,18 @@
-﻿using Caliburn.Micro;
+﻿using AnalogSignalAnalysisWpf.Core;
+using AnalogSignalAnalysisWpf.Hardware.PLC;
+using AnalogSignalAnalysisWpf.Hardware.PWM;
+using AnalogSignalAnalysisWpf.Hardware.Scope;
+using Caliburn.Micro;
 using MahApps.Metro;
-using AnalogSignalAnalysisWpf.Core;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO.Ports;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using AnalogSignalAnalysisWpf.Event;
-using MahApps.Metro.Controls.Dialogs;
-using System.Threading;
-using MahApps.Metro.Controls;
-using AnalogSignalAnalysisWpf.Hardware.Scope;
-using AnalogSignalAnalysisWpf.Hardware.PLC;
-using System.Collections.ObjectModel;
-using System.IO.Ports;
-using AnalogSignalAnalysisWpf.Hardware.PWM;
 
 namespace AnalogSignalAnalysisWpf
 {
@@ -78,9 +73,15 @@ namespace AnalogSignalAnalysisWpf
                                          .ToList();
 
             //创建示波器控件实例
-            Scope = new Hantek66022BE();
-            ScopeControlView = new ScopeControlView();
-            ScopeControlView.DataContext = new ScopeControlViewModel(Scope);
+            Scope = new LOTOA02();
+            ScopeControlView = new ScopeControlView2();
+            ScopeControlView.DataContext = this;
+
+            ScopeCouplingCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<LOTOA02.ECoupling>());
+            ScopeSampleRateCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<LOTOA02.ESampleRate>());
+            ScopeTriggerModelCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<LOTOA02.ETriggerModel>());
+            ScopeTriggerEdgeCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<LOTOA02.ETriggerEdge>());
+            ScopeVoltageDIVCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<LOTOA02.EVoltageDIV>());
 
             //创建PLC控件实例
             PLC = new ModbusPLC("COM1");
@@ -95,6 +96,11 @@ namespace AnalogSignalAnalysisWpf
             //更新串口
             SerialPorts = new ObservableCollection<string>(SerialPort.GetPortNames());
             PLC.PrimarySerialPortName = SerialPorts[0] ?? "";
+
+            AddRunningMessage("PWMControlView");
+            AddRunningMessage("ObservableCollection");
+            AddRunningMessage("SerialPortPWM SerialPortPWM SerialPortPWM SerialPortPWM SerialPortPWM SerialPortPWM SerialPortPWM SerialPortPWM");
+            AddRunningMessage("ObservableCollection");
 
         }
 
@@ -206,41 +212,21 @@ namespace AnalogSignalAnalysisWpf
 
         #endregion
 
-        #region 硬件
-
-        /// <summary>
-        /// 示波器
-        /// </summary>
-        public IScope Scope { get; set; }
-
-        /// <summary>
-        /// 示波器有效标志
-        /// </summary>
-        public bool IsScopeValid
-        {
-            get
-            {
-                return Scope?.IsConnect ?? false;
-            }
-        }
-
-        #endregion
-
         #region 子窗口
 
-        private ScopeControlView scopeControlView;
+        private ScopeControlView2 scopeControlView;
 
         /// <summary>
         /// 示波器配置控件
         /// </summary>
-        public ScopeControlView ScopeControlView
+        public ScopeControlView2 ScopeControlView
         {
-            get 
-            { 
+            get
+            {
                 return scopeControlView;
             }
             set
-            { 
+            {
                 scopeControlView = value;
                 NotifyOfPropertyChange(() => ScopeControlView);
             }
@@ -281,6 +267,285 @@ namespace AnalogSignalAnalysisWpf
                 NotifyOfPropertyChange(() => PWMControlView);
             }
         }
+
+        #endregion
+
+        #region 硬件
+
+        #region Scope
+
+        /// <summary>
+        /// 示波器
+        /// </summary>
+        public LOTOA02 Scope { get; set; }
+
+        /// <summary>
+        /// 示波器有效标志
+        /// </summary>
+        public bool IsScopeValid
+        {
+            get
+            {
+                return Scope?.IsConnect ?? false;
+            }
+        }
+
+        /// <summary>
+        /// 连接到Scope
+        /// </summary>
+        public void ConnectScope()
+        {
+            Scope?.Connect();
+            UpdateScopeStatus();
+        }
+
+        /// <summary>
+        /// 断开连接
+        /// </summary>
+        public void DisconnectScope()
+        {
+            Scope?.Disconnect();
+            UpdateScopeStatus();
+        }
+
+        /// <summary>
+        /// 更新示波器状态
+        /// </summary>
+        public void UpdateScopeStatus()
+        {
+            NotifyOfPropertyChange(() => ScopeCHAVoltageDIV);
+            NotifyOfPropertyChange(() => ScopeCHBVoltageDIV);
+            NotifyOfPropertyChange(() => ScopeCHACoupling);
+            NotifyOfPropertyChange(() => ScopeCHBCoupling);
+            NotifyOfPropertyChange(() => ScopeSampleRate);
+            NotifyOfPropertyChange(() => ScopeTriggerModel);
+            NotifyOfPropertyChange(() => ScopeTriggerEdge);
+
+        }
+
+        #region 配置参数
+
+        /// <summary>
+        /// 电压档位
+        /// </summary>
+        public ObservableCollection<string> ScopeVoltageDIVCollection { get; set; }
+
+        /// <summary>
+        /// 耦合集合
+        /// </summary>
+        public ObservableCollection<string> ScopeCouplingCollection { get; set; }
+
+        /// <summary>
+        /// 采样率
+        /// </summary>
+        public ObservableCollection<string> ScopeSampleRateCollection { get; set; }
+
+        /// <summary>
+        /// 触发模式
+        /// </summary>
+        public ObservableCollection<string> ScopeTriggerModelCollection { get; set; }
+
+        /// <summary>
+        /// 触发边沿
+        /// </summary>
+        public ObservableCollection<string> ScopeTriggerEdgeCollection { get; set; }
+
+        /// <summary>
+        /// 示波器CHA使能标志
+        /// </summary>
+        public bool ScopeCHAEnable
+        {
+            get
+            {
+                return IsScopeValid;
+            }
+            set
+            {
+                NotifyOfPropertyChange(() => ScopeCHAEnable);
+            }
+        }
+
+        /// <summary>
+        /// 示波器CHB使能标志
+        /// </summary>
+        public bool ScopeCHBEnable
+        {
+            get
+            {
+                return Scope?.IsCHBEnable ?? false;
+            }
+            set
+            {
+                if (IsScopeValid)
+                {
+                    Scope.IsCHBEnable = value;
+                }
+                NotifyOfPropertyChange(() => ScopeCHBEnable);
+            }
+        }
+
+        /// <summary>
+        /// CHA电压档位
+        /// </summary>
+        public string ScopeCHAVoltageDIV
+        {
+            get
+            {
+                if (IsScopeValid)
+                {
+                    return EnumHelper.GetDescription(Scope.CHAVoltageDIV);
+                }
+                return "";
+            }
+            set
+            {
+                if (IsScopeValid)
+                {
+                    Scope.CHAVoltageDIV = EnumHelper.GetEnum<LOTOA02.EVoltageDIV>(value);
+                }
+                NotifyOfPropertyChange(() => ScopeCHAVoltageDIV);
+            }
+        }
+
+        /// <summary>
+        /// CHB电压档位
+        /// </summary>
+        public string ScopeCHBVoltageDIV
+        {
+            get
+            {
+                if (IsScopeValid)
+                {
+                    return EnumHelper.GetDescription(Scope.CHBVoltageDIV);
+                }
+                return "";
+            }
+            set
+            {
+                if (IsScopeValid)
+                {
+                    Scope.CHBVoltageDIV = EnumHelper.GetEnum<LOTOA02.EVoltageDIV>(value);
+                }
+                NotifyOfPropertyChange(() => ScopeCHAVoltageDIV);
+            }
+        }
+
+        /// <summary>
+        /// CHA耦合
+        /// </summary>
+        public string ScopeCHACoupling
+        {
+            get
+            {
+                if (IsScopeValid)
+                {
+                    return EnumHelper.GetDescription(Scope.CHACoupling);
+                }
+                return "";
+            }
+            set
+            {
+                if (IsScopeValid)
+                {
+                    Scope.CHACoupling = EnumHelper.GetEnum<LOTOA02.ECoupling>(value);
+                }
+                NotifyOfPropertyChange(() => ScopeCHACoupling);
+            }
+        }
+
+        /// <summary>
+        /// CHB耦合
+        /// </summary>
+        public string ScopeCHBCoupling
+        {
+            get
+            {
+                if (IsScopeValid)
+                {
+                    return EnumHelper.GetDescription(Scope.CHBCoupling);
+                }
+                return "";
+            }
+            set
+            {
+                if (IsScopeValid)
+                {
+                    Scope.CHBCoupling = EnumHelper.GetEnum<LOTOA02.ECoupling>(value);
+                }
+                NotifyOfPropertyChange(() => ScopeCHBCoupling);
+            }
+        }
+
+        /// <summary>
+        /// 采样率
+        /// </summary>
+        public string ScopeSampleRate
+        {
+            get
+            {
+                if (IsScopeValid)
+                {
+                    return EnumHelper.GetDescription(Scope.SampleRate);
+                }
+                return "";
+            }
+            set
+            {
+                if (IsScopeValid)
+                {
+                    Scope.SampleRate = EnumHelper.GetEnum<LOTOA02.ESampleRate>(value);
+                }
+                NotifyOfPropertyChange(() => ScopeSampleRate);
+            }
+        }
+
+        /// <summary>
+        /// 触发模式
+        /// </summary>
+        public string ScopeTriggerModel
+        {
+            get
+            {
+                if (IsScopeValid)
+                {
+                    return EnumHelper.GetDescription(Scope.TriggerModel);
+                }
+                return "";
+            }
+            set
+            {
+                if (IsScopeValid)
+                {
+                    Scope.TriggerModel = EnumHelper.GetEnum<LOTOA02.ETriggerModel>(value);
+                }
+                NotifyOfPropertyChange(() => ScopeTriggerModel);
+            }
+        }
+
+        /// <summary>
+        /// 触发沿
+        /// </summary>
+        public string ScopeTriggerEdge
+        {
+            get
+            {
+                if (IsScopeValid)
+                {
+                    return EnumHelper.GetDescription(Scope.TriggerEdge);
+                }
+                return "";
+            }
+            set
+            {
+                if (IsScopeValid)
+                {
+                    Scope.TriggerEdge = EnumHelper.GetEnum<LOTOA02.ETriggerEdge>(value);
+                }
+                NotifyOfPropertyChange(() => ScopeTriggerEdge);
+            }
+        }
+
+        #endregion
 
         #endregion
 
@@ -331,8 +596,8 @@ namespace AnalogSignalAnalysisWpf
         /// <summary>
         /// 串口波特率
         /// </summary>
-        public int PLCSerialPortBaudRate 
-        { 
+        public int PLCSerialPortBaudRate
+        {
             get
             {
                 return PLC?.SerialPortBaudRate ?? 115200;
@@ -455,7 +720,7 @@ namespace AnalogSignalAnalysisWpf
                 {
                     PLC.Current = value;
                 }
-                
+
                 //NotifyOfPropertyChange(() => PLCCurrent);
                 UpdatePLCStatus();
             }
@@ -712,6 +977,8 @@ namespace AnalogSignalAnalysisWpf
 
         #endregion
 
+        #endregion
+
         #region 事件
 
         /// <summary>
@@ -757,6 +1024,42 @@ namespace AnalogSignalAnalysisWpf
         public void ThrowMessage()
         {
             OnMessageRaised(MessageLevel.Message, "提示信息");
+        }
+
+        private string runningMessage;
+
+        /// <summary>
+        /// 运行信息
+        /// </summary>
+        public string RunningMessage
+        {
+            get
+            {
+                return runningMessage;
+            }
+            set
+            {
+                runningMessage = value;
+                NotifyOfPropertyChange(() => RunningMessage);
+            }
+        }
+
+        /// <summary>
+        /// 增加运行信息
+        /// </summary>
+        public void AddRunningMessage(string message)
+        {
+            RunningMessage += $"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}:\r\n{message}\r\n\r\n";
+
+        }
+
+        /// <summary>
+        /// 清除运行信息
+        /// </summary>
+        public void ClearRunningMessage()
+        {
+            RunningMessage = "";
+
         }
 
         #endregion

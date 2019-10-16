@@ -34,7 +34,7 @@ namespace AnalogSignalAnalysisWpf
             InitializeComponent();
         }
 
-        private void ViewModel_MessageRaised(object sender, Event.MessageRaisedEventArgs e)
+        private void ViewModel_MessageRaised(object sender, MessageRaisedEventArgs e)
         {
             ((MetroWindow)Application.Current.MainWindow).ShowMessageAsync(EnumHelper.GetDescription(e.MessageLevel), e.Message);
 

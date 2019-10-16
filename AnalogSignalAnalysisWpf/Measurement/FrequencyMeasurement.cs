@@ -73,6 +73,11 @@ namespace AnalogSignalAnalysisWpf.Measurement
         /// </summary>
         public double FrequencyErrLimit { get; set; } = 0.2;
 
+        /// <summary>
+        /// 通信延迟(MS)
+        /// </summary>
+        public int ComDelay { get; set; } = 200;
+
         #endregion
 
         #region 事件

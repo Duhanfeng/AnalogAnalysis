@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MathNet.Filtering;
+using MathNet.Numerics;
+using MathNet.Numerics.Statistics;
 
 namespace DataAnalysis
 {
@@ -96,7 +98,6 @@ namespace DataAnalysis
 
         }
 
-
         /// <summary>
         /// 中值滤波
         /// </summary>
@@ -176,8 +177,6 @@ namespace DataAnalysis
             }
 
         }
-
-
 
         #endregion
 
@@ -427,6 +426,43 @@ namespace DataAnalysis
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// 测量上升沿边沿时间
+        /// </summary>
+        /// <param name="source">数据源</param>
+        /// <param name="minThreshold">最小阈值</param>
+        /// <param name="maxThreshold">最大阈值</param>
+        /// <param name="time">边沿时间</param>
+        /// <returns>执行结果</returns>
+        public static bool MeasureRisingEdgeTime(double[] source, double minThreshold, double maxThreshold, out double time)
+        {
+            time = -1;
+
+            if (source == null || source.Length == 0)
+            {
+                throw new ArgumentException($"{nameof(source)}无效");
+            }
+
+            if (minThreshold > maxThreshold)
+            {
+                throw new ArgumentException($"{nameof(minThreshold)}({minThreshold})不得大于{nameof(maxThreshold)}({maxThreshold})");
+            }
+
+
+            return false;
+        }
+
+        /// <summary>
+        /// 计算平均值
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public static double Median(double[] source)
+        {
+            return ArrayStatistics.MedianInplace(source);
         }
 
         #endregion

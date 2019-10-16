@@ -9,36 +9,35 @@ using System.Threading.Tasks;
 
 namespace AnalogSignalAnalysisWpf.Hardware.Scope
 {
-    public class LOTOA02
+    public class LOTOA02 : IScopeBase
     {
         #region C++接口
 
         //-------------------声明动态库USBInterFace.dll的一些接口函数--------------------------------------------------------------------
         [DllImport("USBInterFace.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall, EntryPoint = "SpecifyDevIdx")]
-        public static extern void SpecifyDevIdx(Int32 index);  //设置产品编号，不同型号产品编号不同
+        private static extern void SpecifyDevIdx(Int32 index);  //设置产品编号，不同型号产品编号不同
 
         [DllImport("USBInterFace.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
-        public static extern Int32 DeviceOpen();     //打开设备，并准备资源
+        private static extern Int32 DeviceOpen();     //打开设备，并准备资源
 
         [DllImport("USBInterFace.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
-        public static extern Int32 DeviceClose();     //关闭设备并释放资源
+        private static extern Int32 DeviceClose();     //关闭设备并释放资源
 
         [DllImport("USBInterFace.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall, EntryPoint = "USBCtrlTrans")]
-        public static extern byte USBCtrlTrans(byte Request, UInt16 usValue, uint outBufSize);//USB传输控制命令
+        private static extern byte USBCtrlTrans(byte Request, UInt16 usValue, uint outBufSize);//USB传输控制命令
 
         [DllImport("USBInterFace.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall, EntryPoint = "USBCtrlTransSimple")]
-        public static extern Int32 USBCtrlTransSimple(Int32 Request);//USB传输控制命令
-
+        private static extern Int32 USBCtrlTransSimple(Int32 Request);//USB传输控制命令
 
 
         [DllImport("USBInterFace.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall, EntryPoint = "GetBuffer4Wr")]
-        public static extern IntPtr GetBuffer4Wr(Int32 index);//获取原始数据缓冲区首指针
+        private static extern IntPtr GetBuffer4Wr(Int32 index);//获取原始数据缓冲区首指针
 
         [DllImport("USBInterFace.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
-        public static extern Int32 AiReadBulkData(Int32 SampleCount, uint num, Int32 ulTimeout, IntPtr PBuffer);//批量读取原始数据块
+        private static extern Int32 AiReadBulkData(Int32 SampleCount, uint num, Int32 ulTimeout, IntPtr PBuffer);//批量读取原始数据块
 
         [DllImport("USBInterFace.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall, EntryPoint = "SetInfo")]
-        public static extern void SetInfo(double dataNumPerPixar, double currentSampleRate, byte ChannelMask, Int32 m_ZrroUniInt, uint BufferOffset, uint HWbufferSize);
+        private static extern void SetInfo(double dataNumPerPixar, double currentSampleRate, byte ChannelMask, Int32 m_ZrroUniInt, uint BufferOffset, uint HWbufferSize);
 
         //声明需要的变量
         public static byte g_CtrlByte0 = 0;//记录IO控制位
@@ -52,82 +51,100 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
 
         #region 参数配置
 
-
-        enum Channel
+        public enum EChannel
         {
+            [Description("CHA")]
             CHA,
+            [Description("CHB")]
             CHB
         }
 
-        private static void SetCoupling(Channel channel, int type)
+        public enum ECoupling
         {
-            if (channel == Channel.CHA)
-            {
+            [Description("直流耦合")]
+            DC,
+            [Description("交流耦合")]
+            AC
+        }
 
-                if (type == 0)
+        public void SetCoupling(EChannel channel, ECoupling coupling)
+        {
+            if (channel == EChannel.CHA)
+            {
+                switch (coupling)
                 {
-                    //DC耦合
-                    g_CtrlByte0 &= 0xef;
-                    g_CtrlByte0 |= 0x10;
-                    USBCtrlTrans(0x94, g_CtrlByte0, 1);
-                }
-                else
-                {
-                    //AC耦合
-                    g_CtrlByte0 &= 0xef;
-                    USBCtrlTrans(0x94, g_CtrlByte0, 1);
+                    case ECoupling.DC:
+                        //DC耦合
+                        g_CtrlByte0 &= 0xef;
+                        g_CtrlByte0 |= 0x10;
+                        USBCtrlTrans(0x94, g_CtrlByte0, 1);
+                        break;
+                    case ECoupling.AC:
+                        //AC耦合
+                        g_CtrlByte0 &= 0xef;
+                        USBCtrlTrans(0x94, g_CtrlByte0, 1);
+                        break;
+                    default:
+                        break;
                 }
             }
             else
             {
-                if (type == 0)
+                switch (coupling)
                 {
-                    //DC耦合
-                    g_CtrlByte0 &= 0xef;
-                    g_CtrlByte0 |= 0x10;
-                    USBCtrlTrans(0x24, g_CtrlByte0, 1);
-                }
-                else
-                {
-                    //AC耦合
-                    g_CtrlByte0 &= 0xef;
-                    USBCtrlTrans(0x24, g_CtrlByte0, 1);
+                    case ECoupling.DC:
+                        //DC耦合
+                        g_CtrlByte0 &= 0xef;
+                        g_CtrlByte0 |= 0x10;
+                        USBCtrlTrans(0x24, g_CtrlByte0, 1);
+                        break;
+                    case ECoupling.AC:
+                        //AC耦合
+                        g_CtrlByte0 &= 0xef;
+                        USBCtrlTrans(0x24, g_CtrlByte0, 1);
+                        break;
+                    default:
+                        break;
                 }
             }
 
         }
 
-        enum SampleRate
+        public enum ESampleRate
         {
+            [Description("49K")]
             Sps_49K,
+            [Description("781K")]
             Sps_781K,
+            [Description("12.5M")]
             Sps_12M5,
+            [Description("100M")]
             Sps_100M,
         }
 
-        private static void SetSampleRate(SampleRate sampleRate)
+        public void SetSampleRate(ESampleRate sampleRate)
         {
             switch (sampleRate)
             {
-                case SampleRate.Sps_49K:
+                case ESampleRate.Sps_49K:
                     //设置49K Hz 采样率
                     g_CtrlByte0 &= 0xf0;
                     g_CtrlByte0 |= 0x0e;
                     USBCtrlTrans(0x94, g_CtrlByte0, 1);
                     break;
-                case SampleRate.Sps_781K:
+                case ESampleRate.Sps_781K:
                     //设置781K Hz 采样率
                     g_CtrlByte0 &= 0xf0;
                     g_CtrlByte0 |= 0x0c;
                     USBCtrlTrans(0x94, g_CtrlByte0, 1);
                     break;
-                case SampleRate.Sps_12M5:
+                case ESampleRate.Sps_12M5:
                     // 设置12.5M Hz 采样率
                     g_CtrlByte0 &= 0xf0;
                     g_CtrlByte0 |= 0x08;
                     USBCtrlTrans(0x94, g_CtrlByte0, 1);
                     break;
-                case SampleRate.Sps_100M:
+                case ESampleRate.Sps_100M:
                     //设置100M Hz 采样率
                     g_CtrlByte0 &= 0xf0;
                     g_CtrlByte0 |= 0x00;
@@ -138,26 +155,29 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
             }
         }
 
-        enum TriggerModel
+        public enum ETriggerModel
         {
+            [Description("CHA")]
             CHA,
+            [Description("外触发")]
             Ext,
+            [Description("无")]
             No,
         }
 
-        private static void SetTriggerModel(TriggerModel triggerModel)
+        public void SetTriggerModel(ETriggerModel triggerModel)
         {
             switch (triggerModel)
             {
-                case TriggerModel.CHA:
+                case ETriggerModel.CHA:
                     USBCtrlTrans(0xE7, 0x01, 1);
                     break;
-                case TriggerModel.Ext:
+                case ETriggerModel.Ext:
                     //g_TrigSourceChan = 2;
                     //通道EXT触发
                     USBCtrlTrans(0xE7, 0x01, 1);
                     break;
-                case TriggerModel.No:
+                case ETriggerModel.No:
                     USBCtrlTrans(0xE7, 0x00, 1);
                     break;
                 default:
@@ -165,20 +185,22 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
             }
         }
 
-        enum TriggerEdge
+        public enum ETriggerEdge
         {
+            [Description("上升沿")]
             Rising,
+            [Description("下降沿")]
             Filling,
         }
 
-        private static void SetTriggerEdge(TriggerEdge triggerEdge)
+        public void SetTriggerEdge(ETriggerEdge triggerEdge)
         {
             switch (triggerEdge)
             {
-                case TriggerEdge.Rising:
+                case ETriggerEdge.Rising:
                     USBCtrlTrans(0xC5, 0x00, 1);
                     break;
-                case TriggerEdge.Filling:
+                case ETriggerEdge.Filling:
                     USBCtrlTrans(0xC5, 0x01, 1);
                     break;
                 default:
@@ -186,7 +208,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
             }
         }
 
-        private static void SetTriggerLevel(byte level)
+        public void SetTriggerLevel(byte level)
         {
             //设置触发数据
             USBCtrlTrans(0x16, level, 1);
@@ -195,7 +217,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         /// <summary>
         /// 电压档位
         /// </summary>
-        enum VoltageDIV
+        public enum EVoltageDIV
         {
             [Description("250mV/DIV")]
             DIV_250MV,
@@ -209,35 +231,35 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
             DIV_5V,
         }
 
-        private static void SetVoltageDIV(int channel, VoltageDIV voltageDIV)
+        public void SetVoltageDIV(EChannel channel, EVoltageDIV voltageDIV)
         {
-            if (channel == 0)
+            if (channel == EChannel.CHA)
             {
                 switch (voltageDIV)
                 {
-                    case VoltageDIV.DIV_250MV:
+                    case EVoltageDIV.DIV_250MV:
                         g_CtrlByte1 &= 0xF7;
                         USBCtrlTrans(0x22, 0x04, 1);
                         USBCtrlTrans(0x24, g_CtrlByte1, 1);
                         break;
-                    case VoltageDIV.DIV_500MV:
+                    case EVoltageDIV.DIV_500MV:
                         g_CtrlByte1 &= 0xF7;
                         USBCtrlTrans(0x22, 0x02, 1);
                         USBCtrlTrans(0x24, g_CtrlByte1, 1);
                         break;
-                    case VoltageDIV.DIV_1V:
+                    case EVoltageDIV.DIV_1V:
                         g_CtrlByte1 &= 0xF7;
                         g_CtrlByte1 |= 0x08;
                         USBCtrlTrans(0x22, 0x04, 1);
                         USBCtrlTrans(0x24, g_CtrlByte1, 1);
                         break;
-                    case VoltageDIV.DIV_2V5:
+                    case EVoltageDIV.DIV_2V5:
                         g_CtrlByte1 &= 0xF7;
                         g_CtrlByte1 |= 0x08;
                         USBCtrlTrans(0x22, 0x02, 1);
                         USBCtrlTrans(0x24, g_CtrlByte1, 1);
                         break;
-                    case VoltageDIV.DIV_5V:
+                    case EVoltageDIV.DIV_5V:
                         g_CtrlByte1 &= 0xF7;
                         g_CtrlByte1 |= 0x08;
                         USBCtrlTrans(0x22, 0x00, 1);
@@ -251,31 +273,31 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
             {
                 switch (voltageDIV)
                 {
-                    case VoltageDIV.DIV_250MV:
+                    case EVoltageDIV.DIV_250MV:
                         g_CtrlByte1 &= 0xF9;
                         g_CtrlByte1 |= 0x04;//放大4倍               
                         USBCtrlTrans(0x23, 0x40, 1);
                         USBCtrlTrans(0x24, g_CtrlByte1, 1);
                         break;
-                    case VoltageDIV.DIV_500MV:
+                    case EVoltageDIV.DIV_500MV:
                         g_CtrlByte1 &= 0xF9;
                         g_CtrlByte1 |= 0x02;//放大两倍
                         USBCtrlTrans(0x23, 0x40, 1);
                         USBCtrlTrans(0x24, g_CtrlByte1, 1);
                         break;
-                    case VoltageDIV.DIV_1V:
+                    case EVoltageDIV.DIV_1V:
                         g_CtrlByte1 &= 0xF9;
                         g_CtrlByte1 |= 0x04;
                         USBCtrlTrans(0x23, 0x00, 1);
                         USBCtrlTrans(0x24, g_CtrlByte1, 1);
                         break;
-                    case VoltageDIV.DIV_2V5:
+                    case EVoltageDIV.DIV_2V5:
                         g_CtrlByte1 &= 0xF9;
                         g_CtrlByte1 |= 0x02;
                         USBCtrlTrans(0x23, 0x00, 1);
                         USBCtrlTrans(0x24, g_CtrlByte1, 1);
                         break;
-                    case VoltageDIV.DIV_5V:
+                    case EVoltageDIV.DIV_5V:
                         g_CtrlByte1 &= 0xF9;
                         USBCtrlTrans(0x23, 0x00, 1);
                         USBCtrlTrans(0x24, g_CtrlByte1, 1);
@@ -292,7 +314,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         /// 使能通道B
         /// </summary>
         /// <param name="isEnable"></param>
-        private static void EnableCHB(bool isEnable)
+        public void EnableCHB(bool isEnable)
         {
             if (isEnable)
             {
@@ -312,7 +334,12 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
 
         #region 示波器接口
 
-        public static uint RecvDataLenght = 64 * 1024;
+        private static uint RecvDataLenght = 64 * 1024;
+
+        /// <summary>
+        /// 采集时长(MS)
+        /// </summary>
+        public int SampleTime { get; set; } = 200;
 
         /// <summary>
         /// 设备连接标志
@@ -405,12 +432,160 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
                     byte* pData = (byte*)g_pBuffer;
                     for (int i = 0; i < RecvDataLenght; i++)
                     {
-                        g_chADataArray[i] = *(pData + i * 2);     //通道A的数据在原始缓冲区里的标号是0，2，4，6，8...
-                        g_chBDataArray[i] = *(pData + i * 2 + 1);  //通道B的数据在原始缓冲区里的标号是1，3，5，7，9...
+                        g_chADataArray[i] = *(pData + i * 2);       //通道A的数据在原始缓冲区里的标号是0，2，4，6，8...
+                        g_chBDataArray[i] = *(pData + i * 2 + 1);   //通道B的数据在原始缓冲区里的标号是1，3，5，7，9...
                     }
                 }
             }
 
+        }
+
+        #endregion
+
+        #region 属性
+
+        private ECoupling chaCoupling;
+
+        /// <summary>
+        /// CHA耦合
+        /// </summary>
+        public ECoupling CHACoupling
+        {
+            get 
+            { 
+                return chaCoupling;
+            }
+            set
+            { 
+                chaCoupling = value;
+                SetCoupling(EChannel.CHA, value);
+            }
+        }
+
+        private ECoupling chbCoupling;
+
+        /// <summary>
+        /// CHB耦合
+        /// </summary>
+        public ECoupling CHBCoupling
+        {
+            get
+            {
+                return chbCoupling;
+            }
+            set
+            {
+                chbCoupling = value;
+                SetCoupling(EChannel.CHB, value);
+            }
+        }
+
+        private ESampleRate sampleRate;
+
+        /// <summary>
+        /// 采样率
+        /// </summary>
+        public ESampleRate SampleRate
+        {
+            get
+            { 
+                return sampleRate; 
+            }
+            set
+            { 
+                sampleRate = value;
+                SetSampleRate(value);
+            }
+        }
+
+        private ETriggerModel triggerModel;
+
+        /// <summary>
+        /// 触发模式
+        /// </summary>
+        public ETriggerModel TriggerModel
+        {
+            get 
+            { 
+                return triggerModel;
+            }
+            set
+            { 
+                triggerModel = value;
+                SetTriggerModel(value);
+            }
+        }
+
+        private ETriggerEdge triggerEdge;
+
+        /// <summary>
+        /// 触发边沿
+        /// </summary>
+        public ETriggerEdge TriggerEdge
+        {
+            get 
+            { 
+                return triggerEdge;
+            }
+            set 
+            { 
+                triggerEdge = value;
+                SetTriggerEdge(value);
+            }
+        }
+
+        private EVoltageDIV chaVoltageDIV;
+
+        /// <summary>
+        /// CHA电压档位
+        /// </summary>
+        public EVoltageDIV CHAVoltageDIV
+        {
+            get 
+            { 
+                return chaVoltageDIV;
+            }
+            set
+            { 
+                chaVoltageDIV = value;
+                SetVoltageDIV(EChannel.CHA, value);
+            }
+        }
+
+        private EVoltageDIV chbVoltageDIV;
+
+        /// <summary>
+        /// CHB电压档位
+        /// </summary>
+        public EVoltageDIV CHBVoltageDIV
+        {
+            get
+            {
+                return chbVoltageDIV;
+            }
+            set
+            {
+                chbVoltageDIV = value;
+                SetVoltageDIV(EChannel.CHB, value);
+            }
+        }
+
+        private bool isCHBEnable;
+
+        /// <summary>
+        /// 使能CHB通道
+        /// </summary>
+        public bool IsCHBEnable
+        {
+            get 
+            {
+                return isCHBEnable;
+            }
+            set
+            { 
+                isCHBEnable = value;
+                EnableCHB(value);
+            }
         }
 
         #endregion

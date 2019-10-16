@@ -8,6 +8,7 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:materialDesignConverters="clr-namespace:MaterialDesignThemes.Wpf.Converters;assembly=MaterialDesignThemes.Wpf"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:cal="http://www.caliburnproject.org"
              d:DataContext="{d:DesignInstance local:MainWindowViewModel}"
              d:DesignHeight="500"
              d:DesignWidth="800"
@@ -163,74 +164,41 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" MinWidth="500"/>
+            <ColumnDefinition Width="10" />
+            <ColumnDefinition Width="Auto" MinWidth="200"/>
         </Grid.ColumnDefinitions>
 
-        <ScrollViewer Grid.Column="1"
+        <ScrollViewer Grid.Column="2"
                       MinWidth="230"
-                      Margin="10 10 5 10"
-                      Padding="0 0 5 0"
                       HorizontalContentAlignment="Stretch"
                       HorizontalScrollBarVisibility="Disabled" 
-                      Visibility="Collapsed">
-            <StackPanel Margin="0 0 0 10" Orientation="Vertical">
-                <Controls:ToggleSwitch Margin="0 10 0 5"
-                                       Header="IsPaneOpen:"
-                                       IsChecked="{Binding ElementName=HamburgerMenuControl, Path=IsPaneOpen, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-
-                <Controls:MetroHeader Margin="0 10 0 5" Header="DisplayMode:">
-                    <ComboBox MinWidth="150"
-                              HorizontalAlignment="Left"
-                              ItemsSource="{Binding Source={StaticResource DisplayModeEnumValues}}"
-                              SelectedItem="{Binding ElementName=HamburgerMenuControl, Path=DisplayMode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                </Controls:MetroHeader>
-
-                <Controls:MetroHeader Margin="0 10 0 5" Header="SelectedIndex:">
-                    <Slider AutoToolTipPlacement="TopLeft"
-                            Maximum="3"
-                            Minimum="0"
-                            Value="{Binding ElementName=HamburgerMenuControl, Path=SelectedIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                </Controls:MetroHeader>
-
-                <Controls:MetroHeader Margin="0 10 0 5" Header="CompactPaneLength:">
-                    <Slider AutoToolTipPlacement="TopLeft"
-                            Maximum="80"
-                            Minimum="10"
-                            Value="{Binding ElementName=HamburgerMenuControl, Path=CompactPaneLength, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                </Controls:MetroHeader>
-
-                <Controls:MetroHeader Margin="0 10 0 5" Header="OpenPaneLength:">
-                    <Slider AutoToolTipPlacement="TopLeft"
-                            Maximum="400"
-                            Minimum="50"
-                            Value="{Binding ElementName=HamburgerMenuControl, Path=OpenPaneLength, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                </Controls:MetroHeader>
-
-                <Controls:MetroHeader Margin="0 10 0 5" Header="HamburgerVisibility:">
-                    <ComboBox MinWidth="150"
-                              HorizontalAlignment="Left"
-                              ItemsSource="{Binding Source={StaticResource VisibilityEnumValues}}"
-                              SelectedItem="{Binding ElementName=HamburgerMenuControl, Path=HamburgerVisibility, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                </Controls:MetroHeader>
-
-                <Controls:MetroHeader Margin="0 10 0 5" Header="Hamburger Width / Height:">
-                    <UniformGrid Columns="2">
-                        <Slider Margin="0 0 5 0"
-                                AutoToolTipPlacement="TopLeft"
-                                Maximum="80"
-                                Minimum="10"
-                                Value="{Binding ElementName=HamburgerMenuControl, Path=HamburgerWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <Slider Margin="5 0 0 0"
-                                AutoToolTipPlacement="TopLeft"
-                                Maximum="80"
-                                Minimum="10"
-                                Value="{Binding ElementName=HamburgerMenuControl, Path=HamburgerHeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    </UniformGrid>
-                </Controls:MetroHeader>
-            </StackPanel>
+                      Visibility="Visible"
+                      Margin="2,0,0,0">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                    <Label VerticalAlignment="Center">消息:</Label>
+                    <Button Margin="10,0,0,0" cal:Message.Attach="ClearRunningMessage">清除</Button>
+                </StackPanel>
+                <RichTextBox Padding="5"
+                             Margin="0,7,0,5"
+                             IsReadOnly="True"
+                             IsDocumentEnabled="True"
+                             SpellCheck.IsEnabled="True">
+                    <FlowDocument PageWidth="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type RichTextBox}}, Path=ActualWidth}">
+                        <Paragraph>
+                            <Run Text="{Binding RunningMessage}"/>
+                        </Paragraph>
+                    </FlowDocument>
+                </RichTextBox>
+            </DockPanel>
         </ScrollViewer>
-
+        
+        <GridSplitter Grid.Column="1" 
+                      HorizontalAlignment="Stretch" 
+                      Background="LightGray"
+                      Margin="2,0"/>
+        
         <Border Grid.Column="0"
                 Margin="0"
                 BorderBrush="{DynamicResource MahApps.Brushes.Gray7}"
@@ -265,9 +233,9 @@
                                 <local:ThroughputMeasurementView />
                             </Controls:HamburgerMenuIconItem.Tag>
                         </Controls:HamburgerMenuIconItem>
-                        <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="测试4">
+                        <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="输入输出关系曲线测试">
                             <Controls:HamburgerMenuIconItem.Tag>
-                                <local:ThroughputMeasurementView />
+                                <local:InputOutputMeasurementView />
                             </Controls:HamburgerMenuIconItem.Tag>
                         </Controls:HamburgerMenuIconItem>
                     </Controls:HamburgerMenuItemCollection>
