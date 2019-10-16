@@ -244,6 +244,7 @@
       <DependentUpon>ScopeControlView2.xaml</DependentUpon>
     </Compile>
     <Compile Include="ScopeControlViewModel.cs" />
+    <Compile Include="SystemParamManege.cs" />
     <Page Include="HamburgerMenuRipple\FrequencyMeasurementView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

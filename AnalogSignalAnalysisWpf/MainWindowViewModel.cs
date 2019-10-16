@@ -46,7 +46,6 @@ namespace AnalogSignalAnalysisWpf
         }
     }
 
-
     public class MainWindowViewModel : Screen, IDisposable
     {
         /// <summary>
