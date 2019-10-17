@@ -14,6 +14,34 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         #region C++接口
 
         //-------------------声明动态库USBInterFace.dll的一些接口函数--------------------------------------------------------------------
+        [DllImport("USBInterFace.dll", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void SpecifyDevIdx(Int32 index);  //设置产品编号，不同型号产品编号不同
+
+        [DllImport("USBInterFace.dll", CallingConvention = CallingConvention.Cdecl)]
+        private static extern Int32 DeviceOpen();     //打开设备，并准备资源
+
+        [DllImport("USBInterFace.dll", CallingConvention = CallingConvention.Cdecl)]
+        private static extern Int32 DeviceClose();     //关闭设备并释放资源
+
+        [DllImport("USBInterFace.dll", CallingConvention = CallingConvention.Cdecl)]
+        private static extern byte USBCtrlTrans(byte Request, UInt16 usValue, uint outBufSize);//USB传输控制命令
+
+        [DllImport("USBInterFace.dll", CallingConvention = CallingConvention.Cdecl)]
+        private static extern Int32 USBCtrlTransSimple(Int32 Request);//USB传输控制命令
+
+
+        [DllImport("USBInterFace.dll", CallingConvention = CallingConvention.Cdecl)]
+        private static extern IntPtr GetBuffer4Wr(Int32 index);//获取原始数据缓冲区首指针
+
+        [DllImport("USBInterFace.dll", CallingConvention = CallingConvention.Cdecl)]
+        private static extern Int32 AiReadBulkData(Int32 SampleCount, uint num, Int32 ulTimeout, IntPtr PBuffer);//批量读取原始数据块
+
+        [DllImport("USBInterFace.dll", CallingConvention = CallingConvention.Cdecl)]
+        private static extern void SetInfo(double dataNumPerPixar, double currentSampleRate, byte ChannelMask, Int32 m_ZrroUniInt, uint BufferOffset, uint HWbufferSize);
+
+#if false
+        
+        //-------------------声明动态库USBInterFace.dll的一些接口函数--------------------------------------------------------------------
         [DllImport("USBInterFace.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall, EntryPoint = "SpecifyDevIdx")]
         private static extern void SpecifyDevIdx(Int32 index);  //设置产品编号，不同型号产品编号不同
 
@@ -39,6 +67,8 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         [DllImport("USBInterFace.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall, EntryPoint = "SetInfo")]
         private static extern void SetInfo(double dataNumPerPixar, double currentSampleRate, byte ChannelMask, Int32 m_ZrroUniInt, uint BufferOffset, uint HWbufferSize);
 
+#endif
+
         //声明需要的变量
         public static byte g_CtrlByte0 = 0;//记录IO控制位
         public static byte g_CtrlByte1 = 0;//记录IO控制位
@@ -50,22 +80,6 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         #endregion
 
         #region 参数配置
-
-        public enum EChannel
-        {
-            [Description("CHA")]
-            CHA,
-            [Description("CHB")]
-            CHB
-        }
-
-        public enum ECoupling
-        {
-            [Description("直流耦合")]
-            DC,
-            [Description("交流耦合")]
-            AC
-        }
 
         public void SetCoupling(EChannel channel, ECoupling coupling)
         {
@@ -110,18 +124,6 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
 
         }
 
-        public enum ESampleRate
-        {
-            [Description("49K")]
-            Sps_49K,
-            [Description("781K")]
-            Sps_781K,
-            [Description("12.5M")]
-            Sps_12M5,
-            [Description("100M")]
-            Sps_100M,
-        }
-
         public void SetSampleRate(ESampleRate sampleRate)
         {
             switch (sampleRate)
@@ -155,16 +157,6 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
             }
         }
 
-        public enum ETriggerModel
-        {
-            [Description("CHA")]
-            CHA,
-            [Description("外触发")]
-            Ext,
-            [Description("无")]
-            No,
-        }
-
         public void SetTriggerModel(ETriggerModel triggerModel)
         {
             switch (triggerModel)
@@ -183,14 +175,6 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
                 default:
                     break;
             }
-        }
-
-        public enum ETriggerEdge
-        {
-            [Description("上升沿")]
-            Rising,
-            [Description("下降沿")]
-            Filling,
         }
 
         public void SetTriggerEdge(ETriggerEdge triggerEdge)
@@ -212,23 +196,6 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         {
             //设置触发数据
             USBCtrlTrans(0x16, level, 1);
-        }
-
-        /// <summary>
-        /// 电压档位
-        /// </summary>
-        public enum EVoltageDIV
-        {
-            [Description("250mV/DIV")]
-            DIV_250MV,
-            [Description("500mV/DIV")]
-            DIV_500MV,
-            [Description("1V/DIV")]
-            DIV_1V,
-            [Description("2.5V/DIV")]
-            DIV_2V5,
-            [Description("5V/DIV")]
-            DIV_5V,
         }
 
         public void SetVoltageDIV(EChannel channel, EVoltageDIV voltageDIV)
@@ -570,6 +537,21 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
             }
         }
 
+        /// <summary>
+        /// 使能CHA通道
+        /// </summary>
+        public bool IsCHAEnable
+        {
+            get
+            {
+                return true;
+            }
+            set
+            {
+
+            }
+        }
+
         private bool isCHBEnable;
 
         /// <summary>
@@ -577,7 +559,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         /// </summary>
         public bool IsCHBEnable
         {
-            get 
+            get
             {
                 return isCHBEnable;
             }

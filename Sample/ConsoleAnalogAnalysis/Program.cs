@@ -55,7 +55,7 @@ namespace ConsoleAnalogAnalysis
 
         }
 
-        private static void Measurement_MeasurementCompleted(object sender, AnalogSignalAnalysisWpf.PositiveAndNegativeVoltageMeasurementCompletedEventArgs e)
+        private static void Measurement_MeasurementCompleted(object sender, AnalogSignalAnalysisWpf.PNVoltageMeasurementCompletedEventArgs e)
         {
             Console.WriteLine($"Result={e.IsSuccess}: P={e.PositiveVoltage}V N={e.NegativeVoltage}V;");
         }

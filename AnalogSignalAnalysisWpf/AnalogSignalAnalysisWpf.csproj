@@ -74,6 +74,12 @@
     <Reference Include="CsvHelper, Version=12.0.0.0, Culture=neutral, PublicKeyToken=8c4959082be5c823, processorArchitecture=MSIL">
       <HintPath>..\packages\CsvHelper.12.1.2\lib\net45\CsvHelper.dll</HintPath>
     </Reference>
+    <Reference Include="Framework.Infrastructure.Serialization">
+      <HintPath>..\ThirdPartyPlatform\SoftwareFramework\Framework.Infrastructure.Serialization.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.8\lib\net45-full\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="MahApps.Metro, Version=2.0.0.0, Culture=neutral, PublicKeyToken=51482d6f650b2b3f, processorArchitecture=MSIL">
       <HintPath>..\packages\MahApps.Metro.2.0.0-alpha0490\lib\net46\MahApps.Metro.dll</HintPath>
     </Reference>
@@ -149,6 +155,9 @@
     <Reference Include="Microsoft.Xaml.Behaviors, Version=1.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Xaml.Behaviors.Wpf.1.0.1\lib\net45\Microsoft.Xaml.Behaviors.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="NModbus, Version=3.0.58.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\NModbus.3.0.58\lib\net46\NModbus.dll</HintPath>
     </Reference>
@@ -186,22 +195,27 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Converters\BoolToInvertConverter.cs" />
+    <Compile Include="Converters\BoolToStringConverter.cs" />
     <Compile Include="Converters\BoolToColorConverter.cs" />
     <Compile Include="EnumHelper.cs" />
     <Compile Include="EventArgs\FrequencyMeasurementCompletedEventArgs.cs" />
     <Compile Include="EventArgs\InputOutputMeasurementCompletedEventArgs.cs" />
-    <Compile Include="EventArgs\PositiveAndNegativeVoltageMeasurementCompletedEventArgs.cs" />
+    <Compile Include="EventArgs\PNVoltageMeasurementCompletedEventArgs.cs" />
     <Compile Include="EventArgs\ThroughputMeasurementCompletedEventArgs.cs" />
     <Compile Include="EventArgs\MessageRaisedEventArgs.cs" />
     <Compile Include="HamburgerMenuRipple\FrequencyMeasurementView.xaml.cs">
       <DependentUpon>FrequencyMeasurementView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="HamburgerMenuRipple\FrequencyMeasurementViewModel.cs" />
     <Compile Include="HamburgerMenuRipple\HamburgerMenuRipple.xaml.cs">
       <DependentUpon>HamburgerMenuRipple.xaml</DependentUpon>
     </Compile>
-    <Compile Include="HamburgerMenuRipple\PositiveAndNegativeVoltageMeasurementView.xaml.cs">
-      <DependentUpon>PositiveAndNegativeVoltageMeasurementView.xaml</DependentUpon>
+    <Compile Include="HamburgerMenuRipple\InputOutputMeasurementViewModel.cs" />
+    <Compile Include="HamburgerMenuRipple\PNVoltageMeasurementView.xaml.cs">
+      <DependentUpon>PNVoltageMeasurementView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="HamburgerMenuRipple\PNVoltageMeasurementViewModel.cs" />
     <Compile Include="HamburgerMenuRipple\SettingsView.xaml.cs">
       <DependentUpon>SettingsView.xaml</DependentUpon>
     </Compile>
@@ -211,40 +225,29 @@
     <Compile Include="HamburgerMenuRipple\ThroughputMeasurementView.xaml.cs">
       <DependentUpon>ThroughputMeasurementView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="HamburgerMenuRipple\ThroughputMeasurementViewModel.cs" />
     <Compile Include="Hardware\PLC\IPLC.cs" />
     <Compile Include="Hardware\PLC\IPLCCommunication.cs" />
     <Compile Include="Hardware\PLC\ModbusPLC.cs" />
     <Compile Include="Hardware\PWM\IPWM.cs" />
     <Compile Include="Hardware\PWM\SerialPortPWM.cs" />
-    <Compile Include="Hardware\Scope\Hantek66022BE.cs" />
-    <Compile Include="Hardware\Scope\IScope.cs" />
     <Compile Include="Hardware\Scope\IScopeBase.cs" />
     <Compile Include="Hardware\Scope\LOTOA02.cs" />
-    <Compile Include="Hardware\Scope\SigrokCli_Hantek6xxx.cs" />
     <Compile Include="LiveData\Data.cs" />
     <Compile Include="LiveData\LiveDataView.xaml.cs">
       <DependentUpon>LiveDataView.xaml</DependentUpon>
     </Compile>
     <Compile Include="LiveData\LiveDataViewModel.cs" />
-    <Compile Include="Measurement\FrequencyMeasurement.cs" />
-    <Compile Include="Measurement\InputOutputMeasurement.cs" />
-    <Compile Include="Measurement\PositiveAndNegativeVoltageMeasurement.cs" />
-    <Compile Include="Measurement\ThroughputMeasurement.cs" />
     <Compile Include="PLCControlView.xaml.cs">
       <DependentUpon>PLCControlView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="PLCControlViewModel.cs" />
     <Compile Include="PWMControlView.xaml.cs">
       <DependentUpon>PWMControlView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="ScopeControlView.xaml.cs">
-      <DependentUpon>ScopeControlView.xaml</DependentUpon>
     </Compile>
     <Compile Include="ScopeControlView2.xaml.cs">
       <DependentUpon>ScopeControlView2.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ScopeControlViewModel.cs" />
-    <Compile Include="SystemParamManege.cs" />
+    <Compile Include="SystemParamManager.cs" />
     <Page Include="HamburgerMenuRipple\FrequencyMeasurementView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -253,7 +256,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="HamburgerMenuRipple\PositiveAndNegativeVoltageMeasurementView.xaml">
+    <Page Include="HamburgerMenuRipple\PNVoltageMeasurementView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -291,10 +294,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="PWMControlView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="ScopeControlView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

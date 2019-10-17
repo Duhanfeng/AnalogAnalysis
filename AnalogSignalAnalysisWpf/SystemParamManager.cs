@@ -1,9 +1,11 @@
-﻿using System;
+﻿using AnalogSignalAnalysisWpf.Hardware.Scope;
+using Framework.Infrastructure.Serialization;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static AnalogSignalAnalysisWpf.Hardware.Scope.LOTOA02;
 
 namespace AnalogSignalAnalysisWpf
 {
@@ -283,17 +285,17 @@ namespace AnalogSignalAnalysisWpf
         /// <summary>
         /// 示波器参数
         /// </summary>
-        public ScopeParams ScopeParams { get; set; }
+        public ScopeParams ScopeParams { get; set; } = new ScopeParams();
 
         /// <summary>
         /// PWM参数
         /// </summary>
-        public PWMParams PWMParams { get; set; }
+        public PWMParams PWMParams { get; set; } = new PWMParams();
 
         /// <summary>
         /// PLC参数
         /// </summary>
-        public PLCParams PLCParams { get; set; }
+        public PLCParams PLCParams { get; set; } = new PLCParams();
 
         #endregion
 
@@ -302,29 +304,123 @@ namespace AnalogSignalAnalysisWpf
         /// <summary>
         /// 频率测量参数
         /// </summary>
-        public FrequencyMeasureParams FrequencyMeasureParams { get; set; }
+        public FrequencyMeasureParams FrequencyMeasureParams { get; set; } = new FrequencyMeasureParams();
 
         /// <summary>
         /// 输入输出测量参数
         /// </summary>
-        public InputOutputMeasureParams InputOutputMeasureParams { get; set; }
+        public InputOutputMeasureParams InputOutputMeasureParams { get; set; } = new InputOutputMeasureParams();
 
         /// <summary>
         /// 吸合释放电压测量参数
         /// </summary>
-        public PNVoltageMeasureParams PNVoltageMeasureParams { get; set; }
+        public PNVoltageMeasureParams PNVoltageMeasureParams { get; set; } = new PNVoltageMeasureParams();
 
         /// <summary>
         /// 通气量测量参数
         /// </summary>
-        public ThroughputMeasureParams ThroughputMeasureParams { get; set; }
+        public ThroughputMeasureParams ThroughputMeasureParams { get; set; } = new ThroughputMeasureParams();
 
         #endregion
     }
 
-    public class SystemParamManege
+    public class SystemParamManager
     {
+        #region 单例模式
 
+        /// <summary>
+        /// 私有实例接口
+        /// </summary>
+        private static readonly SystemParamManager Instance = new SystemParamManager();
+
+        /// <summary>
+        /// 创建私有SceneManager新实例,保证外界无法通过new来创建新实例
+        /// </summary>
+        private SystemParamManager()
+        {
+
+        }
+
+        /// <summary>
+        /// 获取实例接口
+        /// </summary>
+        /// <returns></returns>
+        public static SystemParamManager GetInstance()
+        {
+
+            return Instance;
+        }
+
+        #endregion
+
+        #region 属性
+
+        /// <summary>
+        /// 参数路径
+        /// </summary>
+        public readonly string ParamPath = "SystemParams/SystemConfig.json";
+
+        /// <summary>
+        /// 系统参数
+        /// </summary>
+        public SystemParam SystemParam { get; set; } = new SystemParam();
+
+        #endregion
+
+        #region 公共方法
+
+        /// <summary>
+        /// 加载参数
+        /// </summary>
+        /// <returns>执行结果</returns>
+        public bool LoadParams()
+        {
+            return LoadParams(ParamPath);
+        }
+
+        /// <summary>
+        /// 加载参数
+        /// </summary>
+        /// <param name="file">文件路径</param>
+        /// <returns>执行结果</returns>
+        public bool LoadParams(string file)
+        {
+            bool result = true;
+            if (File.Exists(file))
+            {
+                SystemParam = JsonSerialization.DeserializeObjectFromFile<SystemParam>(file);
+            }
+
+            if (SystemParam == null)
+            {
+                SystemParam = new SystemParam();
+                result = false;
+            }
+
+            //保存参数到默认配置文件
+            JsonSerialization.SerializeObjectToFile(SystemParam, ParamPath);
+
+            return result;
+        }
+
+        /// <summary>
+        /// 保存参数
+        /// </summary>
+        public void SaveParams()
+        {
+            SaveParams(ParamPath);
+        }
+
+        /// <summary>
+        /// 保存参数
+        /// </summary>
+        /// <param name="file">文件路径</param>
+        public void SaveParams(string file)
+        {
+            JsonSerialization.SerializeObjectToFile(SystemParam, file);
+        }
+
+        #endregion
 
     }
 }

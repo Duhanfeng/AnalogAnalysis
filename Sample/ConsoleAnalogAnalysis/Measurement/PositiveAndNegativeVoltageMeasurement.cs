@@ -103,13 +103,13 @@ namespace AnalogSignalAnalysisWpf.Measurement
         /// <summary>
         /// 测量完成事件
         /// </summary>
-        public event EventHandler<PositiveAndNegativeVoltageMeasurementCompletedEventArgs> MeasurementCompleted;
+        public event EventHandler<PNVoltageMeasurementCompletedEventArgs> MeasurementCompleted;
 
         /// <summary>
         /// 测量完成事件
         /// </summary>
         /// <param name="e"></param>
-        protected void OnMeasurementCompleted(PositiveAndNegativeVoltageMeasurementCompletedEventArgs e)
+        protected void OnMeasurementCompleted(PNVoltageMeasurementCompletedEventArgs e)
         {
             PLC.Enable = false;
             MeasurementCompleted?.Invoke(this, e);
@@ -218,11 +218,11 @@ namespace AnalogSignalAnalysisWpf.Measurement
 
                     if (isSuccess)
                     {
-                        OnMeasurementCompleted(new PositiveAndNegativeVoltageMeasurementCompletedEventArgs(true, positiveVoltage, negativeVoltage));
+                        OnMeasurementCompleted(new PNVoltageMeasurementCompletedEventArgs(true, positiveVoltage, negativeVoltage));
                     }
                 }
 
-                OnMeasurementCompleted(new PositiveAndNegativeVoltageMeasurementCompletedEventArgs());
+                OnMeasurementCompleted(new PNVoltageMeasurementCompletedEventArgs());
 
                 return;
             });

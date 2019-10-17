@@ -6,20 +6,20 @@ using System.Threading.Tasks;
 
 namespace AnalogSignalAnalysisWpf
 {
-    public class PositiveAndNegativeVoltageMeasurementCompletedEventArgs : EventArgs
+    public class PNVoltageMeasurementCompletedEventArgs : EventArgs
     {
-        public PositiveAndNegativeVoltageMeasurementCompletedEventArgs()
+        public PNVoltageMeasurementCompletedEventArgs()
         {
             IsSuccess = false;
         }
 
         /// <summary>
-        /// 创建PositiveAndNegativeVoltageMeasurementCompletedEventArgs新实例
+        /// 创建PNVoltageMeasurementCompletedEventArgs新实例
         /// </summary>
         /// <param name="isSuccess">成功标志</param>
         /// <param name="positiveVoltage">有效电压/吸合电压(V)</param>
         /// <param name="negativeVoltage">无效电压/释放电压(V)</param>
-        public PositiveAndNegativeVoltageMeasurementCompletedEventArgs(bool isSuccess, double positiveVoltage, double negativeVoltage)
+        public PNVoltageMeasurementCompletedEventArgs(bool isSuccess, double positiveVoltage, double negativeVoltage)
         {
             IsSuccess = isSuccess;
             PositiveVoltage = positiveVoltage;

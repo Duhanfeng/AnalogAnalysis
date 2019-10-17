@@ -227,7 +227,7 @@
                         </Controls:HamburgerMenuIconItem>
                         <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="吸合电压与释放电压测量">
                             <Controls:HamburgerMenuIconItem.Tag>
-                                <local:PositiveAndNegativeVoltageMeasurementView />
+                                <local:PNVoltageMeasurementView />
                             </Controls:HamburgerMenuIconItem.Tag>
                         </Controls:HamburgerMenuIconItem>
                         <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="通气量测试">

@@ -48,6 +48,8 @@ namespace AnalogSignalAnalysisWpf
 
     public class MainWindowViewModel : Screen, IDisposable
     {
+        #region 构造、析构接口
+
         /// <summary>
         /// 创建MainWindowViewModel新实例
         /// </summary>
@@ -71,24 +73,106 @@ namespace AnalogSignalAnalysisWpf
                                          .Select(a => new AppThemeMenuData() { Name = a.BaseColorScheme, BorderColorBrush = a.Resources["MahApps.Brushes.BlackColor"] as Brush, ColorBrush = a.Resources["MahApps.Brushes.WhiteColor"] as Brush })
                                          .ToList();
 
-            //创建示波器控件实例
+            //获取系统参数
+            SystemParamManager = SystemParamManager.GetInstance();
+            if (SystemParamManager.LoadParams())
+            {
+                AddRunningMessage("加载参数成功");
+            }
+            else
+            {
+                AddRunningMessage("无有效配置参数，已创建默认配置文件");
+            }
+
+            //更新串口
+            SerialPorts = new ObservableCollection<string>(SerialPort.GetPortNames());
+
+            //恢复硬件参数
             Scope = new LOTOA02();
+            if (Scope.Connect())
+            {
+                AddRunningMessage("打开示波器成功");
+                Scope.CHACoupling = SystemParamManager.SystemParam.ScopeParams.CHACoupling;
+                Scope.CHBCoupling = SystemParamManager.SystemParam.ScopeParams.CHBCoupling;
+                Scope.SampleRate = SystemParamManager.SystemParam.ScopeParams.SampleRate;
+                Scope.TriggerModel = SystemParamManager.SystemParam.ScopeParams.TriggerModel;
+                Scope.TriggerEdge = SystemParamManager.SystemParam.ScopeParams.TriggerEdge;
+                Scope.CHAVoltageDIV = SystemParamManager.SystemParam.ScopeParams.CHAVoltageDIV;
+                Scope.CHBVoltageDIV = SystemParamManager.SystemParam.ScopeParams.CHBVoltageDIV;
+                //Scope.IsCHAEnable = SystemParamManager.SystemParam.ScopeParams.IsCHAEnable;
+                Scope.IsCHBEnable = SystemParamManager.SystemParam.ScopeParams.IsCHBEnable;
+            }
+            else
+            {
+                AddRunningMessage("打开示波器失败");
+            }
+
+            PLC = new ModbusPLC();
+            if (SerialPorts.Contains(SystemParamManager.SystemParam.PLCParams.PrimarySerialPortName))
+            {
+                //配置通信参数
+                PLC.PrimarySerialPortName = SystemParamManager.SystemParam.PLCParams.PrimarySerialPortName;
+                PLC.SerialPortBaudRate = SystemParamManager.SystemParam.PLCParams.SerialPortBaudRate;
+                PLC.SlaveAddress = SystemParamManager.SystemParam.PLCParams.SlaveAddress;
+                PLC.ReadTimeout = SystemParamManager.SystemParam.PLCParams.ReadTimeout;
+                PLC.WriteTimeout = SystemParamManager.SystemParam.PLCParams.WriteTimeout;
+
+                //连接设备
+                if (PLC.Connect())
+                {
+                    AddRunningMessage("连接PLC成功");
+                    PLC.Voltage = SystemParamManager.SystemParam.PLCParams.Voltage;
+                    PLC.Current = SystemParamManager.SystemParam.PLCParams.Current;
+                    PLC.Enable = SystemParamManager.SystemParam.PLCParams.Enable;
+                }
+                else
+                {
+                    AddRunningMessage("连接PLC失败");
+                }
+            }
+            else
+            {
+                AddRunningMessage($"无有效端口[{SystemParamManager.SystemParam.PWMParams.PrimarySerialPortName ?? "Null"}],连接PLC失败");
+            }
+
+            PWM = new SerialPortPWM();
+            if (SerialPorts.Contains(SystemParamManager.SystemParam.PWMParams.PrimarySerialPortName))
+            {
+                //配置通信参数
+                PWM.PrimarySerialPortName = SystemParamManager.SystemParam.PWMParams.PrimarySerialPortName;
+
+                //连接设备
+                if (PWM.Connect())
+                {
+                    AddRunningMessage("连接PWM成功");
+                    PWM.Frequency = SystemParamManager.SystemParam.PWMParams.Frequency;
+                    PWM.DutyRatio = SystemParamManager.SystemParam.PWMParams.DutyRatio;
+                }
+                else
+                {
+                    AddRunningMessage("连接PWM失败");
+                }
+            }
+            else
+            {
+                AddRunningMessage($"无有效端口[{SystemParamManager.SystemParam.PWMParams.PrimarySerialPortName ?? "Null"}],连接PWM失败");
+            }
+
+            //创建示波器控件实例
             ScopeControlView = new ScopeControlView2();
             ScopeControlView.DataContext = this;
 
-            ScopeCouplingCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<LOTOA02.ECoupling>());
-            ScopeSampleRateCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<LOTOA02.ESampleRate>());
-            ScopeTriggerModelCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<LOTOA02.ETriggerModel>());
-            ScopeTriggerEdgeCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<LOTOA02.ETriggerEdge>());
-            ScopeVoltageDIVCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<LOTOA02.EVoltageDIV>());
+            ScopeCouplingCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<ECoupling>());
+            ScopeSampleRateCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<ESampleRate>());
+            ScopeTriggerModelCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<ETriggerModel>());
+            ScopeTriggerEdgeCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<ETriggerEdge>());
+            ScopeVoltageDIVCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<EVoltageDIV>());
 
             //创建PLC控件实例
-            PLC = new ModbusPLC("COM1");
             PLCControlView = new PLCControlView();
             PLCControlView.DataContext = this;
 
             //创建PWM控件实例
-            PWM = new SerialPortPWM();
             PWMControlView = new PWMControlView();
             PWMControlView.DataContext = this;
 
@@ -96,16 +180,76 @@ namespace AnalogSignalAnalysisWpf
             SettingsView = new SettingsView();
             SettingsView.DataContext = this;
 
-            //更新串口
-            SerialPorts = new ObservableCollection<string>(SerialPort.GetPortNames());
-            PLC.PrimarySerialPortName = SerialPorts[0] ?? "";
+            FrequencyMeasurementViewModel = new FrequencyMeasurementViewModel(Scope, PWM);
+            InputOutputMeasurementViewModel = new InputOutputMeasurementViewModel(Scope, PLC);
+            PNVoltageMeasurementViewModel = new PNVoltageMeasurementViewModel(Scope, PLC);
+            ThroughputMeasurementViewModel = new ThroughputMeasurementViewModel(Scope, PLC);
 
-            AddRunningMessage("PWMControlView");
-            AddRunningMessage("ObservableCollection");
-            AddRunningMessage("SerialPortPWM SerialPortPWM SerialPortPWM SerialPortPWM SerialPortPWM SerialPortPWM SerialPortPWM SerialPortPWM");
-            AddRunningMessage("ObservableCollection");
+            FrequencyMeasurementViewModel.MessageRaised += FrequencyMeasurementViewModel_MessageRaised;
+            InputOutputMeasurementViewModel.MessageRaised += InputOutputMeasurementViewModel_MessageRaised;
+            PNVoltageMeasurementViewModel.MessageRaised += PNVoltageMeasurementViewModel_MessageRaised;
+            ThroughputMeasurementViewModel.MessageRaised += ThroughputMeasurementViewModel_MessageRaised;
 
         }
+
+
+        private void FrequencyMeasurementViewModel_MessageRaised(object sender, MessageRaisedEventArgs e)
+        {
+            
+        }
+
+        private void InputOutputMeasurementViewModel_MessageRaised(object sender, MessageRaisedEventArgs e)
+        {
+            
+        }
+
+        private void PNVoltageMeasurementViewModel_MessageRaised(object sender, MessageRaisedEventArgs e)
+        {
+            
+        }
+
+        private void ThroughputMeasurementViewModel_MessageRaised(object sender, MessageRaisedEventArgs e)
+        {
+            
+        }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // 要检测冗余调用
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: 释放托管状态(托管对象)。
+                }
+
+                // TODO: 释放未托管的资源(未托管的对象)并在以下内容中替代终结器。
+                // TODO: 将大型字段设置为 null。
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: 仅当以上 Dispose(bool disposing) 拥有用于释放未托管资源的代码时才替代终结器。
+        // ~MainWindowViewModel()
+        // {
+        //   // 请勿更改此代码。将清理代码放入以上 Dispose(bool disposing) 中。
+        //   Dispose(false);
+        // }
+
+        // 添加此代码以正确实现可处置模式。
+        public void Dispose()
+        {
+            // 请勿更改此代码。将清理代码放入以上 Dispose(bool disposing) 中。
+            Dispose(true);
+            // TODO: 如果在以上内容中替代了终结器，则取消注释以下行。
+            // GC.SuppressFinalize(this);
+        }
+        #endregion
+
+        #endregion
 
         #region 窗口控制
 
@@ -319,6 +463,25 @@ namespace AnalogSignalAnalysisWpf
         {
             Scope?.Connect();
             UpdateScopeStatus();
+
+            if (IsScopeValid)
+            {
+                //还原配置
+                Scope.CHACoupling = SystemParamManager.SystemParam.ScopeParams.CHACoupling;
+                Scope.CHBCoupling = SystemParamManager.SystemParam.ScopeParams.CHBCoupling;
+                Scope.CHAVoltageDIV = SystemParamManager.SystemParam.ScopeParams.CHAVoltageDIV;
+                Scope.CHBVoltageDIV = SystemParamManager.SystemParam.ScopeParams.CHBVoltageDIV;
+                Scope.IsCHBEnable = SystemParamManager.SystemParam.ScopeParams.IsCHBEnable;
+                Scope.SampleRate = SystemParamManager.SystemParam.ScopeParams.SampleRate;
+                Scope.TriggerModel = SystemParamManager.SystemParam.ScopeParams.TriggerModel;
+                Scope.TriggerEdge = SystemParamManager.SystemParam.ScopeParams.TriggerEdge;
+
+                AddRunningMessage("连接示波器成功");
+            }
+            else
+            {
+                AddRunningMessage("连接示波器失败");
+            }
         }
 
         /// <summary>
@@ -401,6 +564,8 @@ namespace AnalogSignalAnalysisWpf
                 if (IsScopeValid)
                 {
                     Scope.IsCHBEnable = value;
+                    SystemParamManager.SystemParam.ScopeParams.IsCHBEnable = Scope.IsCHBEnable;
+                    SystemParamManager.SaveParams();
                 }
                 NotifyOfPropertyChange(() => ScopeCHBEnable);
             }
@@ -423,7 +588,9 @@ namespace AnalogSignalAnalysisWpf
             {
                 if (IsScopeValid)
                 {
-                    Scope.CHAVoltageDIV = EnumHelper.GetEnum<LOTOA02.EVoltageDIV>(value);
+                    Scope.CHAVoltageDIV = EnumHelper.GetEnum<EVoltageDIV>(value);
+                    SystemParamManager.SystemParam.ScopeParams.CHAVoltageDIV = Scope.CHAVoltageDIV;
+                    SystemParamManager.SaveParams();
                 }
                 NotifyOfPropertyChange(() => ScopeCHAVoltageDIV);
             }
@@ -446,7 +613,9 @@ namespace AnalogSignalAnalysisWpf
             {
                 if (IsScopeValid)
                 {
-                    Scope.CHBVoltageDIV = EnumHelper.GetEnum<LOTOA02.EVoltageDIV>(value);
+                    Scope.CHBVoltageDIV = EnumHelper.GetEnum<EVoltageDIV>(value);
+                    SystemParamManager.SystemParam.ScopeParams.CHBVoltageDIV = Scope.CHBVoltageDIV;
+                    SystemParamManager.SaveParams();
                 }
                 NotifyOfPropertyChange(() => ScopeCHAVoltageDIV);
             }
@@ -469,7 +638,9 @@ namespace AnalogSignalAnalysisWpf
             {
                 if (IsScopeValid)
                 {
-                    Scope.CHACoupling = EnumHelper.GetEnum<LOTOA02.ECoupling>(value);
+                    Scope.CHACoupling = EnumHelper.GetEnum<ECoupling>(value);
+                    SystemParamManager.SystemParam.ScopeParams.CHACoupling = Scope.CHACoupling;
+                    SystemParamManager.SaveParams();
                 }
                 NotifyOfPropertyChange(() => ScopeCHACoupling);
             }
@@ -492,7 +663,9 @@ namespace AnalogSignalAnalysisWpf
             {
                 if (IsScopeValid)
                 {
-                    Scope.CHBCoupling = EnumHelper.GetEnum<LOTOA02.ECoupling>(value);
+                    Scope.CHBCoupling = EnumHelper.GetEnum<ECoupling>(value);
+                    SystemParamManager.SystemParam.ScopeParams.CHBCoupling = Scope.CHBCoupling;
+                    SystemParamManager.SaveParams();
                 }
                 NotifyOfPropertyChange(() => ScopeCHBCoupling);
             }
@@ -515,7 +688,9 @@ namespace AnalogSignalAnalysisWpf
             {
                 if (IsScopeValid)
                 {
-                    Scope.SampleRate = EnumHelper.GetEnum<LOTOA02.ESampleRate>(value);
+                    Scope.SampleRate = EnumHelper.GetEnum<ESampleRate>(value);
+                    SystemParamManager.SystemParam.ScopeParams.SampleRate = Scope.SampleRate;
+                    SystemParamManager.SaveParams();
                 }
                 NotifyOfPropertyChange(() => ScopeSampleRate);
             }
@@ -538,7 +713,9 @@ namespace AnalogSignalAnalysisWpf
             {
                 if (IsScopeValid)
                 {
-                    Scope.TriggerModel = EnumHelper.GetEnum<LOTOA02.ETriggerModel>(value);
+                    Scope.TriggerModel = EnumHelper.GetEnum<ETriggerModel>(value);
+                    SystemParamManager.SystemParam.ScopeParams.TriggerModel = Scope.TriggerModel;
+                    SystemParamManager.SaveParams();
                 }
                 NotifyOfPropertyChange(() => ScopeTriggerModel);
             }
@@ -561,7 +738,9 @@ namespace AnalogSignalAnalysisWpf
             {
                 if (IsScopeValid)
                 {
-                    Scope.TriggerEdge = EnumHelper.GetEnum<LOTOA02.ETriggerEdge>(value);
+                    Scope.TriggerEdge = EnumHelper.GetEnum<ETriggerEdge>(value);
+                    SystemParamManager.SystemParam.ScopeParams.TriggerEdge = Scope.TriggerEdge;
+                    SystemParamManager.SaveParams();
                 }
                 NotifyOfPropertyChange(() => ScopeTriggerEdge);
             }
@@ -683,6 +862,24 @@ namespace AnalogSignalAnalysisWpf
         {
             PLC?.Connect();
             UpdatePLCStatus();
+
+            if (IsPLCValid)
+            {
+                //将当前通信配置保存到系统参数中
+                SystemParamManager.SystemParam.PLCParams.PrimarySerialPortName = PLCSerialPort;
+                SystemParamManager.SystemParam.PLCParams.SerialPortBaudRate = PLCSerialPortBaudRate;
+                SystemParamManager.SystemParam.PLCParams.SlaveAddress = PLCSlaveAddress;
+                SystemParamManager.SystemParam.PLCParams.ReadTimeout = PLCTimeout;
+                SystemParamManager.SystemParam.PLCParams.WriteTimeout = PLCTimeout;
+                SystemParamManager.SaveParams();
+
+                AddRunningMessage("连接PLC成功");
+            }
+            else
+            {
+                AddRunningMessage("连接PLC失败");
+            }
+
         }
 
         /// <summary>
@@ -920,6 +1117,19 @@ namespace AnalogSignalAnalysisWpf
         {
             PWM?.Connect();
             UpdatePWMStatus();
+
+            if (IsPWMValid)
+            {
+                //将当前通信配置保存到系统参数中
+                SystemParamManager.SystemParam.PWMParams.PrimarySerialPortName = PWMSerialPort;
+                SystemParamManager.SaveParams();
+
+                AddRunningMessage("连接PWM成功");
+            }
+            else
+            {
+                AddRunningMessage("连接PWM失败");
+            }
         }
 
         /// <summary>
@@ -930,7 +1140,6 @@ namespace AnalogSignalAnalysisWpf
             PWM?.Disconnect();
             UpdatePWMStatus();
         }
-
 
         /// <summary>
         /// 更新PLC状态
@@ -954,7 +1163,7 @@ namespace AnalogSignalAnalysisWpf
         {
             get
             {
-                if (PWM != null)
+                if (IsPWMValid)
                 {
                     return PWM.Frequency;
                 }
@@ -962,7 +1171,7 @@ namespace AnalogSignalAnalysisWpf
             }
             set
             {
-                if (PWM != null)
+                if (IsPWMValid)
                 {
                     PWM.Frequency = value;
                 }
@@ -978,7 +1187,7 @@ namespace AnalogSignalAnalysisWpf
         {
             get
             {
-                if (PWM != null)
+                if (IsPWMValid)
                 {
                     return PWM.DutyRatio;
                 }
@@ -986,7 +1195,7 @@ namespace AnalogSignalAnalysisWpf
             }
             set
             {
-                if (PWM != null)
+                if (IsPWMValid)
                 {
                     PWM.DutyRatio = value;
                 }
@@ -1084,42 +1293,61 @@ namespace AnalogSignalAnalysisWpf
 
         }
 
+        /// <summary>
+        /// 频率测试Model
+        /// </summary>
+        public FrequencyMeasurementViewModel FrequencyMeasurementViewModel { get; set; }
+
+        /// <summary>
+        /// 输入输出测试Model
+        /// </summary>
+        public InputOutputMeasurementViewModel InputOutputMeasurementViewModel { get; set; }
+
+        /// <summary>
+        /// 吸合释放电压测试Model
+        /// </summary>
+        public PNVoltageMeasurementViewModel PNVoltageMeasurementViewModel { get; set; }
+
+        /// <summary>
+        /// 通气量测试Model
+        /// </summary>
+        public ThroughputMeasurementViewModel ThroughputMeasurementViewModel { get; set; }
+
         #endregion
 
-        #region IDisposable Support
-        private bool disposedValue = false; // 要检测冗余调用
+        #region 参数
 
-        protected virtual void Dispose(bool disposing)
+        /// <summary>
+        /// 系统参数管理器
+        /// </summary>
+        public SystemParamManager SystemParamManager { get; private set; }
+
+        /// <summary>
+        /// 保存系统参数
+        /// </summary>
+        public void SaveSystemParam()
         {
-            if (!disposedValue)
+            SystemParamManager.SaveParams();
+            AddRunningMessage($"保存配置文件成功");
+        }
+
+        /// <summary>
+        /// 加载系统参数
+        /// </summary>
+        /// <param name="file"></param>
+        public void LoadSystemParam(string file)
+        {
+            if (SystemParamManager.LoadParams(file))
             {
-                if (disposing)
-                {
-                    // TODO: 释放托管状态(托管对象)。
-                }
-
-                // TODO: 释放未托管的资源(未托管的对象)并在以下内容中替代终结器。
-                // TODO: 将大型字段设置为 null。
-
-                disposedValue = true;
+                AddRunningMessage($"加载配置文件({file})成功");
             }
+            else
+            {
+                AddRunningMessage($"加载配置文件({file})失败,已还原为默认参数");
+            }
+
         }
 
-        // TODO: 仅当以上 Dispose(bool disposing) 拥有用于释放未托管资源的代码时才替代终结器。
-        // ~MainWindowViewModel()
-        // {
-        //   // 请勿更改此代码。将清理代码放入以上 Dispose(bool disposing) 中。
-        //   Dispose(false);
-        // }
-
-        // 添加此代码以正确实现可处置模式。
-        public void Dispose()
-        {
-            // 请勿更改此代码。将清理代码放入以上 Dispose(bool disposing) 中。
-            Dispose(true);
-            // TODO: 如果在以上内容中替代了终结器，则取消注释以下行。
-            // GC.SuppressFinalize(this);
-        }
         #endregion
 
     }

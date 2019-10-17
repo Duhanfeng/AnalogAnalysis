@@ -1,5 +1,6 @@
 ﻿using AnalogSignalAnalysisWpf.Hardware.PLC;
 using AnalogSignalAnalysisWpf.Hardware.Scope;
+using Caliburn.Micro;
 using DataAnalysis;
 using System;
 using System.Collections.Generic;
@@ -8,28 +9,25 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AnalogSignalAnalysisWpf.Measurement
+namespace AnalogSignalAnalysisWpf
 {
-    /// <summary>
-    /// 吸合电压与释放电压测试
-    /// </summary>
-    public class PositiveAndNegativeVoltageMeasurement
+    public class PNVoltageMeasurementViewModel : Screen
     {
         #region 构造函数
 
         /// <summary>
-        /// 创建频率测量新实例
+        /// 创建PNVoltageMeasurementViewModel新实例
         /// </summary>
         /// <param name="scope">示波器接口</param>
         /// <param name="plc">PLC接口</param>
-        public PositiveAndNegativeVoltageMeasurement(IScope scope, IPLC plc)
+        public PNVoltageMeasurementViewModel(IScopeBase scope, IPLC plc)
         {
-            if (scope?.IsConnect != true)
+            if (scope == null)
             {
                 throw new ArgumentException("scope invalid");
             }
 
-            if (plc?.IsConnect != true)
+            if (plc == null)
             {
                 throw new ArgumentException("plc invalid");
             }
@@ -45,7 +43,7 @@ namespace AnalogSignalAnalysisWpf.Measurement
         /// <summary>
         /// 示波器接口
         /// </summary>
-        public IScope Scope { get; set; }
+        public IScopeBase Scope { get; set; }
 
         /// <summary>
         /// PLC接口
@@ -56,45 +54,149 @@ namespace AnalogSignalAnalysisWpf.Measurement
 
         #region 配置参数
 
+        private double minVoltageThreshold = 1.5;
+
         /// <summary>
         /// 最小电压阈值(单位:V)
         /// </summary>
-        public double MinVoltageThreshold { get; set; } = 1.5;
+        public double MinVoltageThreshold
+        {
+            get
+            {
+                return minVoltageThreshold;
+            }
+            set
+            {
+                minVoltageThreshold = value;
+                NotifyOfPropertyChange(() => MinVoltageThreshold);
+            }
+        }
+
+        private double maxVoltageThreshold = 8.0;
 
         /// <summary>
         /// 最大电压阈值(单位:V)
         /// </summary>
-        public double MaxVoltageThreshold { get; set; } = 8.0;
+        public double MaxVoltageThreshold
+        {
+            get
+            {
+                return minVoltageThreshold;
+            }
+            set
+            {
+                maxVoltageThreshold = value;
+                NotifyOfPropertyChange(() => MaxVoltageThreshold);
+            }
+        }
+
+        private double frequencyErrLimit = 0.2;
 
         /// <summary>
         /// 频率误差
         /// </summary>
-        public double FrequencyErrLimit { get; set; } = 0.2;
+        public double FrequencyErrLimit
+        {
+            get
+            {
+                return frequencyErrLimit;
+            }
+            set
+            {
+                frequencyErrLimit = value;
+                NotifyOfPropertyChange(() => FrequencyErrLimit);
+            }
+        }
+
+        private double voltageInterval = 0.25;
 
         /// <summary>
         /// 电压间隔(V)
         /// </summary>
-        public double VoltageInterval { get; set; } = 0.25;
+        public double VoltageInterval
+        {
+            get 
+            { 
+                return voltageInterval; 
+            }
+            set 
+            { 
+                voltageInterval = value;
+                NotifyOfPropertyChange(() => VoltageInterval);
+            }
+        }
+
+        private double minVoltage = 1;
 
         /// <summary>
-        /// 最小电压(V)
+        /// 最小电压(单位:V)
         /// </summary>
-        public double MinVoltage { get; set; } = 1.0;
+        public double MinVoltage
+        {
+            get
+            {
+                return minVoltage;
+            }
+            set
+            {
+                minVoltage = value;
+                NotifyOfPropertyChange(() => MinVoltage);
+            }
+        }
+
+        private double maxVoltage = 15.0;
 
         /// <summary>
-        /// 最大电压(V)
+        /// 最大电压(单位:V)
         /// </summary>
-        public double MaxVoltage { get; set; } = 15.0;
+        public double MaxVoltage
+        {
+            get
+            {
+                return minVoltage;
+            }
+            set
+            {
+                maxVoltage = value;
+                NotifyOfPropertyChange(() => MaxVoltage);
+            }
+        }
+
+        private int sampleTime = 500;
 
         /// <summary>
         /// 采样时间(MS)
         /// </summary>
-        public int SampleTime { get; set; } = 500;
+        public int SampleTime
+        {
+            get
+            {
+                return sampleTime;
+            }
+            set
+            {
+                sampleTime = value;
+                NotifyOfPropertyChange(() => SampleTime);
+            }
+        }
+
+        private int comDelay = 200;
 
         /// <summary>
         /// 通信延迟(MS)
         /// </summary>
-        public int ComDelay { get; set; } = 200;
+        public int ComDelay
+        {
+            get
+            {
+                return comDelay;
+            }
+            set
+            {
+                comDelay = value;
+                NotifyOfPropertyChange(() => ComDelay);
+            }
+        }
 
         #endregion
 
@@ -113,6 +215,22 @@ namespace AnalogSignalAnalysisWpf.Measurement
         {
             PLC.Enable = false;
             MeasurementCompleted?.Invoke(this, e);
+        }
+
+        /// <summary>
+        /// 消息触发事件
+        /// </summary>
+        public event EventHandler<MessageRaisedEventArgs> MessageRaised;
+
+        /// <summary>
+        /// 触发消息触发事件
+        /// </summary>
+        /// <param name="messageLevel"></param>
+        /// <param name="message"></param>
+        /// <param name="exception"></param>
+        protected void OnMessageRaised(MessageLevel messageLevel, string message, Exception exception = null)
+        {
+            MessageRaised?.Invoke(this, new MessageRaisedEventArgs(messageLevel, message, exception));
         }
 
         #endregion
@@ -160,7 +278,7 @@ namespace AnalogSignalAnalysisWpf.Measurement
 
                     //读取Scope数据
                     double[] originalData;
-                    Scope.ReadData(0, out originalData);
+                    Scope.ReadDataBlock(0, out originalData);
 
                     //数据滤波
                     double[] filterData;
@@ -194,7 +312,7 @@ namespace AnalogSignalAnalysisWpf.Measurement
 
                         //读取Scope数据
                         double[] originalData;
-                        Scope.ReadData(0, out originalData);
+                        Scope.ReadDataBlock(0, out originalData);
 
                         //数据滤波
                         double[] filterData;
@@ -231,5 +349,7 @@ namespace AnalogSignalAnalysisWpf.Measurement
         }
 
         #endregion
+
+
     }
 }

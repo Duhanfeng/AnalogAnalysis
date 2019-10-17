@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace AnalogSignalAnalysisWpf
 {
     /// <summary>
-    /// PositiveAndNegativeVoltageMeasurementView.xaml 的交互逻辑
+    /// PNVoltageMeasurementView.xaml 的交互逻辑
     /// </summary>
-    public partial class PositiveAndNegativeVoltageMeasurementView : UserControl
+    public partial class PNVoltageMeasurementView : UserControl
     {
-        public PositiveAndNegativeVoltageMeasurementView()
+        public PNVoltageMeasurementView()
         {
             InitializeComponent();
         }

@@ -97,8 +97,8 @@
                   VerticalAlignment="Stretch"
                   Background="{Binding ElementName=MainWindow, Path=WindowTitleBrush}">
                 <MenuItem Header="文件">
-                    <MenuItem Header="加载"/>
-                    <MenuItem Header="保存"/>
+                    <MenuItem Header="加载" Click="LoadSystemParamMenu_Click"/>
+                    <MenuItem Header="保存" cal:Message.Attach="SaveSystemParam"/>
                     <MenuItem Header="另存为..."/>
                 </MenuItem>
                 <MenuItem Header="设备">

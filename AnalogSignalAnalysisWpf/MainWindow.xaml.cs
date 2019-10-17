@@ -203,5 +203,19 @@ namespace AnalogSignalAnalysisWpf
 
             flyout.IsOpen = true;
         }
+
+        private void LoadSystemParamMenu_Click(object sender, RoutedEventArgs e)
+        {
+            var ofd = new Microsoft.Win32.OpenFileDialog
+            {
+                DefaultExt = ".json",
+                Filter = "json file|*.json",
+            };
+
+            if (ofd.ShowDialog() == true)
+            {
+                _viewModel.LoadSystemParam(ofd.FileName);
+            }
+        }
     }
 }

@@ -8,19 +8,17 @@
              xmlns:local="clr-namespace:AnalogSignalAnalysisWpf"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance local:MainWindowViewModel}"
-             d:DesignHeight="450" d:DesignWidth="800"
-             MinWidth="600">
+             d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Column="0" Margin="10,5">
             <!--<Label Foreground="Green" FontSize="16">示波器</Label>-->
             <GroupBox Header="示波器" MinHeight="{Binding ElementName=PLCGroupBox, Path=ActualHeight}">
-                <local:ScopeControlView DataContext="{Binding}"/>
+                <local:ScopeControlView2 DataContext="{Binding}"/>
             </GroupBox>
         </StackPanel>
         <StackPanel Grid.Column="1" Margin="10,5">

@@ -16,7 +16,16 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
         /// <summary>
         /// 创建ModbusPLC新实例
         /// </summary>
-        /// <param name="portName"></param>
+        public ModbusPLC() : this("")
+        {
+
+        }
+
+        /// <summary>
+        /// 创建ModbusPLC新实例
+        /// </summary>
+        /// <param name="portName">端口名</param>
+        /// <param name="baudRate">波特率</param>
         public ModbusPLC(string portName, int baudRate = 115200)
         {
             PrimarySerialPortName = portName;
