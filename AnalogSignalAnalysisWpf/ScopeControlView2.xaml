@@ -21,9 +21,7 @@
         <StackPanel Margin="10">
             <DockPanel Margin="0,10,0,0">
                 <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">连接</TextBlock>
-                <ToggleButton cal:Message.Attach="[Event Checked] = [Action ConnectScope];[Event Unchecked] = [Action DisconnectScope]" 
-                              IsChecked="{Binding PLCEnable, Converter={StaticResource BoolToInvertConverter}}"
-                              Content="{Binding PLCEnable, Converter={StaticResource BoolToStringConverter}}"/>
+                <Button cal:Message.Attach="ConnectOrDisconnectScope" Content="{Binding IsScopeValid, Converter={StaticResource BoolToStringConverter}}"/>
             </DockPanel>
 
             <StackPanel IsEnabled="{Binding IsScopeValid}" >

@@ -216,9 +216,9 @@ namespace AnalogSignalAnalysisWpf
         public int Frequency { get; set; }
 
         /// <summary>
-        /// 占空比
+        /// 占空比(1-100)
         /// </summary>
-        public double DutyRatio { get; set; }
+        public int DutyRatio { get; set; }
     }
 
     /// <summary>
@@ -268,9 +268,9 @@ namespace AnalogSignalAnalysisWpf
         public double Current { get; set; }
 
         /// <summary>
-        /// 使能
+        /// 使能输出
         /// </summary>
-        public bool Enable { get; set; }
+        public bool EnableOutput { get; set; }
 
         #endregion
 

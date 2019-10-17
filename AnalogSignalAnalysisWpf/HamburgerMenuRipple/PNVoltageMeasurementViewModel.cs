@@ -213,7 +213,7 @@ namespace AnalogSignalAnalysisWpf
         /// <param name="e"></param>
         protected void OnMeasurementCompleted(PNVoltageMeasurementCompletedEventArgs e)
         {
-            PLC.Enable = false;
+            PLC.EnableOutput = false;
             MeasurementCompleted?.Invoke(this, e);
         }
 
@@ -269,7 +269,7 @@ namespace AnalogSignalAnalysisWpf
 
                 double currentVoltage = MinVoltage;
                 PLC.Voltage = currentVoltage;
-                PLC.Enable = true;
+                PLC.EnableOutput = true;
                 while (currentVoltage <= MaxVoltage)
                 {
                     //设置当前电压

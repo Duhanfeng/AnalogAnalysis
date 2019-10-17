@@ -202,7 +202,7 @@ namespace AnalogSignalAnalysisWpf
             measureThread = new Thread(() =>
             {
                 //设置电压
-                PLC.Enable = false;
+                PLC.EnableOutput = false;
                 PLC.Voltage = OutputVoltage;
 
                 //设置示波器采集时间
@@ -214,14 +214,14 @@ namespace AnalogSignalAnalysisWpf
                     Thread.Sleep(OutputDelay);
 
                     //设置电压
-                    PLC.Enable = true;
+                    PLC.EnableOutput = true;
                 });
 
                 //读取Scope数据
                 double[] originalData;
                 Scope.ReadDataBlock(0, out originalData);
                 Thread.Sleep(OutputDelay);
-                PLC.Enable = false;
+                PLC.EnableOutput = false;
 
                 //数据滤波
                 double[] filterData;

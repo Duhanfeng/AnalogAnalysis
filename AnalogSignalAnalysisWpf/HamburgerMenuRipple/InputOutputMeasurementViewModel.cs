@@ -222,7 +222,7 @@ namespace AnalogSignalAnalysisWpf
 
                 double currentVoltage = MinVoltage;
                 PLC.Voltage = currentVoltage;
-                PLC.Enable = true;
+                PLC.EnableOutput = true;
                 while (currentVoltage <= MaxVoltage)
                 {
                     //设置当前电压

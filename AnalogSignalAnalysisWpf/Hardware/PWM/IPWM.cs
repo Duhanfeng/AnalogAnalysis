@@ -35,8 +35,8 @@ namespace AnalogSignalAnalysisWpf.Hardware.PWM
         int Frequency { get; set; }
 
         /// <summary>
-        /// 占空比
+        /// 占空比(1-100)
         /// </summary>
-        double DutyRatio { get; set; }
+        int DutyRatio { get; set; }
     }
 }

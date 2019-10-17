@@ -21,9 +21,9 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
         double Current { get; set; }
 
         /// <summary>
-        /// 使能
+        /// 使能输出
         /// </summary>
-        bool Enable { get; set; }
+        bool EnableOutput { get; set; }
 
         /// <summary>
         /// 开关频率

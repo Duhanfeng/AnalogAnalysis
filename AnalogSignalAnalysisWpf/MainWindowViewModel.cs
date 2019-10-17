@@ -3,6 +3,7 @@ using AnalogSignalAnalysisWpf.Hardware.PLC;
 using AnalogSignalAnalysisWpf.Hardware.PWM;
 using AnalogSignalAnalysisWpf.Hardware.Scope;
 using Caliburn.Micro;
+using Framework.Infrastructure.Serialization;
 using MahApps.Metro;
 using System;
 using System.Collections.Generic;
@@ -123,7 +124,7 @@ namespace AnalogSignalAnalysisWpf
                     AddRunningMessage("连接PLC成功");
                     PLC.Voltage = SystemParamManager.SystemParam.PLCParams.Voltage;
                     PLC.Current = SystemParamManager.SystemParam.PLCParams.Current;
-                    PLC.Enable = SystemParamManager.SystemParam.PLCParams.Enable;
+                    PLC.EnableOutput = SystemParamManager.SystemParam.PLCParams.EnableOutput;
                 }
                 else
                 {
@@ -191,7 +192,6 @@ namespace AnalogSignalAnalysisWpf
             ThroughputMeasurementViewModel.MessageRaised += ThroughputMeasurementViewModel_MessageRaised;
 
         }
-
 
         private void FrequencyMeasurementViewModel_MessageRaised(object sender, MessageRaisedEventArgs e)
         {
@@ -491,6 +491,23 @@ namespace AnalogSignalAnalysisWpf
         {
             Scope?.Disconnect();
             UpdateScopeStatus();
+            AddRunningMessage("断开示波器连接");
+        }
+
+        /// <summary>
+        /// 连接/断开连接
+        /// </summary>
+        public void ConnectOrDisconnectScope()
+        {
+            if (IsScopeValid)
+            {
+                DisconnectScope();
+            }
+            else
+            {
+                ConnectScope();
+            }
+
         }
 
         /// <summary>
@@ -889,6 +906,23 @@ namespace AnalogSignalAnalysisWpf
         {
             PLC?.Disconnect();
             UpdatePLCStatus();
+            AddRunningMessage("断开PLC连接");
+        }
+
+        /// <summary>
+        /// 连接/断开连接
+        /// </summary>
+        public void ConnectOrDisconnectPLC()
+        {
+            if (IsPLCValid)
+            {
+                DisconnectPLC();
+            }
+            else
+            {
+                ConnectPLC();
+            }
+
         }
 
         #endregion
@@ -913,6 +947,8 @@ namespace AnalogSignalAnalysisWpf
                 if (IsPLCValid == true)
                 {
                     PLC.Voltage = value;
+                    SystemParamManager.SystemParam.PLCParams.Voltage = value;
+                    SystemParamManager.SaveParams();
                 }
 
                 //NotifyOfPropertyChange(() => PLCVoltage);
@@ -938,6 +974,8 @@ namespace AnalogSignalAnalysisWpf
                 if (IsPLCValid == true)
                 {
                     PLC.Current = value;
+                    SystemParamManager.SystemParam.PLCParams.Current = value;
+                    SystemParamManager.SaveParams();
                 }
 
                 //NotifyOfPropertyChange(() => PLCCurrent);
@@ -946,15 +984,15 @@ namespace AnalogSignalAnalysisWpf
         }
 
         /// <summary>
-        /// PLC电流
+        /// PLC使能输出
         /// </summary>
-        public bool PLCEnable
+        public bool PLCEnableOutput
         {
             get
             {
                 if (IsPLCValid)
                 {
-                    return PLC.Enable;
+                    return PLC.EnableOutput;
                 }
                 return false;
             }
@@ -962,10 +1000,12 @@ namespace AnalogSignalAnalysisWpf
             {
                 if (IsPLCValid == true)
                 {
-                    PLC.Enable = value;
+                    PLC.EnableOutput = value;
+                    SystemParamManager.SystemParam.PLCParams.EnableOutput = value;
+                    SystemParamManager.SaveParams();
                 }
 
-                //NotifyOfPropertyChange(() => PLCEnable);
+                //NotifyOfPropertyChange(() => PLCEnableOutput);
                 UpdatePLCStatus();
             }
         }
@@ -1020,49 +1060,57 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public void UpdatePLCStatus()
         {
-            lock (plcLock)
-            {
-                if (isPLCThreadRunning)
-                {
-                    return;
-                }
-            }
+            NotifyOfPropertyChange(() => IsPLCValid);
+            NotifyOfPropertyChange(() => PLCVoltage);
+            NotifyOfPropertyChange(() => PLCCurrent);
+            NotifyOfPropertyChange(() => PLCEnableOutput);
+            NotifyOfPropertyChange(() => PLCRealityVoltage);
+            NotifyOfPropertyChange(() => PLCRealityCurrent);
+            NotifyOfPropertyChange(() => PLCRealityTemperature);
 
-            new Thread(() =>
-            {
-                lock (plcLock)
-                {
-                    isPLCThreadRunning = true;
-                }
+            //lock (plcLock)
+            //{
+            //    if (isPLCThreadRunning)
+            //    {
+            //        return;
+            //    }
+            //}
 
-                for (int i = 0; i < 20; i++)
-                {
-                    Thread.Sleep(50);
-                    NotifyOfPropertyChange(() => IsPLCValid);
-                    NotifyOfPropertyChange(() => PLCVoltage);
-                    NotifyOfPropertyChange(() => PLCCurrent);
-                    NotifyOfPropertyChange(() => PLCEnable);
-                    NotifyOfPropertyChange(() => PLCRealityVoltage);
-                    NotifyOfPropertyChange(() => PLCRealityCurrent);
-                    NotifyOfPropertyChange(() => PLCRealityTemperature);
-                }
+            //new Thread(() =>
+            //{
+            //    lock (plcLock)
+            //    {
+            //        isPLCThreadRunning = true;
+            //    }
 
-                lock (plcLock)
-                {
-                    isPLCThreadRunning = false;
-                }
+            //    for (int i = 0; i < 20; i++)
+            //    {
+            //        Thread.Sleep(50);
+            //        NotifyOfPropertyChange(() => IsPLCValid);
+            //        NotifyOfPropertyChange(() => PLCVoltage);
+            //        NotifyOfPropertyChange(() => PLCCurrent);
+            //        NotifyOfPropertyChange(() => PLCEnableOutput);
+            //        NotifyOfPropertyChange(() => PLCRealityVoltage);
+            //        NotifyOfPropertyChange(() => PLCRealityCurrent);
+            //        NotifyOfPropertyChange(() => PLCRealityTemperature);
+            //    }
 
-            }).Start();
+            //    lock (plcLock)
+            //    {
+            //        isPLCThreadRunning = false;
+            //    }
+
+            //}).Start();
         }
 
         /// <summary>
         /// 使能PLC输出
         /// </summary>
-        public void EnablePLC()
+        public void EnablePLCOutput()
         {
             if (IsPLCValid)
             {
-                PLCEnable = !PLCEnable;
+                PLCEnableOutput = !PLCEnableOutput;
             }
         }
 
@@ -1139,6 +1187,23 @@ namespace AnalogSignalAnalysisWpf
         {
             PWM?.Disconnect();
             UpdatePWMStatus();
+            AddRunningMessage("断开PWM连接");
+        }
+
+        /// <summary>
+        /// 连接/断开连接
+        /// </summary>
+        public void ConnectOrDisconnectPWM()
+        {
+            if (IsPWMValid)
+            {
+                DisconnectPWM();
+            }
+            else
+            {
+                ConnectPWM();
+            }
+
         }
 
         /// <summary>
@@ -1174,8 +1239,11 @@ namespace AnalogSignalAnalysisWpf
                 if (IsPWMValid)
                 {
                     PWM.Frequency = value;
+                    SystemParamManager.SystemParam.PWMParams.Frequency = value;
+                    SystemParamManager.SaveParams();
                 }
 
+                //NotifyOfPropertyChange(() => PWMFrequency);
                 UpdatePWMStatus();
             }
         }
@@ -1183,7 +1251,7 @@ namespace AnalogSignalAnalysisWpf
         /// <summary>
         /// PWM占空比
         /// </summary>
-        public double PWMDutyRatio
+        public int PWMDutyRatio
         {
             get
             {
@@ -1198,8 +1266,11 @@ namespace AnalogSignalAnalysisWpf
                 if (IsPWMValid)
                 {
                     PWM.DutyRatio = value;
+                    SystemParamManager.SystemParam.PWMParams.DutyRatio = value;
+                    SystemParamManager.SaveParams();
                 }
 
+                //NotifyOfPropertyChange(() => PWMDutyRatio);
                 UpdatePWMStatus();
             }
         }
@@ -1328,7 +1399,8 @@ namespace AnalogSignalAnalysisWpf
         public void SaveSystemParam()
         {
             SystemParamManager.SaveParams();
-            AddRunningMessage($"保存配置文件成功");
+            var serial = JsonSerialization.SerializeObject(SystemParamManager.SystemParam);
+            AddRunningMessage($"保存配置文件成功:\r\n{serial}");
         }
 
         /// <summary>
@@ -1339,7 +1411,8 @@ namespace AnalogSignalAnalysisWpf
         {
             if (SystemParamManager.LoadParams(file))
             {
-                AddRunningMessage($"加载配置文件({file})成功");
+                var serial = JsonSerialization.SerializeObject(SystemParamManager.SystemParam);
+                AddRunningMessage($"加载配置文件({file})成功:\r\n{serial}");
             }
             else
             {

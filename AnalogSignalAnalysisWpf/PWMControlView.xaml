@@ -25,9 +25,8 @@
             </DockPanel>
             <DockPanel Margin="0,10,0,0" Visibility="Visible">
                 <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">连接</TextBlock>
-                <ToggleButton cal:Message.Attach="[Event Checked] = [Action ConnectPWM];[Event Unchecked] = [Action DisconnectPWM]"
-                              IsChecked="{Binding PLCEnable, Converter={StaticResource BoolToInvertConverter}}"
-                              Content="{Binding PLCEnable, Converter={StaticResource BoolToStringConverter}}"/>
+                <Button cal:Message.Attach="ConnectOrDisconnectPWM"
+                            Content="{Binding IsPWMValid, Converter={StaticResource BoolToStringConverter}}"/>
             </DockPanel>
             <StackPanel IsEnabled="{Binding IsPWMValid}">
                 <TextBlock Margin="0,20,0,0" FontSize="14">PWM输出控制</TextBlock>
@@ -36,7 +35,7 @@
                     <TextBox Text="{Binding PWMFrequency, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
                 </DockPanel>
                 <DockPanel Margin="0,10,0,0">
-                    <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">占空比(0-1)</TextBlock>
+                    <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">占空比(1-100)</TextBlock>
                     <TextBox Text="{Binding PWMDutyRatio, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
                 </DockPanel>
                 <DockPanel Margin="0,10,0,0">

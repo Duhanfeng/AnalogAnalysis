@@ -444,7 +444,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
         /// <summary>
         /// 使能
         /// </summary>
-        public bool Enable
+        public bool EnableOutput
         {
             get
             {
