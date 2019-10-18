@@ -515,6 +515,7 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public void UpdateScopeStatus()
         {
+            NotifyOfPropertyChange(() => IsScopeValid);
             NotifyOfPropertyChange(() => ScopeCHAVoltageDIV);
             NotifyOfPropertyChange(() => ScopeCHBVoltageDIV);
             NotifyOfPropertyChange(() => ScopeCHACoupling);
@@ -522,7 +523,22 @@ namespace AnalogSignalAnalysisWpf
             NotifyOfPropertyChange(() => ScopeSampleRate);
             NotifyOfPropertyChange(() => ScopeTriggerModel);
             NotifyOfPropertyChange(() => ScopeTriggerEdge);
+            NotifyOfPropertyChange(() => ScopeCHAEnable);
+            NotifyOfPropertyChange(() => ScopeCHBEnable);
 
+        }
+
+        /// <summary>
+        /// 读取数据
+        /// </summary>
+        public void StartReadScopeData()
+        {
+            if (IsScopeValid)
+            {
+                double[] channelAData;
+                double[] channelBData;
+                Scope.ReadDataBlock(out channelAData, out channelBData);
+            }
         }
 
         #region 配置参数
@@ -574,7 +590,11 @@ namespace AnalogSignalAnalysisWpf
         {
             get
             {
-                return Scope?.IsCHBEnable ?? false;
+                if (IsScopeValid)
+                {
+                    return Scope.IsCHBEnable;
+                }
+                return false;
             }
             set
             {

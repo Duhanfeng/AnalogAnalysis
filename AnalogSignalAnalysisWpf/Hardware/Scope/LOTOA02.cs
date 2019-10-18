@@ -11,73 +11,13 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
 {
     public class LOTOA02 : IScopeBase
     {
-        #region C++接口
-
-        //-------------------声明动态库USBInterFace.dll的一些接口函数--------------------------------------------------------------------
-        [DllImport("USBInterFace.dll", CallingConvention = CallingConvention.Cdecl)]
-        private static extern void SpecifyDevIdx(Int32 index);  //设置产品编号，不同型号产品编号不同
-
-        [DllImport("USBInterFace.dll", CallingConvention = CallingConvention.Cdecl)]
-        private static extern Int32 DeviceOpen();     //打开设备，并准备资源
-
-        [DllImport("USBInterFace.dll", CallingConvention = CallingConvention.Cdecl)]
-        private static extern Int32 DeviceClose();     //关闭设备并释放资源
-
-        [DllImport("USBInterFace.dll", CallingConvention = CallingConvention.Cdecl)]
-        private static extern byte USBCtrlTrans(byte Request, UInt16 usValue, uint outBufSize);//USB传输控制命令
-
-        [DllImport("USBInterFace.dll", CallingConvention = CallingConvention.Cdecl)]
-        private static extern Int32 USBCtrlTransSimple(Int32 Request);//USB传输控制命令
-
-
-        [DllImport("USBInterFace.dll", CallingConvention = CallingConvention.Cdecl)]
-        private static extern IntPtr GetBuffer4Wr(Int32 index);//获取原始数据缓冲区首指针
-
-        [DllImport("USBInterFace.dll", CallingConvention = CallingConvention.Cdecl)]
-        private static extern Int32 AiReadBulkData(Int32 SampleCount, uint num, Int32 ulTimeout, IntPtr PBuffer);//批量读取原始数据块
-
-        [DllImport("USBInterFace.dll", CallingConvention = CallingConvention.Cdecl)]
-        private static extern void SetInfo(double dataNumPerPixar, double currentSampleRate, byte ChannelMask, Int32 m_ZrroUniInt, uint BufferOffset, uint HWbufferSize);
-
-#if false
-        
-        //-------------------声明动态库USBInterFace.dll的一些接口函数--------------------------------------------------------------------
-        [DllImport("USBInterFace.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall, EntryPoint = "SpecifyDevIdx")]
-        private static extern void SpecifyDevIdx(Int32 index);  //设置产品编号，不同型号产品编号不同
-
-        [DllImport("USBInterFace.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
-        private static extern Int32 DeviceOpen();     //打开设备，并准备资源
-
-        [DllImport("USBInterFace.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
-        private static extern Int32 DeviceClose();     //关闭设备并释放资源
-
-        [DllImport("USBInterFace.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall, EntryPoint = "USBCtrlTrans")]
-        private static extern byte USBCtrlTrans(byte Request, UInt16 usValue, uint outBufSize);//USB传输控制命令
-
-        [DllImport("USBInterFace.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall, EntryPoint = "USBCtrlTransSimple")]
-        private static extern Int32 USBCtrlTransSimple(Int32 Request);//USB传输控制命令
-
-
-        [DllImport("USBInterFace.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall, EntryPoint = "GetBuffer4Wr")]
-        private static extern IntPtr GetBuffer4Wr(Int32 index);//获取原始数据缓冲区首指针
-
-        [DllImport("USBInterFace.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
-        private static extern Int32 AiReadBulkData(Int32 SampleCount, uint num, Int32 ulTimeout, IntPtr PBuffer);//批量读取原始数据块
-
-        [DllImport("USBInterFace.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall, EntryPoint = "SetInfo")]
-        private static extern void SetInfo(double dataNumPerPixar, double currentSampleRate, byte ChannelMask, Int32 m_ZrroUniInt, uint BufferOffset, uint HWbufferSize);
-
-#endif
-
         //声明需要的变量
         public static byte g_CtrlByte0 = 0;//记录IO控制位
         public static byte g_CtrlByte1 = 0;//记录IO控制位
 
         public static IntPtr g_pBuffer = (IntPtr)0;
-        public static byte[] g_chADataArray = new byte[RecvDataLenght]; //用来放通道A原始数据的数组。
-        public static byte[] g_chBDataArray = new byte[RecvDataLenght]; //用来放通道B原始数据的数组。
-
-        #endregion
+        public byte[] g_chADataArray = new byte[RecvDataLenght]; //用来放通道A原始数据的数组。
+        public byte[] g_chBDataArray = new byte[RecvDataLenght]; //用来放通道B原始数据的数组。
 
         #region 参数配置
 
@@ -91,12 +31,12 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
                         //DC耦合
                         g_CtrlByte0 &= 0xef;
                         g_CtrlByte0 |= 0x10;
-                        USBCtrlTrans(0x94, g_CtrlByte0, 1);
+                        MyDLLimport.USBCtrlTrans(0x94, g_CtrlByte0, 1);
                         break;
                     case ECoupling.AC:
                         //AC耦合
                         g_CtrlByte0 &= 0xef;
-                        USBCtrlTrans(0x94, g_CtrlByte0, 1);
+                        MyDLLimport.USBCtrlTrans(0x94, g_CtrlByte0, 1);
                         break;
                     default:
                         break;
@@ -110,12 +50,12 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
                         //DC耦合
                         g_CtrlByte0 &= 0xef;
                         g_CtrlByte0 |= 0x10;
-                        USBCtrlTrans(0x24, g_CtrlByte0, 1);
+                        MyDLLimport.USBCtrlTrans(0x24, g_CtrlByte0, 1);
                         break;
                     case ECoupling.AC:
                         //AC耦合
                         g_CtrlByte0 &= 0xef;
-                        USBCtrlTrans(0x24, g_CtrlByte0, 1);
+                        MyDLLimport.USBCtrlTrans(0x24, g_CtrlByte0, 1);
                         break;
                     default:
                         break;
@@ -132,25 +72,25 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
                     //设置49K Hz 采样率
                     g_CtrlByte0 &= 0xf0;
                     g_CtrlByte0 |= 0x0e;
-                    USBCtrlTrans(0x94, g_CtrlByte0, 1);
+                    MyDLLimport.USBCtrlTrans(0x94, g_CtrlByte0, 1);
                     break;
                 case ESampleRate.Sps_781K:
                     //设置781K Hz 采样率
                     g_CtrlByte0 &= 0xf0;
                     g_CtrlByte0 |= 0x0c;
-                    USBCtrlTrans(0x94, g_CtrlByte0, 1);
+                    MyDLLimport.USBCtrlTrans(0x94, g_CtrlByte0, 1);
                     break;
                 case ESampleRate.Sps_12M5:
                     // 设置12.5M Hz 采样率
                     g_CtrlByte0 &= 0xf0;
                     g_CtrlByte0 |= 0x08;
-                    USBCtrlTrans(0x94, g_CtrlByte0, 1);
+                    MyDLLimport.USBCtrlTrans(0x94, g_CtrlByte0, 1);
                     break;
                 case ESampleRate.Sps_100M:
                     //设置100M Hz 采样率
                     g_CtrlByte0 &= 0xf0;
                     g_CtrlByte0 |= 0x00;
-                    USBCtrlTrans(0x94, g_CtrlByte0, 1);
+                    MyDLLimport.USBCtrlTrans(0x94, g_CtrlByte0, 1);
                     break;
                 default:
                     break;
@@ -162,15 +102,15 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
             switch (triggerModel)
             {
                 case ETriggerModel.CHA:
-                    USBCtrlTrans(0xE7, 0x01, 1);
+                    MyDLLimport.USBCtrlTrans(0xE7, 0x01, 1);
                     break;
                 case ETriggerModel.Ext:
                     //g_TrigSourceChan = 2;
                     //通道EXT触发
-                    USBCtrlTrans(0xE7, 0x01, 1);
+                    MyDLLimport.USBCtrlTrans(0xE7, 0x01, 1);
                     break;
                 case ETriggerModel.No:
-                    USBCtrlTrans(0xE7, 0x00, 1);
+                    MyDLLimport.USBCtrlTrans(0xE7, 0x00, 1);
                     break;
                 default:
                     break;
@@ -182,10 +122,10 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
             switch (triggerEdge)
             {
                 case ETriggerEdge.Rising:
-                    USBCtrlTrans(0xC5, 0x00, 1);
+                    MyDLLimport.USBCtrlTrans(0xC5, 0x00, 1);
                     break;
                 case ETriggerEdge.Filling:
-                    USBCtrlTrans(0xC5, 0x01, 1);
+                    MyDLLimport.USBCtrlTrans(0xC5, 0x01, 1);
                     break;
                 default:
                     break;
@@ -195,7 +135,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         public void SetTriggerLevel(byte level)
         {
             //设置触发数据
-            USBCtrlTrans(0x16, level, 1);
+            MyDLLimport.USBCtrlTrans(0x16, level, 1);
         }
 
         public void SetVoltageDIV(EChannel channel, EVoltageDIV voltageDIV)
@@ -206,31 +146,31 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
                 {
                     case EVoltageDIV.DIV_250MV:
                         g_CtrlByte1 &= 0xF7;
-                        USBCtrlTrans(0x22, 0x04, 1);
-                        USBCtrlTrans(0x24, g_CtrlByte1, 1);
+                        MyDLLimport.USBCtrlTrans(0x22, 0x04, 1);
+                        MyDLLimport.USBCtrlTrans(0x24, g_CtrlByte1, 1);
                         break;
                     case EVoltageDIV.DIV_500MV:
                         g_CtrlByte1 &= 0xF7;
-                        USBCtrlTrans(0x22, 0x02, 1);
-                        USBCtrlTrans(0x24, g_CtrlByte1, 1);
+                        MyDLLimport.USBCtrlTrans(0x22, 0x02, 1);
+                        MyDLLimport.USBCtrlTrans(0x24, g_CtrlByte1, 1);
                         break;
                     case EVoltageDIV.DIV_1V:
                         g_CtrlByte1 &= 0xF7;
                         g_CtrlByte1 |= 0x08;
-                        USBCtrlTrans(0x22, 0x04, 1);
-                        USBCtrlTrans(0x24, g_CtrlByte1, 1);
+                        MyDLLimport.USBCtrlTrans(0x22, 0x04, 1);
+                        MyDLLimport.USBCtrlTrans(0x24, g_CtrlByte1, 1);
                         break;
                     case EVoltageDIV.DIV_2V5:
                         g_CtrlByte1 &= 0xF7;
                         g_CtrlByte1 |= 0x08;
-                        USBCtrlTrans(0x22, 0x02, 1);
-                        USBCtrlTrans(0x24, g_CtrlByte1, 1);
+                        MyDLLimport.USBCtrlTrans(0x22, 0x02, 1);
+                        MyDLLimport.USBCtrlTrans(0x24, g_CtrlByte1, 1);
                         break;
                     case EVoltageDIV.DIV_5V:
                         g_CtrlByte1 &= 0xF7;
                         g_CtrlByte1 |= 0x08;
-                        USBCtrlTrans(0x22, 0x00, 1);
-                        USBCtrlTrans(0x24, g_CtrlByte1, 1);
+                        MyDLLimport.USBCtrlTrans(0x22, 0x00, 1);
+                        MyDLLimport.USBCtrlTrans(0x24, g_CtrlByte1, 1);
                         break;
                     default:
                         break;
@@ -243,31 +183,31 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
                     case EVoltageDIV.DIV_250MV:
                         g_CtrlByte1 &= 0xF9;
                         g_CtrlByte1 |= 0x04;//放大4倍               
-                        USBCtrlTrans(0x23, 0x40, 1);
-                        USBCtrlTrans(0x24, g_CtrlByte1, 1);
+                        MyDLLimport.USBCtrlTrans(0x23, 0x40, 1);
+                        MyDLLimport.USBCtrlTrans(0x24, g_CtrlByte1, 1);
                         break;
                     case EVoltageDIV.DIV_500MV:
                         g_CtrlByte1 &= 0xF9;
                         g_CtrlByte1 |= 0x02;//放大两倍
-                        USBCtrlTrans(0x23, 0x40, 1);
-                        USBCtrlTrans(0x24, g_CtrlByte1, 1);
+                        MyDLLimport.USBCtrlTrans(0x23, 0x40, 1);
+                        MyDLLimport.USBCtrlTrans(0x24, g_CtrlByte1, 1);
                         break;
                     case EVoltageDIV.DIV_1V:
                         g_CtrlByte1 &= 0xF9;
                         g_CtrlByte1 |= 0x04;
-                        USBCtrlTrans(0x23, 0x00, 1);
-                        USBCtrlTrans(0x24, g_CtrlByte1, 1);
+                        MyDLLimport.USBCtrlTrans(0x23, 0x00, 1);
+                        MyDLLimport.USBCtrlTrans(0x24, g_CtrlByte1, 1);
                         break;
                     case EVoltageDIV.DIV_2V5:
                         g_CtrlByte1 &= 0xF9;
                         g_CtrlByte1 |= 0x02;
-                        USBCtrlTrans(0x23, 0x00, 1);
-                        USBCtrlTrans(0x24, g_CtrlByte1, 1);
+                        MyDLLimport.USBCtrlTrans(0x23, 0x00, 1);
+                        MyDLLimport.USBCtrlTrans(0x24, g_CtrlByte1, 1);
                         break;
                     case EVoltageDIV.DIV_5V:
                         g_CtrlByte1 &= 0xF9;
-                        USBCtrlTrans(0x23, 0x00, 1);
-                        USBCtrlTrans(0x24, g_CtrlByte1, 1);
+                        MyDLLimport.USBCtrlTrans(0x23, 0x00, 1);
+                        MyDLLimport.USBCtrlTrans(0x24, g_CtrlByte1, 1);
                         break;
                     default:
                         break;
@@ -287,13 +227,13 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
             {
                 g_CtrlByte1 &= 0xfe;
                 g_CtrlByte1 |= 0x01;
-                USBCtrlTrans(0x24, g_CtrlByte1, 1);
+                MyDLLimport.USBCtrlTrans(0x24, g_CtrlByte1, 1);
             }
             else
             {
                 g_CtrlByte1 &= 0xfe;
                 g_CtrlByte1 |= 0x00;
-                USBCtrlTrans(0x24, g_CtrlByte1, 1);
+                MyDLLimport.USBCtrlTrans(0x24, g_CtrlByte1, 1);
             }
         }
 
@@ -301,7 +241,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
 
         #region 示波器接口
 
-        private static uint RecvDataLenght = 64 * 1024;
+        private static readonly uint RecvDataLenght = 64 * 1024;
 
         /// <summary>
         /// 采集时长(MS)
@@ -324,24 +264,24 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
                 IsConnect = false;
 
                 //设置产品编号
-                SpecifyDevIdx(6);
+                MyDLLimport.SpecifyDevIdx(6);
 
                 //打开设备
-                Int32 res = DeviceOpen();
+                Int32 res = MyDLLimport.DeviceOpen();
                 if (res != 0)
                 {
                     return false;
                 }
 
                 //获取数据缓冲区首指针
-                g_pBuffer = GetBuffer4Wr(-1);
+                g_pBuffer = MyDLLimport.GetBuffer4Wr(-1);
                 if (g_pBuffer == IntPtr.Zero)
                 {
                     return false;
                 }
 
                 //设置数据缓冲区
-                SetInfo(1, 0, 0x11, 0, 0, RecvDataLenght * 2);//设置使用的缓冲区为128K字节,即每个通道64K字节
+                MyDLLimport.SetInfo(1, 0, 0x11, 0, 0, RecvDataLenght * 2);//设置使用的缓冲区为128K字节,即每个通道64K字节
                 IsConnect = true;
             }
             catch (Exception)
@@ -357,7 +297,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         /// </summary>
         public void Disconnect()
         {
-            DeviceClose();
+            MyDLLimport.DeviceClose();
             IsConnect = false;
         }
 
@@ -382,16 +322,16 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
             channelData2 = new double[0];
 
             //开始AD采集
-            USBCtrlTransSimple((Int32)0x33);
+            MyDLLimport.USBCtrlTransSimple((Int32)0x33);
 
             //等待采集完成
-            while (USBCtrlTransSimple((Int32)0x50) != 33)
+            while (MyDLLimport.USBCtrlTransSimple((Int32)0x50) != 33)
             {
                 Thread.Sleep(10);
             }
 
             //获取数据
-            int res = AiReadBulkData((int)RecvDataLenght * 2, 1, 2000, g_pBuffer);
+            int res = MyDLLimport.AiReadBulkData((int)RecvDataLenght * 2, 1, 2000, g_pBuffer);
             if (res == 0)
             {
                 unsafe
