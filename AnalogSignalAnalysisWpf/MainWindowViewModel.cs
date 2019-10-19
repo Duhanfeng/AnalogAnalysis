@@ -2,7 +2,9 @@
 using AnalogSignalAnalysisWpf.Hardware.PLC;
 using AnalogSignalAnalysisWpf.Hardware.PWM;
 using AnalogSignalAnalysisWpf.Hardware.Scope;
+using AnalogSignalAnalysisWpf.LiveData;
 using Caliburn.Micro;
+using DataAnalysis;
 using Framework.Infrastructure.Serialization;
 using MahApps.Metro;
 using System;
@@ -93,15 +95,18 @@ namespace AnalogSignalAnalysisWpf
             if (Scope.Connect())
             {
                 AddRunningMessage("打开示波器成功");
+                Scope.IsCHBEnable = SystemParamManager.SystemParam.ScopeParams.IsCHBEnable;
+                Scope.CHAScale = SystemParamManager.SystemParam.ScopeParams.CHAScale;
+                Scope.CHBScale = SystemParamManager.SystemParam.ScopeParams.CHBScale;
+                Scope.CHAVoltageDIV = SystemParamManager.SystemParam.ScopeParams.CHAVoltageDIV;
+                Scope.CHBVoltageDIV = SystemParamManager.SystemParam.ScopeParams.CHBVoltageDIV;
                 Scope.CHACoupling = SystemParamManager.SystemParam.ScopeParams.CHACoupling;
                 Scope.CHBCoupling = SystemParamManager.SystemParam.ScopeParams.CHBCoupling;
                 Scope.SampleRate = SystemParamManager.SystemParam.ScopeParams.SampleRate;
+                Scope.SampleTime = SystemParamManager.SystemParam.ScopeParams.SampleTime;
                 Scope.TriggerModel = SystemParamManager.SystemParam.ScopeParams.TriggerModel;
                 Scope.TriggerEdge = SystemParamManager.SystemParam.ScopeParams.TriggerEdge;
-                Scope.CHAVoltageDIV = SystemParamManager.SystemParam.ScopeParams.CHAVoltageDIV;
-                Scope.CHBVoltageDIV = SystemParamManager.SystemParam.ScopeParams.CHBVoltageDIV;
                 //Scope.IsCHAEnable = SystemParamManager.SystemParam.ScopeParams.IsCHAEnable;
-                Scope.IsCHBEnable = SystemParamManager.SystemParam.ScopeParams.IsCHBEnable;
             }
             else
             {
@@ -163,6 +168,7 @@ namespace AnalogSignalAnalysisWpf
             ScopeControlView = new ScopeControlView2();
             ScopeControlView.DataContext = this;
 
+            ScopeScale = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<EScale>());
             ScopeCouplingCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<ECoupling>());
             ScopeSampleRateCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<ESampleRate>());
             ScopeTriggerModelCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<ETriggerModel>());
@@ -181,6 +187,7 @@ namespace AnalogSignalAnalysisWpf
             SettingsView = new SettingsView();
             SettingsView.DataContext = this;
 
+            //设置测试model实例
             FrequencyMeasurementViewModel = new FrequencyMeasurementViewModel(Scope, PWM);
             InputOutputMeasurementViewModel = new InputOutputMeasurementViewModel(Scope, PLC);
             PNVoltageMeasurementViewModel = new PNVoltageMeasurementViewModel(Scope, PLC);
@@ -195,22 +202,22 @@ namespace AnalogSignalAnalysisWpf
 
         private void FrequencyMeasurementViewModel_MessageRaised(object sender, MessageRaisedEventArgs e)
         {
-            
+            AddRunningMessage(e.Message);
         }
 
         private void InputOutputMeasurementViewModel_MessageRaised(object sender, MessageRaisedEventArgs e)
         {
-            
+            AddRunningMessage(e.Message);
         }
 
         private void PNVoltageMeasurementViewModel_MessageRaised(object sender, MessageRaisedEventArgs e)
         {
-            
+            AddRunningMessage(e.Message);
         }
 
         private void ThroughputMeasurementViewModel_MessageRaised(object sender, MessageRaisedEventArgs e)
         {
-            
+            AddRunningMessage(e.Message);
         }
 
         #region IDisposable Support
@@ -528,6 +535,8 @@ namespace AnalogSignalAnalysisWpf
 
         }
 
+        private readonly int SampleInterval = 1;
+
         /// <summary>
         /// 读取数据
         /// </summary>
@@ -538,10 +547,49 @@ namespace AnalogSignalAnalysisWpf
                 double[] channelAData;
                 double[] channelBData;
                 Scope.ReadDataBlock(out channelAData, out channelBData);
+
+                //设置通道A数据
+                //数据滤波
+                double[] filterData;
+                Analysis.MeanFilter(channelAData, 11, out filterData);
+                ScopeAverageCHA = Analysis.Mean(filterData);
+
+                //显示数据
+                var collection = new ObservableCollection<Data>();
+                for (int i = 0; i < channelAData.Length / SampleInterval; i++)
+                {
+                    collection.Add(new Data() { Value1 = filterData[i * SampleInterval], Value = i * 1000.0 / ((int)Scope.SampleRate) * SampleInterval });
+                }
+                ScopeChACollection = collection;
+
+                if (ScopeCHBEnable)
+                {
+                    Analysis.MeanFilter(channelBData, 11, out filterData);
+                    ScopeAverageCHB = Analysis.Mean(filterData);
+
+                    //显示通道B数据
+                    collection = new ObservableCollection<Data>();
+                    for (int i = 0; i < channelBData.Length / SampleInterval; i++)
+                    {
+                        collection.Add(new Data() { Value1 = filterData[i * SampleInterval], Value = i * 1000.0 / ((int)Scope.SampleRate) * SampleInterval });
+                    }
+                    ScopeChBCollection = collection;
+                }
+                else
+                {
+                    ScopeAverageCHB = -1;
+                    ScopeChBCollection = new ObservableCollection<Data>();
+                }
+
             }
         }
 
         #region 配置参数
+
+        /// <summary>
+        /// 放大倍数
+        /// </summary>
+        public ObservableCollection<string> ScopeScale { get; set; }
 
         /// <summary>
         /// 电压档位
@@ -605,6 +653,56 @@ namespace AnalogSignalAnalysisWpf
                     SystemParamManager.SaveParams();
                 }
                 NotifyOfPropertyChange(() => ScopeCHBEnable);
+            }
+        }
+
+        /// <summary>
+        /// CHA档位
+        /// </summary>
+        public string ScopeCHAScale
+        {
+            get
+            {
+                if (IsScopeValid)
+                {
+                    return EnumHelper.GetDescription(Scope.CHAScale);
+                }
+                return "";
+            }
+            set
+            {
+                if (IsScopeValid)
+                {
+                    Scope.CHAScale = EnumHelper.GetEnum<EScale>(value);
+                    SystemParamManager.SystemParam.ScopeParams.CHAScale = Scope.CHAScale;
+                    SystemParamManager.SaveParams();
+                }
+                NotifyOfPropertyChange(() => ScopeCHAScale);
+            }
+        }
+
+        /// <summary>
+        /// 示波器CHB倍数
+        /// </summary>
+        public string ScopeCHBScale
+        {
+            get
+            {
+                if (IsScopeValid)
+                {
+                    return EnumHelper.GetDescription(Scope.CHBScale);
+                }
+                return "";
+            }
+            set
+            {
+                if (IsScopeValid)
+                {
+                    Scope.CHBScale = EnumHelper.GetEnum<EScale>(value);
+                    SystemParamManager.SystemParam.ScopeParams.CHBScale = Scope.CHBScale;
+                    SystemParamManager.SaveParams();
+                }
+                NotifyOfPropertyChange(() => ScopeCHBScale);
             }
         }
 
@@ -780,6 +878,107 @@ namespace AnalogSignalAnalysisWpf
                     SystemParamManager.SaveParams();
                 }
                 NotifyOfPropertyChange(() => ScopeTriggerEdge);
+            }
+        }
+
+        /// <summary>
+        /// 采样时间
+        /// </summary>
+        public int ScopeSampleTime
+        {
+            get
+            {
+                if (IsScopeValid)
+                {
+                    return Scope.SampleTime;
+                }
+                return -1;
+            }
+            set
+            {
+                if (IsScopeValid)
+                {
+                    Scope.SampleTime = value;
+                    SystemParamManager.SystemParam.ScopeParams.SampleTime = Scope.SampleTime;
+                    SystemParamManager.SaveParams();
+                }
+                NotifyOfPropertyChange(() => ScopeSampleTime);
+            }
+        }
+
+        #endregion
+
+        #region 显示参数
+
+        private ObservableCollection<Data> scopeChACollection;
+
+        /// <summary>
+        /// 通道A数据
+        /// </summary>
+        public ObservableCollection<Data> ScopeChACollection
+        {
+            get
+            {
+                return scopeChACollection;
+            }
+            set
+            {
+                scopeChACollection = value;
+                NotifyOfPropertyChange(() => ScopeChACollection);
+            }
+        }
+
+        private ObservableCollection<Data> scopeChBCollection;
+
+        /// <summary>
+        /// 通道B数据
+        /// </summary>
+        public ObservableCollection<Data> ScopeChBCollection
+        {
+            get
+            {
+                return scopeChBCollection;
+            }
+            set
+            {
+                scopeChBCollection = value;
+                NotifyOfPropertyChange(() => ScopeChBCollection);
+            }
+        }
+
+        private double scopeAverageCHA;
+
+        /// <summary>
+        /// 通道A平均值
+        /// </summary>
+        public double ScopeAverageCHA
+        {
+            get
+            {
+                return scopeAverageCHA;
+            }
+            set
+            {
+                scopeAverageCHA = value;
+                NotifyOfPropertyChange(() => ScopeAverageCHA);
+            }
+        }
+
+        private double scopeAverageCHB;
+
+        /// <summary>
+        /// 通道B平均值
+        /// </summary>
+        public double ScopeAverageCHB
+        {
+            get
+            {
+                return scopeAverageCHB;
+            }
+            set
+            {
+                scopeAverageCHB = value;
+                NotifyOfPropertyChange(() => ScopeAverageCHB);
             }
         }
 

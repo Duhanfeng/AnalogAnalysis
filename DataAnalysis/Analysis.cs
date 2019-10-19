@@ -455,7 +455,7 @@ namespace DataAnalysis
         }
 
         /// <summary>
-        /// 计算平均值
+        /// 计算中值
         /// </summary>
         /// <param name="source"></param>
         /// <param name="result"></param>
@@ -463,6 +463,24 @@ namespace DataAnalysis
         public static double Median(double[] source)
         {
             return ArrayStatistics.MedianInplace(source);
+        }
+
+        /// <summary>
+        /// 计算平均值
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public static double Mean(double[] source)
+        {
+            double sum = 0;
+
+            foreach (var item in source)
+            {
+                sum += item;
+            }
+
+            return sum / source.Length;
         }
 
         #endregion

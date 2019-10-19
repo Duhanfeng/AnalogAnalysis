@@ -157,6 +157,16 @@ namespace AnalogSignalAnalysisWpf
     public class ScopeParams
     {
         /// <summary>
+        /// CHA档位
+        /// </summary>
+        public EScale CHAScale { get; set; }
+
+        /// <summary>
+        /// CHB档位
+        /// </summary>
+        public EScale CHBScale { get; set; }
+
+        /// <summary>
         /// CHA耦合
         /// </summary>
         public ECoupling CHACoupling { get; set; }
@@ -200,6 +210,11 @@ namespace AnalogSignalAnalysisWpf
         /// 使能CHB通道
         /// </summary>
         public bool IsCHBEnable { get; set; }
+
+        /// <summary>
+        /// 采样时间
+        /// </summary>
+        public int SampleTime { get; set; }
 
     }
 

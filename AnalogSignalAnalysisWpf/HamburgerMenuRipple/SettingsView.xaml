@@ -8,30 +8,92 @@
              xmlns:local="clr-namespace:AnalogSignalAnalysisWpf"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance local:MainWindowViewModel}"
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="600" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <Style x:Key="containerStyle" TargetType="Border">
+            <Setter Property="BorderBrush" Value="#FFAAFFAA"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style TargetType="{x:Type Line}" x:Key="crossLineStyle">
+            <Setter Property="Stroke" Value="#FFAAFFAA"/>
+            <Setter Property="StrokeThickness" Value="1"/>
+        </Style>
+        <Style TargetType="{x:Type Line}" x:Key="axisLineStyle">
+            <Setter Property="Stroke" Value="#FFAAFFAA"/>
+            <Setter Property="StrokeThickness" Value="0"/>
+        </Style>
+        <Style TargetType="{x:Type Line}" x:Key="minorcrossLineStyle">
+            <Setter Property="Stroke" Value="#FF225633"/>
+            <Setter Property="StrokeThickness" Value="0.25"/>
+        </Style>
+    </UserControl.Resources>
+    
     <Grid>
-        <Grid.ColumnDefinitions>
+        <TabControl>
+            <TabItem Header="示波器">
+                <DockPanel Grid.Column="0" Margin="10,5" >
+                    <!--<Label Foreground="Green" FontSize="16">示波器</Label>-->
+                    <local:ScopeControlView2 DataContext="{Binding}"/>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel DockPanel.Dock="Bottom" Grid.Row="1">
+                            <StackPanel Orientation="Horizontal" Margin="10">
+                                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center">平均电压: </TextBlock>
+                                <TextBox Text="{Binding ScopeAverageCHA, Mode=OneWay, StringFormat={}{0:F3}}" IsReadOnly="True" MinWidth="80" Margin="0,0,10,0"/>
+                                <TextBox Text="{Binding ScopeAverageCHB, Mode=OneWay, StringFormat={}{0:F3}}" IsReadOnly="True" MinWidth="80" Margin="0,0,10,0"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <chart:SparrowChart Foreground="White" FontFamily="Arial" ContainerBorderStyle="{StaticResource containerStyle}" Margin="5" MinHeight="200" MaxHeight="300" VerticalAlignment="Top" MinWidth="400">
+                            <chart:SparrowChart.Background>
+                                <LinearGradientBrush EndPoint="0.504,1.5" StartPoint="0.504,0.03">
+                                    <GradientStop Color="#FF00170B" Offset="0"/>
+                                    <GradientStop Color="#FF005C2C" Offset="0.8"/>
+                                </LinearGradientBrush>
+                            </chart:SparrowChart.Background>
+                            <chart:SparrowChart.Legend>
+                                <chart:Legend Padding="10" Header="示波器电压"/>
+                            </chart:SparrowChart.Legend>
+                            <chart:SparrowChart.XAxis>
+                                <chart:LinearXAxis CrossLineStyle="{StaticResource crossLineStyle}" MinorLineStyle="{StaticResource minorcrossLineStyle}" MajorLineStyle="{StaticResource crossLineStyle}" AxisLineStyle="{StaticResource axisLineStyle}" MinValue="0" MinorTicksCount="3" ShowCrossLines="True" Header="Time(ms)" StringFormat="0.0"/>
+                            </chart:SparrowChart.XAxis>
+                            <chart:SparrowChart.YAxis>
+                                <chart:LinearYAxis CrossLineStyle="{StaticResource crossLineStyle}"  MinorLineStyle="{StaticResource minorcrossLineStyle}" MajorLineStyle="{StaticResource crossLineStyle}" AxisLineStyle="{StaticResource axisLineStyle}" MinValue="0" MaxValue="24"  MinorTicksCount="3" ShowCrossLines="True" StringFormat="0.0" Header="Voltage(V)" >
+                                </chart:LinearYAxis>
+                            </chart:SparrowChart.YAxis>
+                            <chart:LineSeries Label="CH1" PointsSource="{Binding ScopeChACollection}" Stroke="Yellow" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
+                            <chart:LineSeries Label="CH2" PointsSource="{Binding ScopeChBCollection}" Stroke="YellowGreen" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
+                        </chart:SparrowChart>
+                    </Grid>
+                    
+                </DockPanel>
+            </TabItem>
+            <TabItem Header="PLC">
+                <StackPanel Grid.Column="1" Margin="10,5" Orientation="Horizontal">
+                    <!--<Label Foreground="CadetBlue" FontSize="16">PLC</Label>-->
+                    <local:PLCControlView DataContext="{Binding}"/>
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="PWM">
+                <StackPanel Grid.Column="2" Margin="10,5" Orientation="Horizontal">
+                    <!--<Label Foreground="DarkGreen" FontSize="16">PWM</Label>-->
+                    <local:PWMControlView DataContext="{Binding}"/>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+        
+        <!--<Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto" MinWidth="260"/>
             <ColumnDefinition Width="auto" MinWidth="260"/>
             <ColumnDefinition Width="auto" MinWidth="260"/>
-        </Grid.ColumnDefinitions>
-        <StackPanel Grid.Column="0" Margin="10,5">
-            <!--<Label Foreground="Green" FontSize="16">示波器</Label>-->
-            <GroupBox Header="示波器" MinHeight="{Binding ElementName=PLCGroupBox, Path=ActualHeight}">
-                <local:ScopeControlView2 DataContext="{Binding}"/>
-            </GroupBox>
-        </StackPanel>
-        <StackPanel Grid.Column="1" Margin="10,5">
-            <!--<Label Foreground="CadetBlue" FontSize="16">PLC</Label>-->
-            <GroupBox Header="PLC" x:Name="PLCGroupBox">
-                <local:PLCControlView DataContext="{Binding}"/>
-            </GroupBox>
-        </StackPanel>
-        <StackPanel Grid.Column="2" Margin="10,5">
-            <!--<Label Foreground="DarkGreen" FontSize="16">PWM</Label>-->
-            <GroupBox Header="PWM" MinHeight="{Binding ElementName=PLCGroupBox, Path=ActualHeight}">
-                <local:PWMControlView DataContext="{Binding}"/>
-            </GroupBox>
-        </StackPanel>
+        </Grid.ColumnDefinitions>-->
+        
+        
+        
     </Grid>
 </UserControl>

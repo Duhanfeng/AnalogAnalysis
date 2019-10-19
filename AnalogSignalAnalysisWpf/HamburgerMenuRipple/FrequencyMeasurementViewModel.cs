@@ -77,7 +77,7 @@ namespace AnalogSignalAnalysisWpf
         {
             get
             {
-                return minVoltageThreshold;
+                return maxVoltageThreshold;
             }
             set
             {
@@ -183,7 +183,7 @@ namespace AnalogSignalAnalysisWpf
 
             //频率列表(单位:Hz)
             int[] frequencies1 = new int[] { 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100 };
-            int[] sampleTime = new int[] { 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 200, 200, 200, 200, 200, 200, 200 };
+            int[] sampleTime = new int[] { 1000, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 200, 200, 200, 200, 200, 200, 200 };
 
             measureThread = new Thread(() =>
             {
@@ -198,18 +198,28 @@ namespace AnalogSignalAnalysisWpf
                 {
                     //设置PLC频率
                     PWM.Frequency = frequencies1[i];
-                    Thread.Sleep(50);
+                    OnMessageRaised(MessageLevel.Message, $"F: [Frequency- {PWM.Frequency}]");
+                    Thread.Sleep(ComDelay);
 
                     //设置Scope采集时长
                     Scope.SampleTime = sampleTime[i];
+                    OnMessageRaised(MessageLevel.Message, $"F: [SampleTime- {Scope.SampleTime}]");
 
                     //读取Scope数据
                     double[] originalData;
                     Scope.ReadDataBlock(0, out originalData);
 
+                    if ((originalData == null) || (originalData.Length == 0))
+                    {
+                        //测试失败
+                        OnMessageRaised(MessageLevel.Warning, $"F: ReadDataBlock Fail");
+                        OnMeasurementCompleted(new FrequencyMeasurementCompletedEventArgs(false));
+                        return;
+                    }
+
                     //数据滤波
                     double[] filterData;
-                    Analysis.MeanFilter(originalData, 7, out filterData);
+                    Analysis.MeanFilter(originalData, 11, out filterData);
 
                     //阈值查找边沿
                     List<int> edgeIndexs;
@@ -221,6 +231,15 @@ namespace AnalogSignalAnalysisWpf
                     List<double> dutyRatios;
                     Analysis.AnalysePulseData(edgeIndexs, digitEdgeType, (int)Scope.SampleRate, out pulseFrequencies, out dutyRatios);
 
+                    {
+                        string pulseMessage = "";
+                        foreach (var item in pulseFrequencies)
+                        {
+                            pulseMessage += item.ToString("F2") + " ";
+                        }
+                        OnMessageRaised(MessageLevel.Message, $"F: Frequency-{pulseMessage}");
+                    }
+                    
                     if (pulseFrequencies.Count > 0)
                     {
                         //检测脉冲是否异常
@@ -231,11 +250,13 @@ namespace AnalogSignalAnalysisWpf
                             if (lastFrequency != -1)
                             {
                                 //测试完成
+                                OnMessageRaised(MessageLevel.Message, $"F: Success, max = {lastFrequency}");
                                 OnMeasurementCompleted(new FrequencyMeasurementCompletedEventArgs(true, lastFrequency));
                             }
                             else
                             {
                                 //测试失败
+                                OnMessageRaised(MessageLevel.Warning, $"F: Fail");
                                 OnMeasurementCompleted(new FrequencyMeasurementCompletedEventArgs(false));
                             }
                             return;
@@ -250,11 +271,13 @@ namespace AnalogSignalAnalysisWpf
                         if (lastFrequency != -1)
                         {
                             //测试完成
+                            OnMessageRaised(MessageLevel.Message, $"F: Success, max = {lastFrequency}");
                             OnMeasurementCompleted(new FrequencyMeasurementCompletedEventArgs(true, lastFrequency));
                         }
                         else
                         {
                             //测试失败
+                            OnMessageRaised(MessageLevel.Warning, $"F: Fail");
                             OnMeasurementCompleted(new FrequencyMeasurementCompletedEventArgs(false));
                         }
                         return;
@@ -265,11 +288,13 @@ namespace AnalogSignalAnalysisWpf
                 if (lastFrequency != -1)
                 {
                     //测试完成
+                    OnMessageRaised(MessageLevel.Message, $"F: Success, max = {lastFrequency}");
                     OnMeasurementCompleted(new FrequencyMeasurementCompletedEventArgs(true, lastFrequency));
                 }
                 else
                 {
                     //测试失败
+                    OnMessageRaised(MessageLevel.Warning, $"F: Fail");
                     OnMeasurementCompleted(new FrequencyMeasurementCompletedEventArgs(false));
                 }
                 return;

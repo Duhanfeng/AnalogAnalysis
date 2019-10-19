@@ -45,8 +45,37 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         /// <param name="channelData2">通道2数据</param>
         void ReadDataBlock(out double[] channelData1, out double[] channelData2);
 
-
         #region 属性
+
+        /// <summary>
+        /// 使能CHA通道
+        /// </summary>
+        bool IsCHAEnable { get; set; }
+
+        /// <summary>
+        /// 使能CHB通道
+        /// </summary>
+        bool IsCHBEnable { get; set; }
+
+        /// <summary>
+        /// CHA电压档位
+        /// </summary>
+        EVoltageDIV CHAVoltageDIV { get; set; }
+
+        /// <summary>
+        /// CHB电压档位
+        /// </summary>
+        EVoltageDIV CHBVoltageDIV { get; set; }
+
+        /// <summary>
+        /// CHA档位
+        /// </summary>
+        EScale CHAScale { get; set; }
+
+        /// <summary>
+        /// CHB档位
+        /// </summary>
+        EScale CHBScale { get; set; }
 
         /// <summary>
         /// CHA耦合
@@ -73,30 +102,9 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         /// </summary>
         ETriggerEdge TriggerEdge { get; set; }
 
-        /// <summary>
-        /// CHA电压档位
-        /// </summary>
-        EVoltageDIV CHAVoltageDIV { get; set; }
-
-        /// <summary>
-        /// CHB电压档位
-        /// </summary>
-        EVoltageDIV CHBVoltageDIV { get; set; }
-
-        /// <summary>
-        /// 使能CHA通道
-        /// </summary>
-        bool IsCHAEnable { get; set; }
-
-        /// <summary>
-        /// 使能CHB通道
-        /// </summary>
-        bool IsCHBEnable { get; set; }
-
         #endregion
 
     }
-
 
     public enum EChannel
     {
@@ -104,6 +112,16 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         CHA,
         [Description("CHB")]
         CHB
+    }
+
+    public enum EScale
+    {
+        [Description("x1")]
+        x1 = 1,
+        [Description("x10")]
+        x10 = 10,
+        //[Description("x100")]
+        //x100 = 100
     }
 
     public enum ECoupling
@@ -135,6 +153,8 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
     {
         [Description("49K")]
         Sps_49K = 49 * 1000,
+        [Description("96K(Stream)")]
+        Sps_96K = 96 * 1000,
         [Description("781K")]
         Sps_781K = 781 * 1000,
         [Description("12.5M")]

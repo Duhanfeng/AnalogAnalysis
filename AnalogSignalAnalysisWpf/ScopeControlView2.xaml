@@ -33,6 +33,10 @@
                 </DockPanel>
                 <StackPanel IsEnabled="{Binding ScopeCHAEnable}">
                     <DockPanel Margin="0,10,0,0">
+                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">CHA电压档位</TextBlock>
+                        <ComboBox ItemsSource="{Binding ScopeScale}" SelectedItem="{Binding ScopeCHAScale}"/>
+                    </DockPanel>
+                    <DockPanel Margin="0,10,0,0">
                         <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">CHA电压</TextBlock>
                         <ComboBox ItemsSource="{Binding ScopeVoltageDIVCollection}" SelectedItem="{Binding ScopeCHAVoltageDIV}"/>
                     </DockPanel>
@@ -48,6 +52,10 @@
                     <CheckBox IsChecked="{Binding ScopeCHBEnable}" Margin="10,0,0,0"/>
                 </DockPanel>
                 <StackPanel IsEnabled="{Binding ScopeCHBEnable}">
+                    <DockPanel Margin="0,10,0,0">
+                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">CHB电压档位</TextBlock>
+                        <ComboBox ItemsSource="{Binding ScopeScale}" SelectedItem="{Binding ScopeCHBScale}"/>
+                    </DockPanel>
                     <DockPanel Margin="0,10,0,0">
                         <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">CHB电压</TextBlock>
                         <ComboBox ItemsSource="{Binding ScopeVoltageDIVCollection}" SelectedItem="{Binding ScopeCHBVoltageDIV}"/>
@@ -73,7 +81,7 @@
                 </DockPanel>
                 <DockPanel Margin="0,10,0,0">
                     <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">采样时间(MS)</TextBlock>
-                    <TextBox />
+                    <TextBox Text="{Binding ScopeSampleTime, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
                 </DockPanel>
                 <DockPanel Margin="0,10,0,0">
                     <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">采集</TextBlock>
