@@ -153,7 +153,7 @@ namespace AnalogSignalAnalysisWpf
         {
             get
             {
-                return minVoltage;
+                return maxVoltage;
             }
             set
             {

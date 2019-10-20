@@ -62,6 +62,37 @@ namespace AnalogSignalAnalysisWpf
 
     }
 
+    public class FrequencyTestData
+    {
+        /// <summary>
+        /// 频率
+        /// </summary>
+        public int Frequency { get; set; }
+
+        /// <summary>
+        /// 采样时间
+        /// </summary>
+        public int SampleTime { get; set; }
+
+        /// <summary>
+        /// 创建FrequencyTestData新实例
+        /// </summary>
+        public FrequencyTestData()
+        {
+
+        }
+
+        /// <summary>
+        /// 创建FrequencyTestData新实例
+        /// </summary>
+        /// <param name="frequency">频率</param>
+        /// <param name="sampleTime">采样时间</param>
+        public FrequencyTestData(int frequency, int sampleTime)
+        {
+            Frequency = frequency;
+            SampleTime = sampleTime;
+        }
+    }
 
     public class FrequencyMeasurementViewModel : Screen
     {
@@ -72,21 +103,48 @@ namespace AnalogSignalAnalysisWpf
 
         public FrequencyMeasurementViewModel()
         {
-            //获取配置参数
-            SystemParamManager = SystemParamManager.GetInstance();
-
             ScopeScale = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<EScale>());
             ScopeSampleRateCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<ESampleRate>());
             ScopeVoltageDIVCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<EVoltageDIV>());
 
+            //恢复配置参数
+            SystemParamManager = SystemParamManager.GetInstance();
             MinVoltageThreshold = SystemParamManager.SystemParam.FrequencyMeasureParams.MinVoltageThreshold;
             MaxVoltageThreshold = SystemParamManager.SystemParam.FrequencyMeasureParams.MaxVoltageThreshold;
             FrequencyErrLimit = SystemParamManager.SystemParam.FrequencyMeasureParams.FrequencyErrLimit;
             ComDelay = SystemParamManager.SystemParam.FrequencyMeasureParams.ComDelay;
-
             CHAScale = SystemParamManager.SystemParam.FrequencyMeasureParams.CHAScale;
             CHAVoltageDIV = SystemParamManager.SystemParam.FrequencyMeasureParams.CHAVoltageDIV;
             SampleRate = SystemParamManager.SystemParam.FrequencyMeasureParams.SampleRate;
+            if ((SystemParamManager.SystemParam.FrequencyMeasureParams.TestDatas == null) || (SystemParamManager.SystemParam.FrequencyMeasureParams.TestDatas.Count == 0))
+            {
+                SystemParamManager.SystemParam.FrequencyMeasureParams.TestDatas = new ObservableCollection<FrequencyTestData>
+                {
+                    new FrequencyTestData(5, 1000),
+                    new FrequencyTestData(10, 500),
+                    new FrequencyTestData(15, 500),
+                    new FrequencyTestData(20, 500),
+                    new FrequencyTestData(25, 500),
+                    new FrequencyTestData(30, 500),
+                    new FrequencyTestData(35, 300),
+                    new FrequencyTestData(40, 300),
+                    new FrequencyTestData(45, 300),
+                    new FrequencyTestData(50, 300),
+                    new FrequencyTestData(55, 200),
+                    new FrequencyTestData(60, 200),
+                    new FrequencyTestData(65, 200),
+                    new FrequencyTestData(70, 200),
+                    new FrequencyTestData(75, 200),
+                    new FrequencyTestData(80, 200),
+                    new FrequencyTestData(85, 100),
+                    new FrequencyTestData(90, 100),
+                    new FrequencyTestData(95, 100),
+                    new FrequencyTestData(100, 100),
+                };
+            }
+            TestDatas = SystemParamManager.SystemParam.FrequencyMeasureParams.TestDatas;
+
+            
             NotifyOfPropertyChange(() => ScopeCHAScale);
             NotifyOfPropertyChange(() => ScopeCHAVoltageDIV);
             NotifyOfPropertyChange(() => ScopeSampleRate);
@@ -133,6 +191,27 @@ namespace AnalogSignalAnalysisWpf
             }
         }
 
+        private ObservableCollection<FrequencyTestData> testDatas;
+
+        /// <summary>
+        /// 测试数据
+        /// </summary>
+        public ObservableCollection<FrequencyTestData> TestDatas
+        {
+            get
+            {
+                return testDatas;
+            }
+            set
+            {
+                testDatas = value;
+                NotifyOfPropertyChange(() => TestDatas);
+
+                SystemParamManager.SystemParam.FrequencyMeasureParams.TestDatas = value;
+                SystemParamManager.SaveParams();
+            }
+        }
+
         private bool isMeasuring;
 
         /// <summary>
@@ -168,7 +247,6 @@ namespace AnalogSignalAnalysisWpf
                 NotifyOfPropertyChange(() => CurrentSampleTime);
             }
         }
-
 
         private int currentInputFrequency;
 
@@ -237,6 +315,14 @@ namespace AnalogSignalAnalysisWpf
                     return false;
                 }
             }
+        }
+
+        /// <summary>
+        /// 更新硬件
+        /// </summary>
+        public void UpdateHardware()
+        {
+            NotifyOfPropertyChange(() => IsHardwareValid);
         }
 
         /// <summary>
@@ -424,6 +510,7 @@ namespace AnalogSignalAnalysisWpf
         /// <param name="e"></param>
         protected void OnMeasurementCompleted(FrequencyMeasurementCompletedEventArgs e)
         {
+            PWM.Frequency = 0;
             if (e.IsSuccess == true)
             {
                 MaxFrequency = e.MaxLimitFrequency;
@@ -433,7 +520,10 @@ namespace AnalogSignalAnalysisWpf
                 MaxFrequency = -1;
             }
 
-            IsMeasuring = false;
+            lock (lockObject)
+            {
+                IsMeasuring = false;
+            }
             MeasurementCompleted?.Invoke(this, e);
         }
 
@@ -462,7 +552,7 @@ namespace AnalogSignalAnalysisWpf
         /// <summary>
         /// 通道A数据
         /// </summary>
-        public ObservableCollection<Data> ScopeChACollection
+        public ObservableCollection<Data> ScopeCHACollection
         {
             get
             {
@@ -471,7 +561,7 @@ namespace AnalogSignalAnalysisWpf
             set
             {
                 scopeChACollection = value;
-                NotifyOfPropertyChange(() => ScopeChACollection);
+                NotifyOfPropertyChange(() => ScopeCHACollection);
             }
         }
 
@@ -480,7 +570,7 @@ namespace AnalogSignalAnalysisWpf
         /// <summary>
         /// 通道A边沿数据
         /// </summary>
-        public ObservableCollection<Data> ScopeChAEdgeCollection
+        public ObservableCollection<Data> ScopeCHAEdgeCollection
         {
             get
             {
@@ -489,24 +579,8 @@ namespace AnalogSignalAnalysisWpf
             set
             {
                 scopeChAEdgeCollection = value;
-                NotifyOfPropertyChange(() => ScopeChAEdgeCollection);
+                NotifyOfPropertyChange(() => ScopeCHAEdgeCollection);
             }
-        }
-
-        /// <summary>
-        /// 显示数据
-        /// </summary>
-        /// <param name="data">数据</param>
-        private void ShowData(double[] data)
-        {
-            int SampleInterval = 1;
-            var collection = new ObservableCollection<Data>();
-            for (int i = 0; i < data.Length / SampleInterval; i++)
-            {
-                collection.Add(new Data() { Value1 = data[i * SampleInterval], Value = i * 1000.0 / ((int)Scope.SampleRate) * SampleInterval });
-            }
-            ScopeChACollection = collection;
-
         }
 
         /// <summary>
@@ -527,18 +601,20 @@ namespace AnalogSignalAnalysisWpf
             {
                 foreach (var item in edgeIndexs)
                 {
-                    //collection.Add(new Data() { Value1 = ScopeChACollection[item / SampleInterval].Value1, Value = item * 1000.0 / ((int)Scope.SampleRate) * SampleInterval });
+                    //collection.Add(new Data() { Value1 = ScopeCHACollection[item / SampleInterval].Value1, Value = item * 1000.0 / ((int)Scope.SampleRate) * SampleInterval });
                     collection2.Add(new Data() { Value1 = collection[item / SampleInterval].Value1, Value = collection[item / SampleInterval].Value });
                 }
             }
 
-            ScopeChACollection = collection;
-            ScopeChAEdgeCollection = collection2;
+            ScopeCHACollection = collection;
+            ScopeCHAEdgeCollection = collection2;
         }
 
         #endregion
 
         #region 方法
+
+        private object lockObject = new object();
 
         /// <summary>
         /// 测量线程
@@ -550,35 +626,54 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public void Start()
         {
-            if (Scope?.IsConnect != true)
+            lock (lockObject)
             {
-                throw new Exception("scope invalid");
-            }
-
-            //频率列表(单位:Hz)
-            int[] frequencies1 = new int[] { 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100 };
-            int[] sampleTime = new int[] { 1000, 500, 500, 500, 500, 300, 300, 300, 200, 200, 200, 200, 200, 200, 200, 100, 100, 100, 100, 100 };
-
-            measureThread = new Thread(() =>
-            {
-                if (frequencies1.Length != sampleTime.Length)
+                if (IsMeasuring)
                 {
                     return;
                 }
-                IsMeasuring = true;
-                MaxFrequency = -1;
+            }
 
+            if ((TestDatas == null) || (TestDatas.Count == 0))
+            {
+                return;
+            }
+
+            SystemParamManager.SystemParam.FrequencyMeasureParams.TestDatas = TestDatas;
+            SystemParamManager.SaveParams();
+
+            //复位示波器设置
+            Scope.Disconnect();
+            Scope.Connect();
+            Scope.CHAScale = CHAScale;
+            Scope.SampleRate = SampleRate;
+            Scope.CHAVoltageDIV = CHAVoltageDIV;
+            
+            //频率列表(单位:Hz)
+            //int[] frequencies1 = new int[] { 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100 };
+            //int[] sampleTime = new int[] { 1000, 500, 500, 500, 500, 300, 300, 300, 200, 200, 200, 200, 200, 200, 200, 100, 100, 100, 100, 100 };
+
+            measureThread = new Thread(() =>
+            {
+                MeasurementInfos = new ObservableCollection<FrequencyMeasurementInfo>();
+                
+                lock (lockObject)
+                {
+                    IsMeasuring = true;
+                }
+                
+                MaxFrequency = -1;
                 int lastFrequency = -1;
 
-                for (int i = 0; i < frequencies1.Length; i++)
+                foreach (var item in TestDatas)
                 {
                     //设置PLC频率
-                    PWM.Frequency = frequencies1[i];
+                    PWM.Frequency = item.Frequency;
                     OnMessageRaised(MessageLevel.Message, $"F: [Frequency- {PWM.Frequency}]");
                     Thread.Sleep(ComDelay);
 
                     //设置Scope采集时长
-                    Scope.SampleTime = sampleTime[i];
+                    Scope.SampleTime = item.SampleTime;
                     OnMessageRaised(MessageLevel.Message, $"F: [SampleTime- {Scope.SampleTime}]");
 
                     //读取Scope数据
@@ -611,8 +706,8 @@ namespace AnalogSignalAnalysisWpf
                     Analysis.AnalysePulseData(edgeIndexs, digitEdgeType, (int)Scope.SampleRate, out pulseFrequencies, out dutyRatios);
 
                     //显示分析结果
-                    CurrentInputFrequency = frequencies1[i];
-                    CurrentSampleTime = sampleTime[i];
+                    CurrentInputFrequency = item.Frequency;
+                    CurrentSampleTime = item.SampleTime;
                     new Thread(delegate ()
                     {
                         ThreadPool.QueueUserWorkItem(delegate
@@ -627,18 +722,18 @@ namespace AnalogSignalAnalysisWpf
 
                     {
                         string pulseMessage = "";
-                        foreach (var item in pulseFrequencies)
+                        foreach (var item2 in pulseFrequencies)
                         {
-                            pulseMessage += item.ToString("F2") + " ";
+                            pulseMessage += item2.ToString("F2") + " ";
                         }
                         OnMessageRaised(MessageLevel.Message, $"F: Frequency-{pulseMessage}");
                     }
-                    
+
                     if (pulseFrequencies.Count > 0)
                     {
                         //检测脉冲是否异常
-                        double minFrequency = frequencies1[i] * (1 - FrequencyErrLimit);
-                        double maxFrequency = frequencies1[i] * (1 + FrequencyErrLimit);
+                        double minFrequency = item.Frequency * (1 - FrequencyErrLimit);
+                        double maxFrequency = item.Frequency * (1 + FrequencyErrLimit);
                         if (!Analysis.CheckFrequency(pulseFrequencies, minFrequency, maxFrequency, 1))
                         {
                             if (lastFrequency != -1)
@@ -657,7 +752,7 @@ namespace AnalogSignalAnalysisWpf
                         }
                         else
                         {
-                            lastFrequency = frequencies1[i];
+                            lastFrequency = item.Frequency;
                         }
                     }
                     else
@@ -676,7 +771,6 @@ namespace AnalogSignalAnalysisWpf
                         }
                         return;
                     }
-
                 }
 
                 if (lastFrequency != -1)
@@ -695,14 +789,6 @@ namespace AnalogSignalAnalysisWpf
             });
 
             measureThread.Start();
-        }
-
-        /// <summary>
-        /// 更新硬件
-        /// </summary>
-        public void UpdateHardware()
-        {
-            NotifyOfPropertyChange(() => IsHardwareValid);
         }
 
         #endregion

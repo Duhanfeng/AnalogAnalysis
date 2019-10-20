@@ -82,7 +82,7 @@ namespace AnalogSignalAnalysisWpf
         {
             get
             {
-                return minVoltageThreshold;
+                return maxVoltageThreshold;
             }
             set
             {

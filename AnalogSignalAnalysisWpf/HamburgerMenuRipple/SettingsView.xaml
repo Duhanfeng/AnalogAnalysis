@@ -66,7 +66,7 @@
                                 <chart:LinearYAxis CrossLineStyle="{StaticResource crossLineStyle}"  MinorLineStyle="{StaticResource minorcrossLineStyle}" MajorLineStyle="{StaticResource crossLineStyle}" AxisLineStyle="{StaticResource axisLineStyle}" MinValue="0" MaxValue="24"  MinorTicksCount="3" ShowCrossLines="True" StringFormat="0.0" Header="Voltage(V)" >
                                 </chart:LinearYAxis>
                             </chart:SparrowChart.YAxis>
-                            <chart:LineSeries Label="CH1" PointsSource="{Binding ScopeChACollection}" Stroke="Yellow" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
+                            <chart:LineSeries Label="CH1" PointsSource="{Binding ScopeCHACollection}" Stroke="Yellow" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
                             <chart:LineSeries Label="CH2" PointsSource="{Binding ScopeChBCollection}" Stroke="YellowGreen" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
                         </chart:SparrowChart>
                     </Grid>

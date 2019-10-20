@@ -469,8 +469,7 @@ namespace AnalogSignalAnalysisWpf
         public void ConnectScope()
         {
             Scope?.Connect();
-            UpdateScopeStatus();
-
+            
             if (IsScopeValid)
             {
                 //还原配置
@@ -489,6 +488,8 @@ namespace AnalogSignalAnalysisWpf
             {
                 AddRunningMessage("连接示波器失败");
             }
+
+            UpdateScopeStatus();
         }
 
         /// <summary>
@@ -560,7 +561,7 @@ namespace AnalogSignalAnalysisWpf
                 {
                     collection.Add(new Data() { Value1 = filterData[i * SampleInterval], Value = i * 1000.0 / ((int)Scope.SampleRate) * SampleInterval });
                 }
-                ScopeChACollection = collection;
+                ScopeCHACollection = collection;
 
                 if (ScopeCHBEnable)
                 {
@@ -915,7 +916,7 @@ namespace AnalogSignalAnalysisWpf
         /// <summary>
         /// 通道A数据
         /// </summary>
-        public ObservableCollection<Data> ScopeChACollection
+        public ObservableCollection<Data> ScopeCHACollection
         {
             get
             {
@@ -924,7 +925,7 @@ namespace AnalogSignalAnalysisWpf
             set
             {
                 scopeChACollection = value;
-                NotifyOfPropertyChange(() => ScopeChACollection);
+                NotifyOfPropertyChange(() => ScopeCHACollection);
             }
         }
 

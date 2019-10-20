@@ -12,10 +12,11 @@
              d:DataContext="{d:DesignInstance local:FrequencyMeasurementViewModel}"
              d:DesignHeight="450" d:DesignWidth="800"
              MinWidth="600">
+
     <UserControl.Resources>
         <ResourceDictionary>
             <converters:BoolToColorConverter x:Key="BoolToColorConverter" />
-
+            <converters:BoolToInvertConverter x:Key="BoolToInvertConverter" />
             <Style x:Key="containerStyle" TargetType="Border">
                 <Setter Property="BorderBrush" Value="#FFAAFFAA"/>
                 <Setter Property="BorderThickness" Value="1"/>
@@ -61,8 +62,8 @@
                         <chart:LinearYAxis CrossLineStyle="{StaticResource crossLineStyle}"  MinorLineStyle="{StaticResource minorcrossLineStyle}" MajorLineStyle="{StaticResource crossLineStyle}" AxisLineStyle="{StaticResource axisLineStyle}" MinValue="0" MaxValue="24" MinorTicksCount="3" ShowCrossLines="True" StringFormat="0.0" Header="Voltage(mV)" >
                         </chart:LinearYAxis>
                     </chart:SparrowChart.YAxis>
-                    <chart:LineSeries Label="输入电压" PointsSource="{Binding ScopeChACollection}" Stroke="Yellow" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
-                    <chart:ScatterSeries Label="边沿点" PointsSource="{Binding ScopeChAEdgeCollection}" Stroke="Red" XPath="Value" YPath="Value1" ScatterSize="10"  StrokeThickness="2" UseSinglePart="True"/>
+                    <chart:LineSeries Label="输入电压" PointsSource="{Binding ScopeCHACollection}" Stroke="Yellow" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
+                    <chart:ScatterSeries Label="边沿点" PointsSource="{Binding ScopeCHAEdgeCollection}" Stroke="Red" XPath="Value" YPath="Value1" ScatterSize="10"  StrokeThickness="2" UseSinglePart="True"/>
                 </chart:SparrowChart>
             </DockPanel>
 
@@ -106,19 +107,17 @@
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn DisplayMemberBinding="{Binding DateTime}" Header="时间"/>
-                                <GridViewColumn DisplayMemberBinding="{Binding SampleTime}" Header="采样时间"/>
                                 <GridViewColumn DisplayMemberBinding="{Binding InputFrequency}" Header="输入频率"/>
-                                <GridViewColumn DisplayMemberBinding="{Binding CurrentFrequency}" Header="测量频率"/>
+                                <GridViewColumn DisplayMemberBinding="{Binding SampleTime}" Header="采样时间"/>
+                                <GridViewColumn DisplayMemberBinding="{Binding CurrentFrequency}" Header="测量结果"/>
                             </GridView>
                         </ListView.View>
                     </ListView>
                 </ScrollViewer>
-                
             </StackPanel>
-            
         </StackPanel>
 
-        <StackPanel Grid.Column="1" Grid.RowSpan="3" Margin="10" MinWidth="200">
+        <StackPanel Grid.Column="1" Grid.RowSpan="3" Margin="10" MinWidth="200" IsEnabled="{Binding IsMeasuring, Converter={StaticResource BoolToInvertConverter}}">
             <Expander Header="基本设置" IsExpanded="True">
                 <StackPanel>
                     <TextBlock Text="配置参数" Foreground="Green"/>
@@ -157,11 +156,19 @@
                     </DockPanel>
 
                     <TextBlock Text="测试项" Foreground="Green" Margin="0,10,0,0"/>
-                    <DataGrid/>
+                    <ScrollViewer MaxHeight="300">
+                        <DataGrid ItemsSource="{Binding TestDatas}" AutoGenerateColumns="False" CanUserAddRows="True">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="输入频率" Binding="{Binding Frequency}"/>
+                                <DataGridTextColumn Header="采样时间" Binding="{Binding SampleTime}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </ScrollViewer>
                 </StackPanel>
             </Expander>
             <Button cal:Message.Attach="UpdateHardware" Margin="0,10,0,0">刷新硬件</Button>
             <Button cal:Message.Attach="Start" IsEnabled="{Binding IsHardwareValid}" Margin="0,10,0,0">运行</Button>
         </StackPanel>
+    
     </Grid>
 </UserControl>

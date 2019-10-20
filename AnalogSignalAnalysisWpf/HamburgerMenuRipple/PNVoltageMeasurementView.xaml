@@ -7,7 +7,7 @@
              xmlns:chart="http://sparrowtoolkit.codeplex.com/wpf"
              xmlns:cal="http://www.caliburnproject.org"
              mc:Ignorable="d" 
-             d:DataContext="{d:DesignInstance local:MainWindowViewModel}"
+             d:DataContext="{d:DesignInstance local:PNVoltageMeasurementViewModel}"
              d:DesignHeight="450" d:DesignWidth="800"
              MinWidth="600">
     <UserControl.Resources>

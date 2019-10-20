@@ -7,28 +7,35 @@
              xmlns:livedata="clr-namespace:AnalogSignalAnalysisWpf.LiveData"
              xmlns:cal="http://www.caliburnproject.org"
              xmlns:chart="http://sparrowtoolkit.codeplex.com/wpf"
+             xmlns:converters="clr-namespace:AnalogSignalAnalysisWpf.Converters"
              mc:Ignorable="d" 
-             d:DataContext="{d:DesignInstance local:MainWindowViewModel}"
-             d:DesignHeight="450" d:DesignWidth="800"
+             d:DataContext="{d:DesignInstance local:InputOutputMeasurementViewModel}"
+             d:DesignHeight="600" d:DesignWidth="800"
              MinWidth="600">
+
     <UserControl.Resources>
-        <Style x:Key="containerStyle" TargetType="Border">
-            <Setter Property="BorderBrush" Value="#FFAAFFAA"/>
-            <Setter Property="BorderThickness" Value="1"/>
-        </Style>
-        <Style TargetType="{x:Type Line}" x:Key="crossLineStyle">
-            <Setter Property="Stroke" Value="#FFAAFFAA"/>
-            <Setter Property="StrokeThickness" Value="1"/>
-        </Style>
-        <Style TargetType="{x:Type Line}" x:Key="axisLineStyle">
-            <Setter Property="Stroke" Value="#FFAAFFAA"/>
-            <Setter Property="StrokeThickness" Value="0"/>
-        </Style>
-        <Style TargetType="{x:Type Line}" x:Key="minorcrossLineStyle">
-            <Setter Property="Stroke" Value="#FF225633"/>
-            <Setter Property="StrokeThickness" Value="0.25"/>
-        </Style>
+        <ResourceDictionary>
+            <converters:BoolToColorConverter x:Key="BoolToColorConverter" />
+            <converters:BoolToInvertConverter x:Key="BoolToInvertConverter" />
+            <Style x:Key="containerStyle" TargetType="Border">
+                <Setter Property="BorderBrush" Value="#FFAAFFAA"/>
+                <Setter Property="BorderThickness" Value="1"/>
+            </Style>
+            <Style TargetType="{x:Type Line}" x:Key="crossLineStyle">
+                <Setter Property="Stroke" Value="#FFAAFFAA"/>
+                <Setter Property="StrokeThickness" Value="1"/>
+            </Style>
+            <Style TargetType="{x:Type Line}" x:Key="axisLineStyle">
+                <Setter Property="Stroke" Value="#FFAAFFAA"/>
+                <Setter Property="StrokeThickness" Value="0"/>
+            </Style>
+            <Style TargetType="{x:Type Line}" x:Key="minorcrossLineStyle">
+                <Setter Property="Stroke" Value="#FF225633"/>
+                <Setter Property="StrokeThickness" Value="0.25"/>
+            </Style>
+        </ResourceDictionary>
     </UserControl.Resources>
+
     <Grid Margin="10">
         <!--<Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -60,12 +67,35 @@
                         <chart:LinearYAxis CrossLineStyle="{StaticResource crossLineStyle}"  MinorLineStyle="{StaticResource minorcrossLineStyle}" MajorLineStyle="{StaticResource crossLineStyle}" AxisLineStyle="{StaticResource axisLineStyle}" MinorTicksCount="3" ShowCrossLines="True" StringFormat="0.0" Header="Voltage(mV)" >
                         </chart:LinearYAxis>
                     </chart:SparrowChart.YAxis>
-                    <chart:LineSeries Label="输入电压" PointsSource="{Binding Collection}" Stroke="Yellow" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
-                    <chart:LineSeries Label="传感器电压" PointsSource="{Binding Collection2}" Stroke="Green" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
+                    <chart:LineSeries Label="输入电压" PointsSource="{Binding ScopeCHACollection}" Stroke="Yellow" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
+                    <chart:LineSeries Label="测量电压" PointsSource="{Binding ScopeCHBCollection}" Stroke="Red" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
                 </chart:SparrowChart>
             </DockPanel>
 
-            <DockPanel Margin="0,20,0,0">
+
+            <StackPanel Margin="10">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="当前状态:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <Ellipse Width="20" Height="20" Fill="{Binding IsMeasuring, Converter={StaticResource BoolToColorConverter}}" Margin="0,0,20,0"/>
+                    <TextBlock Text="输入电压:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBox Text="{Binding CurrentInput, StringFormat={}{0:F3}}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
+                    <TextBlock Text="测量电压:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBox Text="{Binding CurrentOutput, StringFormat={}{0:F3}}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
+                </StackPanel>
+                <ScrollViewer MaxHeight="300" Margin="0,10,0,0">
+                    <ListView ItemsSource="{Binding MeasurementInfos}" MinHeight="100" >
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn DisplayMemberBinding="{Binding DateTime}" Header="时间"/>
+                                <GridViewColumn DisplayMemberBinding="{Binding Input, StringFormat={}{0:F3}}" Header="输入电压"/>
+                                <GridViewColumn DisplayMemberBinding="{Binding Output, StringFormat={}{0:F3}}" Header="测量电压"/>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </ScrollViewer>
+            </StackPanel>
+
+            <DockPanel Margin="0,20,0,0" Visibility="Collapsed">
                 <TextBlock DockPanel.Dock="Top" FontSize="16">输出电压</TextBlock>
                 <chart:SparrowChart Foreground="White" FontFamily="Arial" ContainerBorderStyle="{StaticResource containerStyle}" Margin="5" MinHeight="200">
                     <chart:SparrowChart.Background>
@@ -90,7 +120,7 @@
             </DockPanel>
         </StackPanel>
 
-        <StackPanel Grid.Column="1" Grid.RowSpan="3" Margin="10" MinWidth="150">
+        <StackPanel Grid.Column="1" Grid.RowSpan="3" Margin="10" MinWidth="150" Visibility="Collapsed">
             <DockPanel Margin="0,10,0,0">
                 <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">最小测试电压(V)</TextBlock>
                 <TextBox Text="{Binding MinVoltage, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
@@ -113,5 +143,54 @@
             </DockPanel>
             <Button cal:Message.Attach="Start" Margin="0,10,0,0">运行</Button>
         </StackPanel>
+
+
+        <StackPanel Grid.Column="1" Grid.RowSpan="3" Margin="10" MinWidth="200" IsEnabled="{Binding IsMeasuring, Converter={StaticResource BoolToInvertConverter}}">
+            <Expander Header="基本设置" IsExpanded="True">
+                <StackPanel>
+                    <TextBlock Text="配置参数" Foreground="Green"/>
+                    <DockPanel Margin="0,10,0,0">
+                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">最小测试电压(V)</TextBlock>
+                        <TextBox Text="{Binding MinVoltage, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+                    </DockPanel>
+                    <DockPanel Margin="0,10,0,0">
+                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">最大测试电压(V)</TextBlock>
+                        <TextBox Text="{Binding MaxVoltage, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+                    </DockPanel>
+                    <DockPanel Margin="0,10,0,0">
+                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">电压间隔(V)</TextBlock>
+                        <TextBox Text="{Binding VoltageInterval, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+                    </DockPanel>
+                    <DockPanel Margin="0,10,0,0">
+                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">采样时间(MS)</TextBlock>
+                        <TextBox Text="{Binding SampleTime, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+                    </DockPanel>
+                    <DockPanel Margin="0,10,0,0">
+                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">通信延迟(MS)</TextBlock>
+                        <TextBox Text="{Binding ComDelay, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+                    </DockPanel>
+                </StackPanel>
+            </Expander>
+            <Expander Header="高级设置" Margin="0,10,0,0">
+                <StackPanel>
+                    <TextBlock Text="示波器配置" Foreground="Green"/>
+                    <DockPanel Margin="0,10,0,0">
+                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">探头衰减</TextBlock>
+                        <ComboBox ItemsSource="{Binding ScopeScale}" SelectedItem="{Binding ScopeCHAScale}"/>
+                    </DockPanel>
+                    <DockPanel Margin="0,10,0,0">
+                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">探头电压档位</TextBlock>
+                        <ComboBox ItemsSource="{Binding ScopeVoltageDIVCollection}" SelectedItem="{Binding ScopeCHAVoltageDIV}"/>
+                    </DockPanel>
+                    <DockPanel Margin="0,10,0,0">
+                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">采样率</TextBlock>
+                        <ComboBox ItemsSource="{Binding ScopeSampleRateCollection}" SelectedItem="{Binding ScopeSampleRate}"/>
+                    </DockPanel>
+                </StackPanel>
+            </Expander>
+            <Button cal:Message.Attach="UpdateHardware" Margin="0,10,0,0">刷新硬件</Button>
+            <Button cal:Message.Attach="Start" IsEnabled="{Binding IsHardwareValid}" Margin="0,10,0,0">运行</Button>
+        </StackPanel>
+
     </Grid>
 </UserControl>
