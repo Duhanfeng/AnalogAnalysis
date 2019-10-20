@@ -167,43 +167,47 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" MinWidth="500"/>
             <ColumnDefinition Width="10" />
-            <ColumnDefinition Width="Auto" MinWidth="200"/>
+            <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
-        <DockPanel Grid.Column="2">
-            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                <Label VerticalAlignment="Center">消息:</Label>
-                <Button Margin="10,0,0,0" cal:Message.Attach="ClearRunningMessage">清除</Button>
-            </StackPanel>
-            <ScrollViewer Grid.Column="2"
+        <Expander Grid.Column="2" ExpandDirection="Left">
+
+            <DockPanel Grid.Column="2">
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                    <Label VerticalAlignment="Center">消息:</Label>
+                    <Button Margin="10,0,0,0" cal:Message.Attach="ClearRunningMessage">清除</Button>
+                </StackPanel>
+                <ScrollViewer Grid.Column="2"
                       MinWidth="230"
                       HorizontalContentAlignment="Stretch"
                       HorizontalScrollBarVisibility="Disabled" 
                       Visibility="Visible"
                       Margin="2,0,0,0">
-                <DockPanel>
+                    <DockPanel>
 
-                    <RichTextBox Padding="5"
+                        <RichTextBox Padding="5"
                              Margin="0,7,0,5"
                              Focusable="False"
                              IsReadOnly="True"
                              IsDocumentEnabled="True"
                              SpellCheck.IsEnabled="True">
-                        <FlowDocument PageWidth="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type RichTextBox}}, Path=ActualWidth}">
-                            <Paragraph>
-                                <Run Text="{Binding RunningMessage}"/>
-                            </Paragraph>
-                        </FlowDocument>
-                    </RichTextBox>
-                    <!--<ContentControl Content="{Binding  PWMControlView}"/>-->
-                </DockPanel>
-            </ScrollViewer>
-        </DockPanel>
-       
-        <GridSplitter Grid.Column="1" 
+                            <FlowDocument PageWidth="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type RichTextBox}}, Path=ActualWidth}">
+                                <Paragraph>
+                                    <Run Text="{Binding RunningMessage}"/>
+                                </Paragraph>
+                            </FlowDocument>
+                        </RichTextBox>
+                        <!--<ContentControl Content="{Binding  PWMControlView}"/>-->
+                    </DockPanel>
+                </ScrollViewer>
+            </DockPanel>
+
+        </Expander>
+        
+        <!--<GridSplitter Grid.Column="1" 
                       HorizontalAlignment="Stretch" 
                       Background="LightGray"
-                      Margin="2,0"/>
+                      Margin="2,0"/>-->
         
         <Border Grid.Column="0"
                 Margin="0"

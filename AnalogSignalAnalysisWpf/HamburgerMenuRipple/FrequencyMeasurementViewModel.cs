@@ -75,12 +75,25 @@ namespace AnalogSignalAnalysisWpf
             //获取配置参数
             SystemParamManager = SystemParamManager.GetInstance();
 
+            ScopeScale = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<EScale>());
+            ScopeSampleRateCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<ESampleRate>());
+            ScopeVoltageDIVCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<EVoltageDIV>());
+
             MinVoltageThreshold = SystemParamManager.SystemParam.FrequencyMeasureParams.MinVoltageThreshold;
             MaxVoltageThreshold = SystemParamManager.SystemParam.FrequencyMeasureParams.MaxVoltageThreshold;
             FrequencyErrLimit = SystemParamManager.SystemParam.FrequencyMeasureParams.FrequencyErrLimit;
             ComDelay = SystemParamManager.SystemParam.FrequencyMeasureParams.ComDelay;
 
+            CHAScale = SystemParamManager.SystemParam.FrequencyMeasureParams.CHAScale;
+            CHAVoltageDIV = SystemParamManager.SystemParam.FrequencyMeasureParams.CHAVoltageDIV;
+            SampleRate = SystemParamManager.SystemParam.FrequencyMeasureParams.SampleRate;
+            NotifyOfPropertyChange(() => ScopeCHAScale);
+            NotifyOfPropertyChange(() => ScopeCHAVoltageDIV);
+            NotifyOfPropertyChange(() => ScopeSampleRate);
+
             MeasurementInfos = new ObservableCollection<FrequencyMeasurementInfo>();
+
+            UpdateHardware();
 
         }
 
@@ -207,6 +220,102 @@ namespace AnalogSignalAnalysisWpf
         /// PLC接口
         /// </summary>
         public IPWM PWM { get; set; }
+
+        /// <summary>
+        /// 硬件有效标志
+        /// </summary>
+        public bool IsHardwareValid
+        { 
+            get
+            {
+                if ((Scope?.IsConnect == true) && (PWM?.IsConnect == true))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 放大倍数
+        /// </summary>
+        public ObservableCollection<string> ScopeScale { get; set; }
+
+        /// <summary>
+        /// 电压档位
+        /// </summary>
+        public ObservableCollection<string> ScopeVoltageDIVCollection { get; set; }
+
+        /// <summary>
+        /// 采样率
+        /// </summary>
+        public ObservableCollection<string> ScopeSampleRateCollection { get; set; }
+
+        private EScale CHAScale = EScale.x10;
+
+        /// <summary>
+        /// CHA探头衰变
+        /// </summary>
+        public string ScopeCHAScale
+        {
+            get
+            {
+                return EnumHelper.GetDescription(CHAScale);
+            }
+            set
+            {
+                CHAScale = EnumHelper.GetEnum<EScale>(value);
+                NotifyOfPropertyChange(() => ScopeCHAScale);
+
+                SystemParamManager.SystemParam.FrequencyMeasureParams.CHAScale = CHAScale;
+                SystemParamManager.SaveParams();
+            }
+        }
+
+        private EVoltageDIV CHAVoltageDIV = EVoltageDIV.DIV_2V5;
+
+        /// <summary>
+        /// CHA电压档位
+        /// </summary>
+        public string ScopeCHAVoltageDIV
+        {
+            get
+            {
+                return EnumHelper.GetDescription(CHAVoltageDIV);
+            }
+            set
+            {
+                CHAVoltageDIV = EnumHelper.GetEnum<EVoltageDIV>(value);
+                NotifyOfPropertyChange(() => ScopeCHAVoltageDIV);
+
+                SystemParamManager.SystemParam.FrequencyMeasureParams.CHAVoltageDIV = CHAVoltageDIV;
+                SystemParamManager.SaveParams();
+            }
+        }
+
+        private ESampleRate SampleRate = ESampleRate.Sps_49K;
+
+        /// <summary>
+        /// 采样率
+        /// </summary>
+        public string ScopeSampleRate
+        {
+            get
+            {
+                return EnumHelper.GetDescription(SampleRate);
+            }
+            set
+            {
+                SampleRate = EnumHelper.GetEnum<ESampleRate>(value);
+                NotifyOfPropertyChange(() => ScopeSampleRate);
+
+                SystemParamManager.SystemParam.FrequencyMeasureParams.SampleRate = SampleRate;
+                SystemParamManager.SaveParams();
+            }
+        }
 
         #endregion
 
@@ -588,6 +697,13 @@ namespace AnalogSignalAnalysisWpf
             measureThread.Start();
         }
 
+        /// <summary>
+        /// 更新硬件
+        /// </summary>
+        public void UpdateHardware()
+        {
+            NotifyOfPropertyChange(() => IsHardwareValid);
+        }
 
         #endregion
     }

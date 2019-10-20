@@ -118,25 +118,50 @@
             
         </StackPanel>
 
-        <StackPanel Grid.Column="1" Grid.RowSpan="3" Margin="10" MinWidth="150">
-            <TextBlock Text="配置参数" Foreground="Green"/>
-            <DockPanel Margin="0,10,0,0">
-                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">最小电压阈值(V)</TextBlock>
-                <TextBox Text="{Binding MinVoltageThreshold, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
-            </DockPanel>
-            <DockPanel Margin="0,10,0,0">
-                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">最大电压阈值(V)</TextBlock>
-                <TextBox Text="{Binding MaxVoltageThreshold, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
-            </DockPanel>
-            <DockPanel Margin="0,10,0,0">
-                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">频率误差</TextBlock>
-                <TextBox Text="{Binding FrequencyErrLimit, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
-            </DockPanel>
-            <DockPanel Margin="0,10,0,0">
-                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">通信延迟(MS)</TextBlock>
-                <TextBox Text="{Binding ComDelay, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
-            </DockPanel>
-            <Button cal:Message.Attach="Start" Margin="0,10,0,0">运行</Button>
+        <StackPanel Grid.Column="1" Grid.RowSpan="3" Margin="10" MinWidth="200">
+            <Expander Header="基本设置" IsExpanded="True">
+                <StackPanel>
+                    <TextBlock Text="配置参数" Foreground="Green"/>
+                    <DockPanel Margin="0,10,0,0">
+                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">最小电压阈值(V)</TextBlock>
+                        <TextBox Text="{Binding MinVoltageThreshold, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+                    </DockPanel>
+                    <DockPanel Margin="0,10,0,0">
+                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">最大电压阈值(V)</TextBlock>
+                        <TextBox Text="{Binding MaxVoltageThreshold, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+                    </DockPanel>
+                    <DockPanel Margin="0,10,0,0">
+                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">频率误差</TextBlock>
+                        <TextBox Text="{Binding FrequencyErrLimit, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+                    </DockPanel>
+                    <DockPanel Margin="0,10,0,0">
+                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">通信延迟(MS)</TextBlock>
+                        <TextBox Text="{Binding ComDelay, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+                    </DockPanel>
+                </StackPanel>
+            </Expander>
+            <Expander Header="高级设置" Margin="0,10,0,0">
+                <StackPanel>
+                    <TextBlock Text="示波器配置" Foreground="Green"/>
+                    <DockPanel Margin="0,10,0,0">
+                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">探头衰减</TextBlock>
+                        <ComboBox ItemsSource="{Binding ScopeScale}" SelectedItem="{Binding ScopeCHAScale}"/>
+                    </DockPanel>
+                    <DockPanel Margin="0,10,0,0">
+                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">探头电压档位</TextBlock>
+                        <ComboBox ItemsSource="{Binding ScopeVoltageDIVCollection}" SelectedItem="{Binding ScopeCHAVoltageDIV}"/>
+                    </DockPanel>
+                    <DockPanel Margin="0,10,0,0">
+                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">采样率</TextBlock>
+                        <ComboBox ItemsSource="{Binding ScopeSampleRateCollection}" SelectedItem="{Binding ScopeSampleRate}"/>
+                    </DockPanel>
+
+                    <TextBlock Text="测试项" Foreground="Green" Margin="0,10,0,0"/>
+                    <DataGrid/>
+                </StackPanel>
+            </Expander>
+            <Button cal:Message.Attach="UpdateHardware" Margin="0,10,0,0">刷新硬件</Button>
+            <Button cal:Message.Attach="Start" IsEnabled="{Binding IsHardwareValid}" Margin="0,10,0,0">运行</Button>
         </StackPanel>
     </Grid>
 </UserControl>

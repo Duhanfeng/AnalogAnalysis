@@ -35,6 +35,21 @@ namespace AnalogSignalAnalysisWpf
         /// 通信延迟(MS)
         /// </summary>
         public int ComDelay { get; set; } = 200;
+
+        /// <summary>
+        /// CHA探头衰变
+        /// </summary>
+        public EScale CHAScale { get; set; } = EScale.x10;
+
+        /// <summary>
+        /// CHA电压档位
+        /// </summary>
+        public EVoltageDIV CHAVoltageDIV { get; set; } = EVoltageDIV.DIV_2V5;
+
+        /// <summary>
+        /// 采样率
+        /// </summary>
+        public ESampleRate SampleRate { get; set; } = ESampleRate.Sps_49K;
     }
 
     /// <summary>

@@ -450,7 +450,7 @@ namespace AnalogSignalAnalysisWpf
         /// <summary>
         /// 示波器
         /// </summary>
-        public LOTOA02 Scope { get; set; }
+        public IScopeBase Scope { get; set; }
 
         /// <summary>
         /// 示波器有效标志
