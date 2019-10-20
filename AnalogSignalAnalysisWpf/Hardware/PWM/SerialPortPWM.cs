@@ -75,7 +75,6 @@ namespace AnalogSignalAnalysisWpf.Hardware.PWM
         {
             get
             {
-
                 return IsConnect ? frequency : -1;
             }
             set
@@ -417,23 +416,14 @@ namespace AnalogSignalAnalysisWpf.Hardware.PWM
                 {
                     var r3 = r2[0].TrimStart('F');
 
-                    switch (r3.Length)
+                    if (r3.Contains("KHz"))
                     {
-                        case 3:
-                            frequency = int.Parse(r3);
-                            break;
-                        case 4:
-                            frequency = (int)(double.Parse(r3) * 1000);
-                            break;
-                        case 5:
-                            frequency = int.Parse(r3.ToCharArray()[0].ToString()) * 100 * 1000 +
-                                        int.Parse(r3.ToCharArray()[2].ToString()) * 10 * 1000 +
-                                        int.Parse(r3.ToCharArray()[4].ToString()) * 10 * 1000;
-                            break;
-                        default:
-                            break;
+                        frequency = (int)(double.Parse(r3.Replace("KHz", "")) * 1000);
                     }
-
+                    else if (r3.Contains("Hz"))
+                    {
+                        frequency = (int)(double.Parse(r3.Replace("Hz", "")));
+                    }
                 }
 
                 var r4 = (from val in r1

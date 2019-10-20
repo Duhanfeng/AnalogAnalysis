@@ -1,9 +1,11 @@
 ﻿using AnalogSignalAnalysisWpf.Hardware.PWM;
 using AnalogSignalAnalysisWpf.Hardware.Scope;
+using AnalogSignalAnalysisWpf.LiveData;
 using Caliburn.Micro;
 using DataAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -11,14 +13,78 @@ using System.Threading.Tasks;
 
 namespace AnalogSignalAnalysisWpf
 {
+    public class FrequencyMeasurementInfo
+    {
+        /// <summary>
+        /// 时间
+        /// </summary>
+        public string DateTime { get; set; }
+
+        /// <summary>
+        /// 输入频率
+        /// </summary>
+        public int InputFrequency { get; set; }
+
+        /// <summary>
+        /// 采样时间
+        /// </summary>
+        public int SampleTime { get; set; }
+
+        /// <summary>
+        /// 当前频率
+        /// </summary>
+        public string CurrentFrequency { get; set; }
+
+        /// <summary>
+        /// 创建FrequencyMeasurementInfo新实例
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="sampleTime"></param>
+        /// <param name="currentFrequency"></param>
+        public FrequencyMeasurementInfo(int input, int sampleTime, List<double> pulseFrequencies)
+        {
+            DateTime = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            InputFrequency = input;
+            SampleTime = sampleTime;
+
+            string pulseMessage = "";
+
+            if (pulseFrequencies != null)
+            {
+                foreach (var item in pulseFrequencies)
+                {
+                    pulseMessage += item.ToString("F2") + ", ";
+                }
+            }
+
+            CurrentFrequency = pulseMessage;
+        }
+
+    }
+
+
     public class FrequencyMeasurementViewModel : Screen
     {
+        /// <summary>
+        /// 系统参数管理器
+        /// </summary>
+        public SystemParamManager SystemParamManager { get; private set; }
+
         public FrequencyMeasurementViewModel()
         {
+            //获取配置参数
+            SystemParamManager = SystemParamManager.GetInstance();
+
+            MinVoltageThreshold = SystemParamManager.SystemParam.FrequencyMeasureParams.MinVoltageThreshold;
+            MaxVoltageThreshold = SystemParamManager.SystemParam.FrequencyMeasureParams.MaxVoltageThreshold;
+            FrequencyErrLimit = SystemParamManager.SystemParam.FrequencyMeasureParams.FrequencyErrLimit;
+            ComDelay = SystemParamManager.SystemParam.FrequencyMeasureParams.ComDelay;
+
+            MeasurementInfos = new ObservableCollection<FrequencyMeasurementInfo>();
 
         }
 
-        public FrequencyMeasurementViewModel(IScopeBase scope, IPWM pwm)
+        public FrequencyMeasurementViewModel(IScopeBase scope, IPWM pwm) : this()
         {
             if (scope == null)
             {
@@ -33,6 +99,102 @@ namespace AnalogSignalAnalysisWpf
             Scope = scope;
             PWM = pwm;
         }
+
+        #region 测量信息
+
+        private ObservableCollection<FrequencyMeasurementInfo> measurementInfos;
+
+        /// <summary>
+        /// 测量信息
+        /// </summary>
+        public ObservableCollection<FrequencyMeasurementInfo> MeasurementInfos
+        {
+            get
+            {
+                return measurementInfos;
+            }
+            set
+            {
+                measurementInfos = value;
+                NotifyOfPropertyChange(() => MeasurementInfos);
+            }
+        }
+
+        private bool isMeasuring;
+
+        /// <summary>
+        /// 测量标志
+        /// </summary>
+        public bool IsMeasuring
+        {
+            get
+            {
+                return isMeasuring;
+            }
+            set
+            {
+                isMeasuring = value;
+                NotifyOfPropertyChange(() => IsMeasuring);
+            }
+        }
+
+        private int currentSampleTime;
+
+        /// <summary>
+        /// 当前采样时间
+        /// </summary>
+        public int CurrentSampleTime
+        {
+            get
+            {
+                return currentSampleTime;
+            }
+            set
+            {
+                currentSampleTime = value;
+                NotifyOfPropertyChange(() => CurrentSampleTime);
+            }
+        }
+
+
+        private int currentInputFrequency;
+
+        /// <summary>
+        /// 当前输入频率
+        /// </summary>
+        public int CurrentInputFrequency
+        {
+            get
+            {
+                return currentInputFrequency;
+            }
+            set
+            {
+                currentInputFrequency = value;
+                NotifyOfPropertyChange(() => CurrentInputFrequency);
+            }
+        }
+
+
+        private int maxFrequency;
+
+        /// <summary>
+        /// 极限频率
+        /// </summary>
+        public int MaxFrequency
+        {
+            get
+            {
+                return maxFrequency;
+            }
+            set
+            {
+                maxFrequency = value;
+                NotifyOfPropertyChange(() => MaxFrequency);
+            }
+        }
+
+        #endregion
 
         #region 硬件接口
 
@@ -65,6 +227,10 @@ namespace AnalogSignalAnalysisWpf
             { 
                 minVoltageThreshold = value;
                 NotifyOfPropertyChange(() => MinVoltageThreshold);
+
+                //保存参数
+                SystemParamManager.SystemParam.FrequencyMeasureParams.MinVoltageThreshold = value;
+                SystemParamManager.SaveParams();
             }
         }
 
@@ -83,6 +249,10 @@ namespace AnalogSignalAnalysisWpf
             {
                 maxVoltageThreshold = value;
                 NotifyOfPropertyChange(() => MaxVoltageThreshold);
+
+                //保存参数
+                SystemParamManager.SystemParam.FrequencyMeasureParams.MaxVoltageThreshold = value;
+                SystemParamManager.SaveParams();
             }
         }
 
@@ -101,6 +271,10 @@ namespace AnalogSignalAnalysisWpf
             {
                 frequencyErrLimit = value;
                 NotifyOfPropertyChange(() => FrequencyErrLimit);
+
+                //保存参数
+                SystemParamManager.SystemParam.FrequencyMeasureParams.FrequencyErrLimit = value;
+                SystemParamManager.SaveParams();
             }
         }
 
@@ -119,6 +293,10 @@ namespace AnalogSignalAnalysisWpf
             {
                 comDelay = value;
                 NotifyOfPropertyChange(() => ComDelay);
+
+                //保存参数
+                SystemParamManager.SystemParam.FrequencyMeasureParams.ComDelay = value;
+                SystemParamManager.SaveParams();
             }
         }
 
@@ -137,6 +315,16 @@ namespace AnalogSignalAnalysisWpf
         /// <param name="e"></param>
         protected void OnMeasurementCompleted(FrequencyMeasurementCompletedEventArgs e)
         {
+            if (e.IsSuccess == true)
+            {
+                MaxFrequency = e.MaxLimitFrequency;
+            }
+            else
+            {
+                MaxFrequency = -1;
+            }
+
+            IsMeasuring = false;
             MeasurementCompleted?.Invoke(this, e);
         }
 
@@ -160,7 +348,84 @@ namespace AnalogSignalAnalysisWpf
 
         #region 折线图
 
+        private ObservableCollection<Data> scopeChACollection;
 
+        /// <summary>
+        /// 通道A数据
+        /// </summary>
+        public ObservableCollection<Data> ScopeChACollection
+        {
+            get
+            {
+                return scopeChACollection;
+            }
+            set
+            {
+                scopeChACollection = value;
+                NotifyOfPropertyChange(() => ScopeChACollection);
+            }
+        }
+
+        private ObservableCollection<Data> scopeChAEdgeCollection;
+
+        /// <summary>
+        /// 通道A边沿数据
+        /// </summary>
+        public ObservableCollection<Data> ScopeChAEdgeCollection
+        {
+            get
+            {
+                return scopeChAEdgeCollection;
+            }
+            set
+            {
+                scopeChAEdgeCollection = value;
+                NotifyOfPropertyChange(() => ScopeChAEdgeCollection);
+            }
+        }
+
+        /// <summary>
+        /// 显示数据
+        /// </summary>
+        /// <param name="data">数据</param>
+        private void ShowData(double[] data)
+        {
+            int SampleInterval = 1;
+            var collection = new ObservableCollection<Data>();
+            for (int i = 0; i < data.Length / SampleInterval; i++)
+            {
+                collection.Add(new Data() { Value1 = data[i * SampleInterval], Value = i * 1000.0 / ((int)Scope.SampleRate) * SampleInterval });
+            }
+            ScopeChACollection = collection;
+
+        }
+
+        /// <summary>
+        /// 显示数据
+        /// </summary>
+        /// <param name="data">数据</param>
+        private void ShowEdgeData(double[] data, List<int> edgeIndexs, DigitEdgeType digitEdgeType)
+        {
+            int SampleInterval = 1;
+
+            var collection = new ObservableCollection<Data>();
+            for (int i = 0; i < data.Length / SampleInterval; i++)
+            {
+                collection.Add(new Data() { Value1 = data[i * SampleInterval], Value = i * 1000.0 / ((int)Scope.SampleRate) * SampleInterval });
+            }
+            var collection2 = new ObservableCollection<Data>();
+            if ((digitEdgeType == DigitEdgeType.FirstFillingEdge) || (digitEdgeType == DigitEdgeType.FirstRisingEdge))
+            {
+                foreach (var item in edgeIndexs)
+                {
+                    //collection.Add(new Data() { Value1 = ScopeChACollection[item / SampleInterval].Value1, Value = item * 1000.0 / ((int)Scope.SampleRate) * SampleInterval });
+                    collection2.Add(new Data() { Value1 = collection[item / SampleInterval].Value1, Value = collection[item / SampleInterval].Value });
+                }
+            }
+
+            ScopeChACollection = collection;
+            ScopeChAEdgeCollection = collection2;
+        }
 
         #endregion
 
@@ -183,7 +448,7 @@ namespace AnalogSignalAnalysisWpf
 
             //频率列表(单位:Hz)
             int[] frequencies1 = new int[] { 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100 };
-            int[] sampleTime = new int[] { 1000, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 500, 200, 200, 200, 200, 200, 200, 200 };
+            int[] sampleTime = new int[] { 1000, 500, 500, 500, 500, 300, 300, 300, 200, 200, 200, 200, 200, 200, 200, 100, 100, 100, 100, 100 };
 
             measureThread = new Thread(() =>
             {
@@ -191,6 +456,8 @@ namespace AnalogSignalAnalysisWpf
                 {
                     return;
                 }
+                IsMeasuring = true;
+                MaxFrequency = -1;
 
                 int lastFrequency = -1;
 
@@ -226,10 +493,28 @@ namespace AnalogSignalAnalysisWpf
                     DigitEdgeType digitEdgeType;
                     Analysis.FindEdgeByThreshold(filterData, MinVoltageThreshold, MaxVoltageThreshold, out edgeIndexs, out digitEdgeType);
 
+                    //显示波形
+                    ShowEdgeData(filterData, edgeIndexs, digitEdgeType);
+
                     //分析脉冲数据
                     List<double> pulseFrequencies;
                     List<double> dutyRatios;
                     Analysis.AnalysePulseData(edgeIndexs, digitEdgeType, (int)Scope.SampleRate, out pulseFrequencies, out dutyRatios);
+
+                    //显示分析结果
+                    CurrentInputFrequency = frequencies1[i];
+                    CurrentSampleTime = sampleTime[i];
+                    new Thread(delegate ()
+                    {
+                        ThreadPool.QueueUserWorkItem(delegate
+                        {
+                            System.Threading.SynchronizationContext.SetSynchronizationContext(new System.Windows.Threading.DispatcherSynchronizationContext(System.Windows.Application.Current.Dispatcher));
+                            System.Threading.SynchronizationContext.Current.Send(pl =>
+                            {
+                                MeasurementInfos.Add(new FrequencyMeasurementInfo(CurrentInputFrequency, CurrentSampleTime, pulseFrequencies));
+                            }, null);
+                        });
+                    }).Start();
 
                     {
                         string pulseMessage = "";
@@ -297,7 +582,7 @@ namespace AnalogSignalAnalysisWpf
                     OnMessageRaised(MessageLevel.Warning, $"F: Fail");
                     OnMeasurementCompleted(new FrequencyMeasurementCompletedEventArgs(false));
                 }
-                return;
+
             });
 
             measureThread.Start();

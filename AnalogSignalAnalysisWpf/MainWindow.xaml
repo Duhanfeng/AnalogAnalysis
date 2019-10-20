@@ -8,7 +8,7 @@
                       xmlns:avalon="http://schemas.xceed.com/wpf/xaml/avalondock"
                       mc:Ignorable="d"
                       xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
-                      Title="MainWindow" Height="450" Width="800"
+                      Title="MainWindow" Height="700" Width="1200"
                       d:DataContext="{d:DesignInstance local:MainWindowViewModel}"
                       NonActiveGlowBrush="#CDFF0000"
                       ShowIconOnTitleBar="True"
@@ -18,7 +18,7 @@
                       WindowStartupLocation="CenterScreen"
                       xmlns:cal="http://www.caliburnproject.org"
                       xmlns:converters="clr-namespace:AnalogSignalAnalysisWpf.Converters"
-                      WindowState="Maximized"
+                      WindowState="Normal"
                       Closing="MetroWindow_Closing">
 
     <Window.Resources>
