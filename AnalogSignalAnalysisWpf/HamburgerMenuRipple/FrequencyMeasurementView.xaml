@@ -59,7 +59,7 @@
                         <chart:LinearXAxis CrossLineStyle="{StaticResource crossLineStyle}" MinorLineStyle="{StaticResource minorcrossLineStyle}" MajorLineStyle="{StaticResource crossLineStyle}" AxisLineStyle="{StaticResource axisLineStyle}" MinorTicksCount="3" ShowCrossLines="True" Header="Time(ms)" StringFormat="0.0"/>
                     </chart:SparrowChart.XAxis>
                     <chart:SparrowChart.YAxis>
-                        <chart:LinearYAxis CrossLineStyle="{StaticResource crossLineStyle}"  MinorLineStyle="{StaticResource minorcrossLineStyle}" MajorLineStyle="{StaticResource crossLineStyle}" AxisLineStyle="{StaticResource axisLineStyle}" MinValue="0" MaxValue="24" MinorTicksCount="3" ShowCrossLines="True" StringFormat="0.0" Header="Voltage(mV)" >
+                        <chart:LinearYAxis CrossLineStyle="{StaticResource crossLineStyle}"  MinorLineStyle="{StaticResource minorcrossLineStyle}" MajorLineStyle="{StaticResource crossLineStyle}" AxisLineStyle="{StaticResource axisLineStyle}" MinValue="0" MaxValue="24" MinorTicksCount="3" ShowCrossLines="True" StringFormat="0.0" Header="Voltage(V)" >
                         </chart:LinearYAxis>
                     </chart:SparrowChart.YAxis>
                     <chart:LineSeries Label="输入电压" PointsSource="{Binding ScopeCHACollection}" Stroke="Yellow" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
@@ -67,34 +67,11 @@
                 </chart:SparrowChart>
             </DockPanel>
 
-            <DockPanel Margin="0,20,0,0" Visibility="Collapsed">
-                <TextBlock DockPanel.Dock="Top" FontSize="16">释放电压测试</TextBlock>
-                <chart:SparrowChart Foreground="White" FontFamily="Arial" ContainerBorderStyle="{StaticResource containerStyle}" Margin="5" MinHeight="200">
-                    <chart:SparrowChart.Background>
-                        <LinearGradientBrush EndPoint="0.504,1.5" StartPoint="0.504,0.03">
-                            <GradientStop Color="#FF00170B" Offset="0"/>
-                            <GradientStop Color="#FF005C2C" Offset="0.8"/>
-                        </LinearGradientBrush>
-                    </chart:SparrowChart.Background>
-                    <chart:SparrowChart.Legend>
-                        <chart:Legend Padding="10" Header="Live Fourier Series"/>
-                    </chart:SparrowChart.Legend>
-                    <chart:SparrowChart.XAxis>
-                        <chart:LinearXAxis CrossLineStyle="{StaticResource crossLineStyle}" MinorLineStyle="{StaticResource minorcrossLineStyle}" MajorLineStyle="{StaticResource crossLineStyle}" AxisLineStyle="{StaticResource axisLineStyle}" MinorTicksCount="3" ShowCrossLines="True" Header="Time(ms)" StringFormat="0.0"/>
-                    </chart:SparrowChart.XAxis>
-                    <chart:SparrowChart.YAxis>
-                        <chart:LinearYAxis CrossLineStyle="{StaticResource crossLineStyle}"  MinorLineStyle="{StaticResource minorcrossLineStyle}" MajorLineStyle="{StaticResource crossLineStyle}" AxisLineStyle="{StaticResource axisLineStyle}" MinorTicksCount="3" ShowCrossLines="True" StringFormat="0.0" Header="Voltage(mV)" >
-                        </chart:LinearYAxis>
-                    </chart:SparrowChart.YAxis>
-                    <chart:LineSeries Label="输入电压" PointsSource="{Binding Collection}" Stroke="Yellow" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
-                    <chart:LineSeries Label="传感器电压" PointsSource="{Binding Collection2}" Stroke="Green" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
-                </chart:SparrowChart>
-            </DockPanel>
-
             <StackPanel Margin="10">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="当前状态:" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <Ellipse Width="20" Height="20" Fill="{Binding IsMeasuring, Converter={StaticResource BoolToColorConverter}}" Margin="0,0,20,0"/>
+                    <Ellipse Width="20" Height="20" Fill="{Binding IsMeasuring, Converter={StaticResource BoolToColorConverter}}" Margin="0,0,10,0"/>
+                    <TextBox Text="{Binding RunningStatus}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
                     <TextBlock Text="采样时长:" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <TextBox Text="{Binding CurrentSampleTime}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
                     <TextBlock Text="输入频率:" VerticalAlignment="Center" Margin="0,0,10,0"/>
@@ -143,15 +120,15 @@
                 <StackPanel>
                     <TextBlock Text="示波器配置" Foreground="Green"/>
                     <DockPanel Margin="0,10,0,0">
-                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">探头衰减</TextBlock>
+                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">探头衰减</TextBlock>
                         <ComboBox ItemsSource="{Binding ScopeScale}" SelectedItem="{Binding ScopeCHAScale}"/>
                     </DockPanel>
                     <DockPanel Margin="0,10,0,0">
-                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">探头电压档位</TextBlock>
+                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">探头电压档位</TextBlock>
                         <ComboBox ItemsSource="{Binding ScopeVoltageDIVCollection}" SelectedItem="{Binding ScopeCHAVoltageDIV}"/>
                     </DockPanel>
                     <DockPanel Margin="0,10,0,0">
-                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">采样率</TextBlock>
+                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">采样率</TextBlock>
                         <ComboBox ItemsSource="{Binding ScopeSampleRateCollection}" SelectedItem="{Binding ScopeSampleRate}"/>
                     </DockPanel>
 

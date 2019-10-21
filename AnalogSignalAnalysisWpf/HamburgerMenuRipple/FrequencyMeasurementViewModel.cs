@@ -230,6 +230,24 @@ namespace AnalogSignalAnalysisWpf
             }
         }
 
+        private string runningStatus = "就绪";
+
+        /// <summary>
+        /// 运行状态
+        /// </summary>
+        public string RunningStatus
+        {
+            get
+            {
+                return runningStatus;
+            }
+            set
+            {
+                runningStatus = value;
+                NotifyOfPropertyChange(() => RunningStatus);
+            }
+        }
+
         private int currentSampleTime;
 
         /// <summary>
@@ -265,7 +283,6 @@ namespace AnalogSignalAnalysisWpf
                 NotifyOfPropertyChange(() => CurrentInputFrequency);
             }
         }
-
 
         private int maxFrequency;
 
@@ -513,10 +530,12 @@ namespace AnalogSignalAnalysisWpf
             PWM.Frequency = 0;
             if (e.IsSuccess == true)
             {
+                RunningStatus = "成功";
                 MaxFrequency = e.MaxLimitFrequency;
             }
             else
             {
+                RunningStatus = "失败";
                 MaxFrequency = -1;
             }
 
@@ -639,6 +658,8 @@ namespace AnalogSignalAnalysisWpf
                 return;
             }
 
+            RunningStatus = "运行中";
+
             SystemParamManager.SystemParam.FrequencyMeasureParams.TestDatas = TestDatas;
             SystemParamManager.SaveParams();
 
@@ -648,15 +669,15 @@ namespace AnalogSignalAnalysisWpf
             Scope.CHAScale = CHAScale;
             Scope.SampleRate = SampleRate;
             Scope.CHAVoltageDIV = CHAVoltageDIV;
-            
+
             //频率列表(单位:Hz)
             //int[] frequencies1 = new int[] { 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100 };
             //int[] sampleTime = new int[] { 1000, 500, 500, 500, 500, 300, 300, 300, 200, 200, 200, 200, 200, 200, 200, 100, 100, 100, 100, 100 };
 
+            MeasurementInfos = new ObservableCollection<FrequencyMeasurementInfo>();
+
             measureThread = new Thread(() =>
             {
-                MeasurementInfos = new ObservableCollection<FrequencyMeasurementInfo>();
-                
                 lock (lockObject)
                 {
                     IsMeasuring = true;
@@ -715,7 +736,7 @@ namespace AnalogSignalAnalysisWpf
                             System.Threading.SynchronizationContext.SetSynchronizationContext(new System.Windows.Threading.DispatcherSynchronizationContext(System.Windows.Application.Current.Dispatcher));
                             System.Threading.SynchronizationContext.Current.Send(pl =>
                             {
-                                MeasurementInfos.Add(new FrequencyMeasurementInfo(CurrentInputFrequency, CurrentSampleTime, pulseFrequencies));
+                                MeasurementInfos.Insert(0, new FrequencyMeasurementInfo(CurrentInputFrequency, CurrentSampleTime, pulseFrequencies));
                             }, null);
                         });
                     }).Start();

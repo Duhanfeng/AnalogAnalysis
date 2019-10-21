@@ -216,7 +216,7 @@
 
             <Controls:HamburgerMenu x:Name="HamburgerMenuControl"
                                     HamburgerWidth="48"
-                                    IsPaneOpen="False"
+                                    IsPaneOpen="True"
                                     DataContext="{Binding}"
                                     ItemInvoked="HamburgerMenuControl_OnItemInvoked"
                                     ItemTemplate="{StaticResource MenuItemTemplate}"

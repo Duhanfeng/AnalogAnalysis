@@ -58,6 +58,7 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public MainWindowViewModel()
         {
+            //throw new Exception();
             //配置窗口
             ShowTitleBar = false;
             IgnoreTaskbarOnMaximize = true;

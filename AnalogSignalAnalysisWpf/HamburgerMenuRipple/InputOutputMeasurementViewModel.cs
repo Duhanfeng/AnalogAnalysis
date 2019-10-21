@@ -78,9 +78,9 @@ namespace AnalogSignalAnalysisWpf
             MaxVoltage = SystemParamManager.SystemParam.InputOutputMeasureParams.MaxVoltage;
             SampleTime = SystemParamManager.SystemParam.InputOutputMeasureParams.SampleTime;
             ComDelay = SystemParamManager.SystemParam.InputOutputMeasureParams.ComDelay;
-            CHAScale = SystemParamManager.SystemParam.FrequencyMeasureParams.CHAScale;
-            CHAVoltageDIV = SystemParamManager.SystemParam.FrequencyMeasureParams.CHAVoltageDIV;
-            SampleRate = SystemParamManager.SystemParam.FrequencyMeasureParams.SampleRate;
+            CHAScale = SystemParamManager.SystemParam.InputOutputMeasureParams.CHAScale;
+            CHAVoltageDIV = SystemParamManager.SystemParam.InputOutputMeasureParams.CHAVoltageDIV;
+            SampleRate = SystemParamManager.SystemParam.InputOutputMeasureParams.SampleRate;
 
             NotifyOfPropertyChange(() => ScopeCHAScale);
             NotifyOfPropertyChange(() => ScopeCHAVoltageDIV);
@@ -151,7 +151,6 @@ namespace AnalogSignalAnalysisWpf
             NotifyOfPropertyChange(() => IsHardwareValid);
         }
 
-
         /// <summary>
         /// 放大倍数
         /// </summary>
@@ -183,7 +182,7 @@ namespace AnalogSignalAnalysisWpf
                 CHAScale = EnumHelper.GetEnum<EScale>(value);
                 NotifyOfPropertyChange(() => ScopeCHAScale);
 
-                SystemParamManager.SystemParam.FrequencyMeasureParams.CHAScale = CHAScale;
+                SystemParamManager.SystemParam.InputOutputMeasureParams.CHAScale = CHAScale;
                 SystemParamManager.SaveParams();
             }
         }
@@ -204,7 +203,7 @@ namespace AnalogSignalAnalysisWpf
                 CHAVoltageDIV = EnumHelper.GetEnum<EVoltageDIV>(value);
                 NotifyOfPropertyChange(() => ScopeCHAVoltageDIV);
 
-                SystemParamManager.SystemParam.FrequencyMeasureParams.CHAVoltageDIV = CHAVoltageDIV;
+                SystemParamManager.SystemParam.InputOutputMeasureParams.CHAVoltageDIV = CHAVoltageDIV;
                 SystemParamManager.SaveParams();
             }
         }
@@ -225,7 +224,7 @@ namespace AnalogSignalAnalysisWpf
                 SampleRate = EnumHelper.GetEnum<ESampleRate>(value);
                 NotifyOfPropertyChange(() => ScopeSampleRate);
 
-                SystemParamManager.SystemParam.FrequencyMeasureParams.SampleRate = SampleRate;
+                SystemParamManager.SystemParam.InputOutputMeasureParams.SampleRate = SampleRate;
                 SystemParamManager.SaveParams();
             }
         }
@@ -379,6 +378,24 @@ namespace AnalogSignalAnalysisWpf
             }
         }
 
+        private string runningStatus = "就绪";
+
+        /// <summary>
+        /// 运行状态
+        /// </summary>
+        public string RunningStatus
+        {
+            get
+            {
+                return runningStatus;
+            }
+            set
+            {
+                runningStatus = value;
+                NotifyOfPropertyChange(() => RunningStatus);
+            }
+        }
+
         private double currentInput;
 
         /// <summary>
@@ -496,16 +513,17 @@ namespace AnalogSignalAnalysisWpf
         /// <param name="e"></param>
         protected void OnMeasurementCompleted(InputOutputMeasurementCompletedEventArgs e)
         {
-            lock (lockObject)
-            {
-                IsMeasuring = false;
-            }
+            RunningStatus = e.IsSuccess ? "成功" : "失败";
 
             if (PLC?.IsConnect == true)
             {
                 PLC.EnableOutput = false;
             }
 
+            lock (lockObject)
+            {
+                IsMeasuring = false;
+            }
             MeasurementCompleted?.Invoke(this, e);
         }
 
@@ -554,6 +572,8 @@ namespace AnalogSignalAnalysisWpf
                     return;
                 }
             }
+
+            RunningStatus = "运行中";
 
             //复位示波器设置
             Scope.Disconnect();
@@ -641,7 +661,7 @@ namespace AnalogSignalAnalysisWpf
 
                                 stopwatch.Start();
 
-                                MeasurementInfos.Add(new InputOutputMeasurementInfo(CurrentInput, CurrentOutput));
+                                MeasurementInfos.Insert(0, new InputOutputMeasurementInfo(CurrentInput, CurrentOutput));
                             }, null);
                         });
                     }).Start();

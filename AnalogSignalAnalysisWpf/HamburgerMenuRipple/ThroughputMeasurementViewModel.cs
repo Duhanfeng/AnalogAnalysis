@@ -215,7 +215,7 @@ namespace AnalogSignalAnalysisWpf
 
                     //设置电压
                     PLC.EnableOutput = true;
-                });
+                }).Start();
 
                 //读取Scope数据
                 double[] originalData;

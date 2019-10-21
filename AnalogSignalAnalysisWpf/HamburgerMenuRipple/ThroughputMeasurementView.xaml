@@ -7,35 +7,36 @@
              xmlns:livedata="clr-namespace:AnalogSignalAnalysisWpf.LiveData"
              xmlns:cal="http://www.caliburnproject.org"
              xmlns:chart="http://sparrowtoolkit.codeplex.com/wpf"
+             xmlns:converters="clr-namespace:AnalogSignalAnalysisWpf.Converters"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance local:ThroughputMeasurementViewModel}"
              d:DesignHeight="450" d:DesignWidth="800"
              MinWidth="600">
+
     <UserControl.Resources>
-        <Style x:Key="containerStyle" TargetType="Border">
-            <Setter Property="BorderBrush" Value="#FFAAFFAA"/>
-            <Setter Property="BorderThickness" Value="1"/>
-        </Style>
-        <Style TargetType="{x:Type Line}" x:Key="crossLineStyle">
-            <Setter Property="Stroke" Value="#FFAAFFAA"/>
-            <Setter Property="StrokeThickness" Value="1"/>
-        </Style>
-        <Style TargetType="{x:Type Line}" x:Key="axisLineStyle">
-            <Setter Property="Stroke" Value="#FFAAFFAA"/>
-            <Setter Property="StrokeThickness" Value="0"/>
-        </Style>
-        <Style TargetType="{x:Type Line}" x:Key="minorcrossLineStyle">
-            <Setter Property="Stroke" Value="#FF225633"/>
-            <Setter Property="StrokeThickness" Value="0.25"/>
-        </Style>
+        <ResourceDictionary>
+            <converters:BoolToColorConverter x:Key="BoolToColorConverter" />
+            <converters:BoolToInvertConverter x:Key="BoolToInvertConverter" />
+            <Style x:Key="containerStyle" TargetType="Border">
+                <Setter Property="BorderBrush" Value="#FFAAFFAA"/>
+                <Setter Property="BorderThickness" Value="1"/>
+            </Style>
+            <Style TargetType="{x:Type Line}" x:Key="crossLineStyle">
+                <Setter Property="Stroke" Value="#FFAAFFAA"/>
+                <Setter Property="StrokeThickness" Value="1"/>
+            </Style>
+            <Style TargetType="{x:Type Line}" x:Key="axisLineStyle">
+                <Setter Property="Stroke" Value="#FFAAFFAA"/>
+                <Setter Property="StrokeThickness" Value="0"/>
+            </Style>
+            <Style TargetType="{x:Type Line}" x:Key="minorcrossLineStyle">
+                <Setter Property="Stroke" Value="#FF225633"/>
+                <Setter Property="StrokeThickness" Value="0.25"/>
+            </Style>
+        </ResourceDictionary>
     </UserControl.Resources>
-    
+
     <Grid Margin="10">
-        <!--<Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="15"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>-->
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="auto" MinWidth="200"/>
