@@ -85,7 +85,6 @@
                         <chart:LinearYAxis CrossLineStyle="{StaticResource crossLineStyle}"  MinorLineStyle="{StaticResource minorcrossLineStyle}" MajorLineStyle="{StaticResource crossLineStyle}" AxisLineStyle="{StaticResource axisLineStyle}" MinValue="0" MinorTicksCount="3" ShowCrossLines="True" StringFormat="0.0" Header="Coefficient" />
                     </chart:SparrowChart.YAxis>
                     <chart:LineSeries Label="输入电压" PointsSource="{Binding DerivativeCollection}" Stroke="Yellow" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
-                    <chart:ScatterSeries Label="有效测量" PointsSource="{Binding EdgeCollection}" Stroke="Red" XPath="Value" YPath="Value1" ScatterSize="10"  StrokeThickness="2" UseSinglePart="True"/>
                 </chart:SparrowChart>
             </DockPanel>
 
@@ -118,6 +117,8 @@
                     <TextBlock Text="当前状态:" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <Ellipse Width="20" Height="20" Fill="{Binding IsMeasuring, Converter={StaticResource BoolToColorConverter}}" Margin="0,0,10,0"/>
                     <TextBox Text="{Binding RunningStatus}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
+                    <TextBlock Text="通气时间(MS):" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBox Text="{Binding Time, StringFormat={}{0:F3}}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
                 </StackPanel>
                 <ScrollViewer MaxHeight="300" Margin="0,10,0,0">
                     <ListView ItemsSource="{Binding MeasurementInfos}" MinHeight="100" >

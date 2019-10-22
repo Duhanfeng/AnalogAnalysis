@@ -451,6 +451,26 @@ namespace AnalogSignalAnalysisWpf
             }
         }
 
+        private double time;
+
+        /// <summary>
+        /// 测量时间
+        /// </summary>
+        public double Time
+        {
+            get 
+            {
+                return time;
+            }
+            set 
+            {
+                time = value;
+                NotifyOfPropertyChange(() => Time);
+
+            }
+        }
+
+
         #endregion
 
         #region 折线图
@@ -665,6 +685,9 @@ namespace AnalogSignalAnalysisWpf
 
                 try
                 {
+                    int start = -1;
+                    int end = -1;
+
                     //读取Scope数据
                     double[] originalData;
                     Scope.ReadDataBlock(0, out originalData);
@@ -672,6 +695,19 @@ namespace AnalogSignalAnalysisWpf
                     //数据滤波
                     double[] filterData;
                     Analysis.MeanFilter(originalData, VoltageFilterCount, out filterData);
+
+                    for (int i = 0; i < filterData.Length; i++)
+                    {
+                        if ((filterData[i] > MinVoltageThreshold) && (start == -1))
+                        {
+                            start = i;
+                        }
+                        else if ((filterData[i] > MaxVoltageThreshold) && (start != -1) && (end == -1))
+                        {
+                            end = i;
+                            break;
+                        }
+                    }
 
                     //微分求导
                     double[] derivativeData;
@@ -692,7 +728,23 @@ namespace AnalogSignalAnalysisWpf
                     ShowData(filterData);
                     ShowDerivativeData(filterData2);
 
-                    OnMeasurementCompleted(new ThroughputMeasurementCompletedEventArgs());
+                    if ((start != -1) && (end != -1))
+                    {
+                        Time = ((end - start) * 1000.0) / (int)Scope.SampleRate;
+
+                        var edge = new ObservableCollection<Data>();
+                        edge.Add(new Data() { Value1 = VoltageCollection[start].Value1, Value = VoltageCollection[start].Value });
+                        edge.Add(new Data() { Value1 = VoltageCollection[end].Value1, Value = VoltageCollection[end].Value });
+                        EdgeCollection = edge;
+                        OnMeasurementCompleted(new ThroughputMeasurementCompletedEventArgs(true, Time));
+
+                    }
+                    else
+                    {
+                        Time = -1;
+                        OnMeasurementCompleted(new ThroughputMeasurementCompletedEventArgs());
+                    }
+
                 }
                 catch (Exception)
                 {

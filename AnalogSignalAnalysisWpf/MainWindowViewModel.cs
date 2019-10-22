@@ -1008,8 +1008,6 @@ namespace AnalogSignalAnalysisWpf
 
         private object plcLock = new object();
 
-        private bool isPLCThreadRunning = false;
-
         #region COM配置
 
         /// <summary>

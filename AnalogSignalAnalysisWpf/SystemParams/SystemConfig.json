@@ -1,0 +1,163 @@
+{
+  "ScopeParams": {
+    "CHAScale": 10,
+    "CHBScale": 10,
+    "CHACoupling": 0,
+    "CHBCoupling": 0,
+    "SampleRate": 49000,
+    "TriggerModel": 2,
+    "TriggerEdge": 0,
+    "CHAVoltageDIV": 3,
+    "CHBVoltageDIV": 3,
+    "IsCHAEnable": false,
+    "IsCHBEnable": true,
+    "SampleTime": 1000
+  },
+  "PWMParams": {
+    "PrimarySerialPortName": "COM4",
+    "Frequency": 50,
+    "DutyRatio": 50
+  },
+  "PLCParams": {
+    "PrimarySerialPortName": "COM3",
+    "SerialPortBaudRate": 115200,
+    "SlaveAddress": 1,
+    "WriteTimeout": 500,
+    "ReadTimeout": 500,
+    "Voltage": 12.0,
+    "Current": 1.0,
+    "EnableOutput": false
+  },
+  "FrequencyMeasureParams": {
+    "MinVoltageThreshold": 0.5,
+    "MaxVoltageThreshold": 4.0,
+    "FrequencyErrLimit": 0.2,
+    "ComDelay": 200,
+    "CHAScale": 10,
+    "CHAVoltageDIV": 3,
+    "SampleRate": 49000,
+    "TestDatas": [
+      {
+        "Frequency": 5,
+        "SampleTime": 1000
+      },
+      {
+        "Frequency": 10,
+        "SampleTime": 500
+      },
+      {
+        "Frequency": 15,
+        "SampleTime": 500
+      },
+      {
+        "Frequency": 20,
+        "SampleTime": 500
+      },
+      {
+        "Frequency": 25,
+        "SampleTime": 500
+      },
+      {
+        "Frequency": 30,
+        "SampleTime": 500
+      },
+      {
+        "Frequency": 35,
+        "SampleTime": 300
+      },
+      {
+        "Frequency": 40,
+        "SampleTime": 300
+      },
+      {
+        "Frequency": 45,
+        "SampleTime": 300
+      },
+      {
+        "Frequency": 50,
+        "SampleTime": 300
+      },
+      {
+        "Frequency": 55,
+        "SampleTime": 200
+      },
+      {
+        "Frequency": 60,
+        "SampleTime": 200
+      },
+      {
+        "Frequency": 65,
+        "SampleTime": 200
+      },
+      {
+        "Frequency": 70,
+        "SampleTime": 200
+      },
+      {
+        "Frequency": 75,
+        "SampleTime": 200
+      },
+      {
+        "Frequency": 80,
+        "SampleTime": 200
+      },
+      {
+        "Frequency": 85,
+        "SampleTime": 100
+      },
+      {
+        "Frequency": 90,
+        "SampleTime": 100
+      },
+      {
+        "Frequency": 95,
+        "SampleTime": 100
+      },
+      {
+        "Frequency": 100,
+        "SampleTime": 100
+      },
+      {
+        "Frequency": 120,
+        "SampleTime": 100
+      }
+    ]
+  },
+  "InputOutputMeasureParams": {
+    "VoltageInterval": 0.25,
+    "MinVoltage": 5.0,
+    "MaxVoltage": 8.0,
+    "SampleTime": 200,
+    "ComDelay": 200,
+    "CHAScale": 10,
+    "CHAVoltageDIV": 3,
+    "SampleRate": 49000
+  },
+  "PNVoltageMeasureParams": {
+    "MinVoltageThreshold": 0.5,
+    "MaxVoltageThreshold": 2.0,
+    "FrequencyErrLimit": 0.2,
+    "VoltageInterval": 0.25,
+    "MinVoltage": 1.0,
+    "MaxVoltage": 8.0,
+    "SampleTime": 200,
+    "ComDelay": 50,
+    "CHAScale": 10,
+    "CHAVoltageDIV": 3,
+    "SampleRate": 49000
+  },
+  "ThroughputMeasureParams": {
+    "MinVoltageThreshold": 1.0,
+    "MaxVoltageThreshold": 7.8,
+    "OutputVoltage": 8.0,
+    "OutputDelay": 200,
+    "SampleTime": 1000,
+    "CHAScale": 10,
+    "CHAVoltageDIV": 4,
+    "SampleRate": 49000,
+    "VoltageFilterCount": 21,
+    "DerivativeK": 200,
+    "IsEnableDerivativeFilter": false,
+    "DerivativeFilterCount": 7
+  }
+}
