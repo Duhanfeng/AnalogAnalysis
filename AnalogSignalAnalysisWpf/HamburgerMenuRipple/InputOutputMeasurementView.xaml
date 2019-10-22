@@ -125,7 +125,7 @@
         <StackPanel Grid.Column="1" Grid.RowSpan="3" Margin="10" MinWidth="200" IsEnabled="{Binding IsMeasuring, Converter={StaticResource BoolToInvertConverter}}">
             <Expander Header="基本设置" IsExpanded="True">
                 <StackPanel>
-                    <TextBlock Text="配置参数" Foreground="Green"/>
+                    <TextBlock Text="配置参数" Foreground="Green" Margin="0,10,0,0"/>
                     <DockPanel Margin="0,10,0,0">
                         <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">最小测试电压(V)</TextBlock>
                         <TextBox Text="{Binding MinVoltage, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>

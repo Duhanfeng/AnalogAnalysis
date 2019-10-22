@@ -551,7 +551,6 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         {
             lock (lockObject)
             {
-
                 int retryCount = 0;
                 channelData1 = new double[0];
                 channelData2 = new double[0];
@@ -596,6 +595,84 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
                 }
             }
 
+        }
+
+        /// <summary>
+        /// 开始记录数据
+        /// </summary>
+        public void StartSample()
+        {
+            lock (lockObject)
+            {
+                int retryCount = 0;
+
+                //开始AD采集
+                MyDLLimport.USBCtrlTransSimple((Int32)0x33);
+
+                //等待采集完成
+                while (MyDLLimport.USBCtrlTransSimple((Int32)0x50) != 33)
+                {
+                    Thread.Sleep(10);
+                    retryCount++;
+
+                    if (retryCount > 1000)
+                    {
+                        throw new TimeoutException("采集数据超时");
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 读取数据
+        /// </summary>
+        /// <param name="channelData1">通道1数据</param>
+        /// <param name="channelData2">通道2数据</param>
+        public void ReadData(int channelIndex, out double[] channelData)
+        {
+            double[] channelData1;
+            double[] channelData2;
+
+            ReadDataBlock(out channelData1, out channelData2);
+            channelData = (channelIndex == 0) ? channelData1 : channelData2;
+        }
+
+        /// <summary>
+        /// 读取数据
+        /// </summary>
+        /// <param name="channelData1">通道1数据</param>
+        /// <param name="channelData2">通道2数据</param>
+        public void ReadData(out double[] channelData1, out double[] channelData2)
+        {
+            lock (lockObject)
+            {
+                channelData1 = new double[0];
+                channelData2 = new double[0];
+
+                //获取数据
+                int res = MyDLLimport.AiReadBulkData((int)sampleCount * 2, 1, 2000, g_pBuffer);
+                if (res == 0)
+                {
+                    //等待事件
+                    var g_CurrentEventID = MyDLLimport.EventCheck(2000);
+                    if (g_CurrentEventID == 1365 || g_CurrentEventID == -1)
+                    {
+                        return;
+                    }
+
+                    channelData1 = new double[sampleCount - invalidDataCount];
+                    channelData2 = new double[sampleCount - invalidDataCount];
+                    unsafe
+                    {
+                        byte* pData = (byte*)g_pBuffer;
+                        for (uint i = invalidDataCount; i < sampleCount; i++)
+                        {
+                            channelData1[i - invalidDataCount] = (*(pData + i * 2) - currentCHAZero) * currentCHAScale;
+                            channelData2[i - invalidDataCount] = (*(pData + i * 2 + 1) - currentCHBZero) * currentCHBScale;
+                        }
+                    }
+                }
+            }
         }
 
         #endregion

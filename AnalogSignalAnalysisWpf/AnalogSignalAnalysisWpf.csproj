@@ -214,9 +214,13 @@
       <DependentUpon>HamburgerMenuRipple.xaml</DependentUpon>
     </Compile>
     <Compile Include="HamburgerMenuRipple\InputOutputMeasurementViewModel.cs" />
+    <Compile Include="HamburgerMenuRipple\ThroughputMeasurementView.xaml.cs">
+      <DependentUpon>ThroughputMeasurementView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="HamburgerMenuRipple\PNVoltageMeasurementView.xaml.cs">
       <DependentUpon>PNVoltageMeasurementView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="HamburgerMenuRipple\ThroughputMeasurementViewModel.cs" />
     <Compile Include="HamburgerMenuRipple\PNVoltageMeasurementViewModel.cs" />
     <Compile Include="HamburgerMenuRipple\SettingsView.xaml.cs">
       <DependentUpon>SettingsView.xaml</DependentUpon>
@@ -224,10 +228,6 @@
     <Compile Include="HamburgerMenuRipple\InputOutputMeasurementView.xaml.cs">
       <DependentUpon>InputOutputMeasurementView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="HamburgerMenuRipple\ThroughputMeasurementView.xaml.cs">
-      <DependentUpon>ThroughputMeasurementView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="HamburgerMenuRipple\ThroughputMeasurementViewModel.cs" />
     <Compile Include="Hardware\PLC\IPLC.cs" />
     <Compile Include="Hardware\PLC\IPLCCommunication.cs" />
     <Compile Include="Hardware\PLC\ModbusPLC.cs" />
@@ -259,6 +259,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="HamburgerMenuRipple\ThroughputMeasurementView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="HamburgerMenuRipple\PNVoltageMeasurementView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -270,10 +274,6 @@
     <Page Include="HamburgerMenuRipple\InputOutputMeasurementView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="HamburgerMenuRipple\ThroughputMeasurementView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="LiveData\LiveDataView.xaml">
       <Generator>MSBuild:Compile</Generator>

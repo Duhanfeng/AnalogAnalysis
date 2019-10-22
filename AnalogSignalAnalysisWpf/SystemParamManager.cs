@@ -213,6 +213,26 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public ESampleRate SampleRate { get; set; } = ESampleRate.Sps_49K;
 
+        /// <summary>
+        /// 电压滤波系数
+        /// </summary>
+        public int VoltageFilterCount { get; set; } = 7;
+
+        /// <summary>
+        /// 微分系数
+        /// </summary>
+        public int DerivativeK { get; set; } = 500;
+
+        /// <summary>
+        /// 使能微分滤波
+        /// </summary>
+        public bool IsEnableDerivativeFilter { get; set; } = false;
+
+        /// <summary>
+        /// 微分滤波系数
+        /// </summary>
+        public int DerivativeFilterCount { get; set; } = 7;
+
     }
 
     #endregion
