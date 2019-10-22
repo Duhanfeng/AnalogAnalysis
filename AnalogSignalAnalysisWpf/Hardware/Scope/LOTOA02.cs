@@ -9,69 +9,6 @@ using System.Threading.Tasks;
 
 namespace AnalogSignalAnalysisWpf.Hardware.Scope
 {
-    //internal class globleVariables
-    //{
-    //    public static int g_CurrentEventID = 0;
-
-    //    public static int m_ZrroUniInt = 0;
-
-    //    public static double g_CurrentScale_ch0 = 1.25;
-
-    //    public static double g_VbiasScale_1V_ch0 = 1.25;
-
-    //    public static double g_VbiasScale_200mV_ch0 = 1.25;
-
-    //    public static double g_VbiasScale_500mV_ch0 = 1.25;
-
-    //    public static double g_VbiasScale_100mV_ch0 = 1.25;
-
-    //    public static double g_VbiasScale_50mV_ch0 = 1.25;
-
-    //    public static double g_VbiasScale_20mV_ch0 = 1.25;
-
-    //    public static double g_CurrentScale_ch1 = 1.25;
-
-    //    public static double g_VbiasScale_1V_ch1 = 1.25;
-
-    //    public static double g_VbiasScale_200mV_ch1 = 1.25;
-
-    //    public static double g_VbiasScale_500mV_ch1 = 1.25;
-
-    //    public static double g_VbiasScale_100mV_ch1 = 1.25;
-
-    //    public static double g_VbiasScale_50mV_ch1 = 1.25;
-
-    //    public static double g_VbiasScale_20mV_ch1 = 1.25;
-
-    //    public static byte g_VbiasZero0 = 128;
-
-    //    public static byte g_VbiasZero1 = 128;
-
-    //    public static byte g_VbiasZero01v = 128;
-
-    //    public static byte g_VbiasZero11v = 128;
-
-    //    public static byte g_VbiasZero0500mv = 128;
-
-    //    public static byte g_VbiasZero1500mv = 128;
-
-    //    public static byte g_VbiasZero0200mv = 128;
-
-    //    public static byte g_VbiasZero1200mv = 128;
-
-    //    public static byte g_VbiasZero0100mv = 128;
-
-    //    public static byte g_VbiasZero1100mv = 128;
-
-    //    public static byte g_VbiasZero050mv = 128;
-
-    //    public static byte g_VbiasZero150mv = 128;
-
-    //    public static byte g_VbiasZero020mv = 128;
-
-    //    public static byte g_VbiasZero120mv = 128;
-
-    //}
 
     internal class CalibrationData
     {
@@ -184,8 +121,6 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
 
         private double currentCHBZero = 0;
         private double currentCHBScale = 0;
-
-        //private globleVariables globleVariables = new globleVariables();
 
         /// <summary>
         /// 线程锁
@@ -552,7 +487,9 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
                     Int32 res = MyDLLimport.DeviceOpen();
                     if (res != 0)
                     {
-                        return false;
+                        IsConnect = true;
+                        return true;    //debug
+                        //return false;
                     }
 
                     //设置默认参数
@@ -708,7 +645,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
             }
         }
 
-        private EScale chbScale;
+        private EScale chbScale = EScale.x1;
 
         /// <summary>
         /// CHB档位
@@ -751,7 +688,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
             }
         }
 
-        private ECoupling chaCoupling;
+        private ECoupling chaCoupling = ECoupling.DC;
 
         /// <summary>
         /// CHA耦合
@@ -769,7 +706,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
             }
         }
 
-        private ECoupling chbCoupling;
+        private ECoupling chbCoupling = ECoupling.DC;
 
         /// <summary>
         /// CHB耦合
@@ -815,7 +752,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
             }
         }
 
-        private ETriggerModel triggerModel;
+        private ETriggerModel triggerModel = ETriggerModel.No;
 
         /// <summary>
         /// 触发模式
@@ -833,7 +770,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
             }
         }
 
-        private ETriggerEdge triggerEdge;
+        private ETriggerEdge triggerEdge = ETriggerEdge.Filling;
 
         /// <summary>
         /// 触发边沿

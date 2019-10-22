@@ -12,22 +12,43 @@ namespace AnalogSignalAnalysisWpf
     {
         public static string GetDescription(object enumObj)
         {
-            return (Attribute.GetCustomAttribute(enumObj.GetType().GetField(enumObj.ToString()), typeof(DescriptionAttribute)) as DescriptionAttribute).Description;
+            string description = "";
+
+            try
+            {
+                if (Enum.IsDefined(enumObj.GetType(), enumObj))
+                {
+                    description = (Attribute.GetCustomAttribute(enumObj.GetType().GetField(enumObj.ToString()), typeof(DescriptionAttribute)) as DescriptionAttribute)?.Description;
+                }
+            }
+            catch (Exception)
+            {
+
+            }
+
+            return description;
         }
 
         public static T GetEnum<T>(string description)
         {
-            if (!string.IsNullOrEmpty(description))
+            try
             {
-                foreach (var item in Enum.GetValues(typeof(T)))
+                if (!string.IsNullOrEmpty(description))
                 {
-                    if ((Attribute.GetCustomAttribute(item.GetType().GetField(item.ToString()), typeof(DescriptionAttribute)) as DescriptionAttribute).Description.Equals(description))
+                    foreach (var item in Enum.GetValues(typeof(T)))
                     {
-                        return (T)item;
+                        if ((Attribute.GetCustomAttribute(item.GetType().GetField(item.ToString()), typeof(DescriptionAttribute)) as DescriptionAttribute)?.Description?.Equals(description) == true)
+                        {
+                            return (T)item;
+                        }
                     }
                 }
             }
+            catch (Exception)
+            {
 
+            }
+            
             return default(T);
         }
 
@@ -40,10 +61,21 @@ namespace AnalogSignalAnalysisWpf
         {
             List<string> descriptions = new List<string>();
 
-            foreach (var item in Enum.GetValues(typeof(T)))
+            try
             {
-                string description = (Attribute.GetCustomAttribute(item.GetType().GetField(item.ToString()), typeof(DescriptionAttribute)) as DescriptionAttribute).Description;
-                descriptions.Add(description);
+                foreach (var item in Enum.GetValues(typeof(T)))
+                {
+                    string description = (Attribute.GetCustomAttribute(item.GetType().GetField(item.ToString()), typeof(DescriptionAttribute)) as DescriptionAttribute)?.Description;
+                    if (!string.IsNullOrEmpty(description))
+                    {
+                        descriptions.Add(description);
+                    }
+                }
+
+            }
+            catch (Exception)
+            {
+
             }
 
             return descriptions;
