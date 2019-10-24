@@ -512,6 +512,32 @@ namespace AnalogSignalAnalysisWpf
             }
         }
 
+        private int voltageFilterCount = 7;
+
+        /// <summary>
+        /// 电压滤波系数
+        /// </summary>
+        public int VoltageFilterCount
+        {
+            get
+            {
+                return voltageFilterCount;
+            }
+            set
+            {
+                if (value < 3)
+                {
+                    value = 3;
+                }
+
+                voltageFilterCount = value;
+                NotifyOfPropertyChange(() => VoltageFilterCount);
+
+                SystemParamManager.SystemParam.ThroughputMeasureParams.VoltageFilterCount = value;
+                SystemParamManager.SaveParams();
+            }
+        }
+
         #endregion
 
         #region 事件
@@ -711,7 +737,7 @@ namespace AnalogSignalAnalysisWpf
 
                     //数据滤波
                     double[] filterData;
-                    Analysis.MeanFilter(originalData, 11, out filterData);
+                    Analysis.MeanFilter(originalData, VoltageFilterCount, out filterData);
 
                     //阈值查找边沿
                     List<int> edgeIndexs;

@@ -131,6 +131,26 @@ namespace AnalogSignalAnalysisWpf
                     PLC.Voltage = SystemParamManager.SystemParam.PLCParams.Voltage;
                     PLC.Current = SystemParamManager.SystemParam.PLCParams.Current;
                     PLC.EnableOutput = SystemParamManager.SystemParam.PLCParams.EnableOutput;
+
+                    //int frequency = 20;
+
+                    ////频率测试
+                    //new Thread(() =>
+                    //{
+                    //    PLC.Voltage = 18;
+                    //    PLC.Current = 1;
+                    //    PLC.EnableOutput = false;
+
+                    //    while (true)
+                    //    {
+                    //        PLC.EnableOutput = !PLC.EnableOutput;
+                    //        Thread.Sleep(1000 / frequency);
+                    //    }
+
+
+
+                    //}).Start();
+
                 }
                 else
                 {

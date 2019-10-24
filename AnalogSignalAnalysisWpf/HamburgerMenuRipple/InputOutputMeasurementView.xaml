@@ -68,7 +68,7 @@
                         </chart:LinearYAxis>
                     </chart:SparrowChart.YAxis>
                     <chart:LineSeries Label="输入电压" PointsSource="{Binding ScopeCHACollection}" Stroke="Yellow" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
-                    <chart:LineSeries Label="测量电压" PointsSource="{Binding ScopeCHBCollection}" Stroke="Red" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
+                    <chart:LineSeries Label="传感器电压" PointsSource="{Binding ScopeCHBCollection}" Stroke="Red" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
                 </chart:SparrowChart>
             </DockPanel>
 
@@ -89,7 +89,7 @@
                             <GridView>
                                 <GridViewColumn DisplayMemberBinding="{Binding DateTime}" Header="时间"/>
                                 <GridViewColumn DisplayMemberBinding="{Binding Input, StringFormat={}{0:F3}}" Header="输入电压"/>
-                                <GridViewColumn DisplayMemberBinding="{Binding Output, StringFormat={}{0:F3}}" Header="测量电压"/>
+                                <GridViewColumn DisplayMemberBinding="{Binding Output, StringFormat={}{0:F3}}" Header="传感器电压"/>
                             </GridView>
                         </ListView.View>
                     </ListView>
