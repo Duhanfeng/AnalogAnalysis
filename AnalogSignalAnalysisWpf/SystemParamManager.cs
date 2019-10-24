@@ -38,6 +38,21 @@ namespace AnalogSignalAnalysisWpf
         public int ComDelay { get; set; } = 200;
 
         /// <summary>
+        /// 输出电压(吸合电压)
+        /// </summary>
+        public double OutputVoltage { get; set; } = 24;
+
+        /// <summary>
+        /// 占空比
+        /// </summary>
+        public int DutyRatio { get; set; } = 50;
+
+        /// <summary>
+        /// 电压滤波系数
+        /// </summary>
+        public int VoltageFilterCount { get; set; } = 11;
+
+        /// <summary>
         /// CHA探头衰变
         /// </summary>
         public EScale CHAScale { get; set; } = EScale.x10;

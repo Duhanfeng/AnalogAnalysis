@@ -487,9 +487,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
                     Int32 res = MyDLLimport.DeviceOpen();
                     if (res != 0)
                     {
-                        IsConnect = true;
-                        return true;    //debug
-                        //return false;
+                        return false;
                     }
 
                     //设置默认参数

@@ -131,26 +131,6 @@ namespace AnalogSignalAnalysisWpf
                     PLC.Voltage = SystemParamManager.SystemParam.PLCParams.Voltage;
                     PLC.Current = SystemParamManager.SystemParam.PLCParams.Current;
                     PLC.EnableOutput = SystemParamManager.SystemParam.PLCParams.EnableOutput;
-
-                    //int frequency = 20;
-
-                    ////频率测试
-                    //new Thread(() =>
-                    //{
-                    //    PLC.Voltage = 18;
-                    //    PLC.Current = 1;
-                    //    PLC.EnableOutput = false;
-
-                    //    while (true)
-                    //    {
-                    //        PLC.EnableOutput = !PLC.EnableOutput;
-                    //        Thread.Sleep(1000 / frequency);
-                    //    }
-
-
-
-                    //}).Start();
-
                 }
                 else
                 {
@@ -209,10 +189,10 @@ namespace AnalogSignalAnalysisWpf
             SettingsView.DataContext = this;
 
             //设置测试model实例
-            FrequencyMeasurementViewModel = new FrequencyMeasurementViewModel(Scope, PWM);
-            InputOutputMeasurementViewModel = new InputOutputMeasurementViewModel(Scope, PLC);
-            PNVoltageMeasurementViewModel = new PNVoltageMeasurementViewModel(Scope, PLC);
-            ThroughputMeasurementViewModel = new ThroughputMeasurementViewModel(Scope, PLC);
+            FrequencyMeasurementViewModel = new FrequencyMeasurementViewModel(Scope, PLC, PWM);
+            InputOutputMeasurementViewModel = new InputOutputMeasurementViewModel(Scope, PLC, PWM);
+            PNVoltageMeasurementViewModel = new PNVoltageMeasurementViewModel(Scope, PLC, PWM);
+            ThroughputMeasurementViewModel = new ThroughputMeasurementViewModel(Scope, PLC, PWM);
 
             FrequencyMeasurementViewModel.MessageRaised += FrequencyMeasurementViewModel_MessageRaised;
             InputOutputMeasurementViewModel.MessageRaised += InputOutputMeasurementViewModel_MessageRaised;

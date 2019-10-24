@@ -1,4 +1,5 @@
 ﻿using AnalogSignalAnalysisWpf.Hardware.PLC;
+using AnalogSignalAnalysisWpf.Hardware.PWM;
 using AnalogSignalAnalysisWpf.Hardware.Scope;
 using AnalogSignalAnalysisWpf.LiveData;
 using Caliburn.Micro;
@@ -56,7 +57,7 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         /// <param name="scope">示波器接口</param>
         /// <param name="plc">PLC接口</param>
-        public ThroughputMeasurementViewModel(IScopeBase scope, IPLC plc) : this()
+        public ThroughputMeasurementViewModel(IScopeBase scope, IPLC plc, IPWM pwm) : this()
         {
             if (scope == null)
             {
@@ -68,8 +69,14 @@ namespace AnalogSignalAnalysisWpf
                 throw new ArgumentException("plc invalid");
             }
 
+            if (pwm == null)
+            {
+                throw new ArgumentException("pwm invalid");
+            }
+
             Scope = scope;
             PLC = plc;
+            PWM = pwm;
         }
 
         #endregion
@@ -87,13 +94,18 @@ namespace AnalogSignalAnalysisWpf
         public IPLC PLC { get; set; }
 
         /// <summary>
+        /// PLC接口
+        /// </summary>
+        public IPWM PWM { get; set; }
+
+        /// <summary>
         /// 硬件有效标志
         /// </summary>
         public bool IsHardwareValid
         {
             get
             {
-                if ((Scope?.IsConnect == true) && (PLC?.IsConnect == true))
+                if ((Scope?.IsConnect == true) && (PLC?.IsConnect == true) && (PWM?.IsConnect == true))
                 {
                     return true;
                 }
