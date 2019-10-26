@@ -25,18 +25,26 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public SystemParamManager SystemParamManager { get; private set; }
 
-
+        /// <summary>
+        /// 创建ThroughputMeasurementViewModel新实例
+        /// </summary>
         public ThroughputMeasurementViewModel()
         {
             ScopeScale = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<EScale>());
             ScopeSampleRateCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<ESampleRate>());
             ScopeVoltageDIVCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<EVoltageDIV>());
 
-
             //恢复配置参数
             SystemParamManager = SystemParamManager.GetInstance();
+            MeasureType = SystemParamManager.SystemParam.ThroughputMeasureParams.MeasureType;
+
+            PressureK = SystemParamManager.SystemParam.ThroughputMeasureParams.PressureK;
             MinVoltageThreshold = SystemParamManager.SystemParam.ThroughputMeasureParams.MinVoltageThreshold;
             MaxVoltageThreshold = SystemParamManager.SystemParam.ThroughputMeasureParams.MaxVoltageThreshold;
+
+            DeadZone = SystemParamManager.SystemParam.ThroughputMeasureParams.DeadZone;
+            CriticalValue = SystemParamManager.SystemParam.ThroughputMeasureParams.CriticalValue;
+
             OutputVoltage = SystemParamManager.SystemParam.ThroughputMeasureParams.OutputVoltage;
             OutputDelay = SystemParamManager.SystemParam.ThroughputMeasureParams.OutputDelay;
             SampleTime = SystemParamManager.SystemParam.ThroughputMeasureParams.SampleTime;
@@ -77,6 +85,15 @@ namespace AnalogSignalAnalysisWpf
             Scope = scope;
             PLC = plc;
             PWM = pwm;
+
+            if (!IsHardwareValid)
+            {
+                RunningStatus = "硬件无效";
+            }
+            else
+            {
+                RunningStatus = "就绪";
+            }
         }
 
         #endregion
@@ -121,6 +138,21 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public void UpdateHardware()
         {
+            if (Scope?.IsConnect != true)
+            {
+                Scope?.Connect();
+            }
+
+            if (PLC?.IsConnect != true)
+            {
+                PLC?.Connect();
+            }
+
+            if (PWM?.IsConnect != true)
+            {
+                PWM?.Connect();
+            }
+
             NotifyOfPropertyChange(() => IsHardwareValid);
         }
 
@@ -206,6 +238,93 @@ namespace AnalogSignalAnalysisWpf
 
         #region 配置参数
 
+        private int measureType = 1;
+
+        /// <summary>
+        /// 测量类型
+        /// </summary>
+        public int MeasureType
+        {
+            get 
+            {
+                return measureType; 
+            }
+            set 
+            { 
+                measureType = value;
+                if (value == 0)
+                {
+                    IsEnableMeasureType0 = true;
+                    IsEnableMeasureType1 = false;
+                }
+                else
+                {
+                    IsEnableMeasureType0 = false;
+                    IsEnableMeasureType1 = true;
+                }
+
+                NotifyOfPropertyChange(() => MeasureType);
+                NotifyOfPropertyChange(() => IsEnableMeasureType0);
+                NotifyOfPropertyChange(() => IsEnableMeasureType1);
+
+                SystemParamManager.SystemParam.ThroughputMeasureParams.MeasureType = value;
+                SystemParamManager.SaveParams();
+            }
+        }
+
+        private bool isEnableMeasureType0;
+
+        public bool IsEnableMeasureType0
+        {
+            get
+            {
+                return isEnableMeasureType0;
+            }
+            set
+            {
+                isEnableMeasureType0 = value;
+                NotifyOfPropertyChange(() => IsEnableMeasureType0);
+            }
+        }
+
+        private bool isEnableMeasureType1;
+
+        public bool IsEnableMeasureType1
+        {
+            get
+            { 
+                return isEnableMeasureType1;
+            }
+            set
+            { 
+                isEnableMeasureType1 = value;
+                NotifyOfPropertyChange(() => IsEnableMeasureType1);
+            }
+        }
+
+        #region 方式0
+
+        private double pressureK = 1;
+
+        /// <summary>
+        /// 气压系数(K=P/V)
+        /// </summary>
+        public double PressureK
+        {
+            get
+            { 
+                return pressureK; 
+            }
+            set
+            {
+                pressureK = value;
+                NotifyOfPropertyChange(() => PressureK);
+
+                SystemParamManager.SystemParam.ThroughputMeasureParams.PressureK = value;
+                SystemParamManager.SaveParams();
+            }
+        }
+
         private double minVoltageThreshold = 1.5;
 
         /// <summary>
@@ -247,6 +366,63 @@ namespace AnalogSignalAnalysisWpf
                 SystemParamManager.SaveParams();
             }
         }
+
+        #endregion
+
+        #region 方式1
+
+        private int deadZone = 15;
+
+        /// <summary>
+        /// 死区(0-30)
+        /// </summary>
+        public int DeadZone
+        {
+            get
+            {
+                return deadZone;
+            }
+            set
+            {
+                if (value > 30)
+                {
+                    value = 30;
+                }
+                else if (value < 0)
+                {
+                    value = 0;
+                }
+
+                deadZone = value;
+                NotifyOfPropertyChange(() => DeadZone);
+
+                SystemParamManager.SystemParam.ThroughputMeasureParams.DeadZone = value;
+                SystemParamManager.SaveParams();
+            }
+        }
+
+        private double criticalValue = 0.8;
+
+        /// <summary>
+        /// 临界值
+        /// </summary>
+        public double CriticalValue
+        {
+            get
+            {
+                return criticalValue;
+            }
+            set
+            {
+                criticalValue = value;
+                NotifyOfPropertyChange(() => CriticalValue);
+
+                SystemParamManager.SystemParam.ThroughputMeasureParams.CriticalValue = value;
+                SystemParamManager.SaveParams();
+            }
+        }
+
+        #endregion
 
         private double outputVoltage = 12.0;
 
@@ -559,6 +735,24 @@ namespace AnalogSignalAnalysisWpf
         }
 
 
+        private ObservableCollection<Data> derivativeEdgeCollection;
+
+        /// <summary>
+        /// 微分边沿数据
+        /// </summary>
+        public ObservableCollection<Data> DerivativeEdgeCollection
+        {
+            get
+            {
+                return derivativeEdgeCollection;
+            }
+            set
+            {
+                derivativeEdgeCollection = value;
+                NotifyOfPropertyChange(() => DerivativeEdgeCollection);
+            }
+        }
+        
         /// <summary>
         /// 显示微分数据
         /// </summary>
@@ -579,6 +773,19 @@ namespace AnalogSignalAnalysisWpf
         #endregion
 
         #region 事件
+
+        /// <summary>
+        /// 测量开始事件
+        /// </summary>
+        public event EventHandler<EventArgs> MeasurementStarted;
+
+        /// <summary>
+        /// 测量开始事件
+        /// </summary>
+        protected void OnMeasurementStarted()
+        {
+            MeasurementStarted?.Invoke(this, new EventArgs());
+        }
 
         /// <summary>
         /// 测量完成事件
@@ -668,7 +875,14 @@ namespace AnalogSignalAnalysisWpf
 
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            
+
+            VoltageCollection = new ObservableCollection<Data>();
+            EdgeCollection = new ObservableCollection<Data>();
+            DerivativeEdgeCollection = new ObservableCollection<Data>();
+            DerivativeCollection = new ObservableCollection<Data>();
+
+            OnMeasurementStarted();
+
             measureThread = new Thread(() =>
             {
                 
@@ -708,19 +922,6 @@ namespace AnalogSignalAnalysisWpf
                     double[] filterData;
                     Analysis.MeanFilter(originalData, VoltageFilterCount, out filterData);
 
-                    for (int i = 0; i < filterData.Length; i++)
-                    {
-                        if ((filterData[i] > MinVoltageThreshold) && (start == -1))
-                        {
-                            start = i;
-                        }
-                        else if ((filterData[i] > MaxVoltageThreshold) && (start != -1) && (end == -1))
-                        {
-                            end = i;
-                            break;
-                        }
-                    }
-
                     //微分求导
                     double[] derivativeData;
                     Analysis.Derivative(filterData, (int)Scope.SampleRate / DerivativeK, out derivativeData);
@@ -736,26 +937,76 @@ namespace AnalogSignalAnalysisWpf
                         filterData2 = derivativeData;
                     }
 
+                    if (MeasureType == 0)
+                    {
+                        for (int i = 0; i < filterData.Length; i++)
+                        {
+                            if ((filterData[i] > MinVoltageThreshold) && (start == -1))
+                            {
+                                start = i;
+                            }
+                            else if ((filterData[i] > MaxVoltageThreshold) && (start != -1) && (end == -1))
+                            {
+                                end = i;
+                                break;
+                            }
+                        }
+
+
+                        if ((start != -1) && (end != -1))
+                        {
+                            Time = ((end - start) * 1000.0) / (int)Scope.SampleRate;
+
+                            var edge = new ObservableCollection<Data>();
+                            edge.Add(new Data() { Value1 = VoltageCollection[start].Value1, Value = VoltageCollection[start].Value });
+                            edge.Add(new Data() { Value1 = VoltageCollection[end].Value1, Value = VoltageCollection[end].Value });
+                            EdgeCollection = edge;
+                            OnMeasurementCompleted(new ThroughputMeasurementCompletedEventArgs(true, Time));
+
+                        }
+                        else
+                        {
+                            Time = -1;
+                            OnMeasurementCompleted(new ThroughputMeasurementCompletedEventArgs());
+                        }
+                    }
+                    else
+                    {
+                        var deadZoneCount = filterData2.Length * (DeadZone / 100);
+
+                        for (int i = deadZoneCount; i < filterData2.Length - (deadZoneCount * 2); i++)
+                        {
+                            if ((filterData2[i] > CriticalValue) && (start == -1))
+                            {
+                                start = i;
+                            }
+                            else if ((filterData2[i - 1] >= CriticalValue) && (filterData2[i] < CriticalValue))
+                            {
+                                end = i;
+                            }
+                        }
+
+
+                        if ((start != -1) && (end != -1))
+                        {
+                            Time = ((end - start) * 1000.0) / DerivativeK;
+
+                            
+                            OnMeasurementCompleted(new ThroughputMeasurementCompletedEventArgs(true, Time));
+
+                        }
+                        else
+                        {
+                            Time = -1;
+                            OnMeasurementCompleted(new ThroughputMeasurementCompletedEventArgs());
+                        }
+
+                    }
+
                     //显示当前曲线
                     ShowData(filterData);
                     ShowDerivativeData(filterData2);
 
-                    if ((start != -1) && (end != -1))
-                    {
-                        Time = ((end - start) * 1000.0) / (int)Scope.SampleRate;
-
-                        var edge = new ObservableCollection<Data>();
-                        edge.Add(new Data() { Value1 = VoltageCollection[start].Value1, Value = VoltageCollection[start].Value });
-                        edge.Add(new Data() { Value1 = VoltageCollection[end].Value1, Value = VoltageCollection[end].Value });
-                        EdgeCollection = edge;
-                        OnMeasurementCompleted(new ThroughputMeasurementCompletedEventArgs(true, Time));
-
-                    }
-                    else
-                    {
-                        Time = -1;
-                        OnMeasurementCompleted(new ThroughputMeasurementCompletedEventArgs());
-                    }
 
                 }
                 catch (Exception)

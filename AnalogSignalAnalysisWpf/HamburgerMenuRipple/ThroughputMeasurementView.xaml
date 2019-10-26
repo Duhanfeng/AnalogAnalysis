@@ -16,6 +16,7 @@
         <ResourceDictionary>
             <converters:BoolToColorConverter x:Key="BoolToColorConverter" />
             <converters:BoolToInvertConverter x:Key="BoolToInvertConverter" />
+            <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
             <Style x:Key="containerStyle" TargetType="Border">
                 <Setter Property="BorderBrush" Value="#FFAAFFAA"/>
                 <Setter Property="BorderThickness" Value="1"/>
@@ -85,6 +86,7 @@
                         <chart:LinearYAxis CrossLineStyle="{StaticResource crossLineStyle}"  MinorLineStyle="{StaticResource minorcrossLineStyle}" MajorLineStyle="{StaticResource crossLineStyle}" AxisLineStyle="{StaticResource axisLineStyle}" MinValue="0" MinorTicksCount="3" ShowCrossLines="True" StringFormat="0.0" Header="Coefficient" />
                     </chart:SparrowChart.YAxis>
                     <chart:LineSeries Label="输入电压" PointsSource="{Binding DerivativeCollection}" Stroke="Yellow" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
+                    <chart:ScatterSeries Label="有效测量" PointsSource="{Binding DerivativeEdgeCollection}" Stroke="Red" XPath="Value" YPath="Value1" ScatterSize="10"  StrokeThickness="2" UseSinglePart="True"/>
                 </chart:SparrowChart>
             </DockPanel>
 
@@ -129,13 +131,38 @@
                 <StackPanel>
                     <TextBlock Text="配置参数" Foreground="Green" Margin="0,10,0,0"/>
                     <DockPanel Margin="0,10,0,0">
-                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">最小电压阈值(V)</TextBlock>
-                        <TextBox Text="{Binding MinVoltageThreshold, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">检测方式</TextBlock>
+                        <ComboBox SelectedIndex="{Binding MeasureType}">
+                            <ComboBoxItem Content="阈值方式"/>
+                            <ComboBoxItem Content="微分方式"/>
+                        </ComboBox>
                     </DockPanel>
-                    <DockPanel Margin="0,10,0,0">
-                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">最大电压阈值(V)</TextBlock>
-                        <TextBox Text="{Binding MaxVoltageThreshold, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
-                    </DockPanel>
+                    <StackPanel IsEnabled="{Binding IsEnableMeasureType0}" Visibility="{Binding IsEnableMeasureType0, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <DockPanel Margin="0,10,0,0">
+                            <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">气压/测量电压系数</TextBlock>
+                            <TextBox Text="{Binding PressureK, UpdateSourceTrigger=Explicit}" KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+                        </DockPanel>
+                        <DockPanel Margin="0,10,0,0">
+                            <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">最小气压</TextBlock>
+                            <TextBox Text="{Binding MinVoltageThreshold, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+                        </DockPanel>
+                        <DockPanel Margin="0,10,0,0">
+                            <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">最大气压</TextBlock>
+                            <TextBox Text="{Binding MaxVoltageThreshold, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+                        </DockPanel>
+                    </StackPanel>
+
+                    <StackPanel IsEnabled="{Binding IsEnableMeasureType1}" Visibility="{Binding IsEnableMeasureType1, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <DockPanel Margin="0,10,0,0">
+                            <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">死区(0-30)</TextBlock>
+                            <TextBox Text="{Binding DeadZone, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+                        </DockPanel>
+                        <DockPanel Margin="0,10,0,0">
+                            <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">临界值</TextBlock>
+                            <TextBox Text="{Binding CriticalValue, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+                        </DockPanel>
+                    </StackPanel>
+                    
                     <DockPanel Margin="0,10,0,0">
                         <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">输出电压(V)</TextBlock>
                         <TextBox Text="{Binding OutputVoltage, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>

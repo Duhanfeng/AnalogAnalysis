@@ -194,11 +194,46 @@ namespace AnalogSignalAnalysisWpf
             PNVoltageMeasurementViewModel = new PNVoltageMeasurementViewModel(Scope, PLC, PWM);
             ThroughputMeasurementViewModel = new ThroughputMeasurementViewModel(Scope, PLC, PWM);
 
+            FrequencyMeasurementViewModel.MeasurementStarted += MeasurementViewModel_MeasurementStarted;
+            InputOutputMeasurementViewModel.MeasurementStarted += MeasurementViewModel_MeasurementStarted;
+            PNVoltageMeasurementViewModel.MeasurementStarted += MeasurementViewModel_MeasurementStarted;
+            ThroughputMeasurementViewModel.MeasurementStarted += MeasurementViewModel_MeasurementStarted;
+
+            FrequencyMeasurementViewModel.MeasurementCompleted += FrequencyMeasurementViewModel_MeasurementCompleted;
+            InputOutputMeasurementViewModel.MeasurementCompleted += InputOutputMeasurementViewModel_MeasurementCompleted;
+            PNVoltageMeasurementViewModel.MeasurementCompleted += PNVoltageMeasurementViewModel_MeasurementCompleted;
+            ThroughputMeasurementViewModel.MeasurementCompleted += ThroughputMeasurementViewModel_MeasurementCompleted;
+
             FrequencyMeasurementViewModel.MessageRaised += FrequencyMeasurementViewModel_MessageRaised;
             InputOutputMeasurementViewModel.MessageRaised += InputOutputMeasurementViewModel_MessageRaised;
             PNVoltageMeasurementViewModel.MessageRaised += PNVoltageMeasurementViewModel_MessageRaised;
             ThroughputMeasurementViewModel.MessageRaised += ThroughputMeasurementViewModel_MessageRaised;
 
+        }
+
+        private void ThroughputMeasurementViewModel_MeasurementCompleted(object sender, ThroughputMeasurementCompletedEventArgs e)
+        {
+            IsMeasuring = false;
+        }
+
+        private void PNVoltageMeasurementViewModel_MeasurementCompleted(object sender, PNVoltageMeasurementCompletedEventArgs e)
+        {
+            IsMeasuring = false;
+        }
+
+        private void InputOutputMeasurementViewModel_MeasurementCompleted(object sender, InputOutputMeasurementCompletedEventArgs e)
+        {
+            IsMeasuring = false;
+        }
+
+        private void FrequencyMeasurementViewModel_MeasurementCompleted(object sender, FrequencyMeasurementCompletedEventArgs e)
+        {
+            IsMeasuring = false;
+        }
+
+        private void MeasurementViewModel_MeasurementStarted(object sender, EventArgs e)
+        {
+            IsMeasuring = true;
         }
 
         private void FrequencyMeasurementViewModel_MessageRaised(object sender, MessageRaisedEventArgs e)
@@ -1581,6 +1616,24 @@ namespace AnalogSignalAnalysisWpf
         {
             RunningMessage = "";
 
+        }
+
+        private bool isMeasuring = false;
+
+        /// <summary>
+        /// 测量标志
+        /// </summary>
+        public bool IsMeasuring
+        {
+            get
+            {
+                return isMeasuring;
+            }
+            set
+            {
+                isMeasuring = value;
+                NotifyOfPropertyChange(() => IsMeasuring);
+            }
         }
 
         /// <summary>

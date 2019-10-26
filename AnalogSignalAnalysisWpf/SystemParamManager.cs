@@ -189,6 +189,18 @@ namespace AnalogSignalAnalysisWpf
     public class ThroughputMeasureParams
     {
         /// <summary>
+        /// 测量方式
+        /// </summary>
+        public int MeasureType { get; set; } = 1;
+
+        #region 阈值方式
+
+        /// <summary>
+        /// 气压系数(K=P/V)
+        /// </summary>
+        public double PressureK { get; set; } = 1;
+
+        /// <summary>
         /// 最小电压阈值(单位:V)
         /// </summary>
         public double MinVoltageThreshold { get; set; } = 1.5;
@@ -197,6 +209,22 @@ namespace AnalogSignalAnalysisWpf
         /// 最大电压阈值(单位:V)
         /// </summary>
         public double MaxVoltageThreshold { get; set; } = 8.0;
+
+        #endregion
+
+        #region 微分方式
+
+        /// <summary>
+        /// 死区(0-30)
+        /// </summary>
+        public int DeadZone { get; set; } = 15;
+
+        /// <summary>
+        /// 临界值
+        /// </summary>
+        public double CriticalValue { get; set; } = 0.8;
+
+        #endregion
 
         /// <summary>
         /// 输出电压(V)

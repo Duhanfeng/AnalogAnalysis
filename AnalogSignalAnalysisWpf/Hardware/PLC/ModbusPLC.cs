@@ -218,6 +218,18 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
         /// <returns>执行结果</returns>
         public bool Connect()
         {
+            if (string.IsNullOrEmpty(PrimarySerialPortName))
+            {
+                return false;
+            }
+
+            var Serials = SerialPort.GetPortNames();
+
+            if (!Serials.Contains(PrimarySerialPortName))
+            {
+                return false;
+            }
+
             ushort[] data;
             if (Read(VoltageAddress, 1, out data))
             {

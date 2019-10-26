@@ -24,6 +24,7 @@
     <Window.Resources>
         <ResourceDictionary>
             <converters:BoolToColorConverter x:Key="BoolToColorConverter" />
+            <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
 
             <Ellipse x:Key="AppThemeMenuIcon"
                      Width="16"
@@ -156,5 +157,6 @@
             </StackPanel>
         </DockPanel>
         <local:HamburgerMenuRipple Grid.Row="1" DataContext="{Binding}"/>
+        <ProgressBar Grid.Row="2" Height="10" IsIndeterminate="True" Visibility="{Binding IsMeasuring, Converter={StaticResource BoolToVisibilityConverter}}"/>
     </Grid>
 </Controls:MetroWindow>

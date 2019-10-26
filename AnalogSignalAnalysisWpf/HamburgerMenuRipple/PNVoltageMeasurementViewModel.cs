@@ -119,6 +119,16 @@ namespace AnalogSignalAnalysisWpf
             Scope = scope;
             PLC = plc;
             PWM = pwm;
+
+            if (!IsHardwareValid)
+            {
+                RunningStatus = "硬件无效";
+            }
+            else
+            {
+                RunningStatus = "就绪";
+            }
+
         }
 
         #endregion
@@ -163,6 +173,21 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public void UpdateHardware()
         {
+            if (Scope?.IsConnect != true)
+            {
+                Scope?.Connect();
+            }
+
+            if (PLC?.IsConnect != true)
+            {
+                PLC?.Connect();
+            }
+
+            if (PWM?.IsConnect != true)
+            {
+                PWM?.Connect();
+            }
+
             NotifyOfPropertyChange(() => IsHardwareValid);
         }
 
@@ -661,6 +686,19 @@ namespace AnalogSignalAnalysisWpf
         #region 事件
 
         /// <summary>
+        /// 测量开始事件
+        /// </summary>
+        public event EventHandler<EventArgs> MeasurementStarted;
+
+        /// <summary>
+        /// 测量开始事件
+        /// </summary>
+        protected void OnMeasurementStarted()
+        {
+            MeasurementStarted?.Invoke(this, new EventArgs());
+        }
+
+        /// <summary>
         /// 测量完成事件
         /// </summary>
         public event EventHandler<PNVoltageMeasurementCompletedEventArgs> MeasurementCompleted;
@@ -731,6 +769,12 @@ namespace AnalogSignalAnalysisWpf
                 }
             }
 
+            if (!IsHardwareValid)
+            {
+                RunningStatus = "硬件无效";
+                return;
+            }
+
             //复位示波器设置
             Scope.Disconnect();
             Scope.Connect();
@@ -752,6 +796,8 @@ namespace AnalogSignalAnalysisWpf
 
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
+
+            OnMeasurementStarted();
 
             measureThread = new Thread(() =>
             {

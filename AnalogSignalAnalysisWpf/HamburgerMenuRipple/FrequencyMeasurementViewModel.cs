@@ -110,6 +110,9 @@ namespace AnalogSignalAnalysisWpf
 
     public class FrequencyMeasurementViewModel : Screen
     {
+        #region 构造函数
+
+
         /// <summary>
         /// 系统参数管理器
         /// </summary>
@@ -162,7 +165,7 @@ namespace AnalogSignalAnalysisWpf
                 };
             }
             TestDatas = SystemParamManager.SystemParam.FrequencyMeasureParams.TestDatas;
-            
+
             NotifyOfPropertyChange(() => ScopeCHAScale);
             NotifyOfPropertyChange(() => ScopeCHAVoltageDIV);
             NotifyOfPropertyChange(() => ScopeSampleRate);
@@ -193,7 +196,18 @@ namespace AnalogSignalAnalysisWpf
             Scope = scope;
             PLC = plc;
             PWM = pwm;
+
+            if (!IsHardwareValid)
+            {
+                RunningStatus = "硬件无效";
+            }
+            else
+            {
+                RunningStatus = "就绪";
+            }
         }
+
+        #endregion
 
         #region 硬件接口
 
@@ -235,6 +249,21 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public void UpdateHardware()
         {
+            if (Scope?.IsConnect != true)
+            {
+                Scope?.Connect();
+            }
+
+            if (PLC?.IsConnect != true)
+            {
+                PLC?.Connect();
+            }
+
+            if (PWM?.IsConnect != true)
+            {
+                PWM?.Connect();
+            }
+
             NotifyOfPropertyChange(() => IsHardwareValid);
         }
 
@@ -643,6 +672,19 @@ namespace AnalogSignalAnalysisWpf
         #region 事件
 
         /// <summary>
+        /// 测量开始事件
+        /// </summary>
+        public event EventHandler<EventArgs> MeasurementStarted;
+
+        /// <summary>
+        /// 测量开始事件
+        /// </summary>
+        protected void OnMeasurementStarted()
+        {
+            MeasurementStarted?.Invoke(this, new EventArgs());
+        }
+
+        /// <summary>
         /// 测量完成事件
         /// </summary>
         public event EventHandler<FrequencyMeasurementCompletedEventArgs> MeasurementCompleted;
@@ -804,6 +846,8 @@ namespace AnalogSignalAnalysisWpf
             Scope.CHAVoltageDIV = CHAVoltageDIV;
 
             MeasurementInfos = new ObservableCollection<FrequencyMeasurementInfo>();
+
+            OnMeasurementStarted();
 
             measureThread = new Thread(() =>
             {

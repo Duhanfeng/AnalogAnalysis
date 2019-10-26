@@ -200,6 +200,7 @@
     <Compile Include="Converters\BoolToInvertConverter.cs" />
     <Compile Include="Converters\BoolToStringConverter.cs" />
     <Compile Include="Converters\BoolToColorConverter.cs" />
+    <Compile Include="Converters\BoolToVisibilityConverter.cs" />
     <Compile Include="EnumHelper.cs" />
     <Compile Include="EventArgs\FrequencyMeasurementCompletedEventArgs.cs" />
     <Compile Include="EventArgs\InputOutputMeasurementCompletedEventArgs.cs" />
