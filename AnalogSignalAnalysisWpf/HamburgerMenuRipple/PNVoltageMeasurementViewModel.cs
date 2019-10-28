@@ -34,6 +34,11 @@ namespace AnalogSignalAnalysisWpf
         public double CurrentVoltage { get; set; }
 
         /// <summary>
+        /// 当前气压
+        /// </summary>
+        public double CurrentPressure { get; set; }
+
+        /// <summary>
         /// 测量电平
         /// </summary>
         public string MeasureLevel { get; set; }
@@ -49,11 +54,12 @@ namespace AnalogSignalAnalysisWpf
         /// <param name="input"></param>
         /// <param name="sampleTime"></param>
         /// <param name="currentFrequency"></param>
-        public PNVoltageMeasurementInfo(string currentStatus, double currentVoltage, string measureLevel, string measureResult)
+        public PNVoltageMeasurementInfo(string currentStatus, double currentVoltage, double currentPressure, string measureLevel, string measureResult)
         {
             DateTime = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             CurrentStatus = currentStatus;
             CurrentVoltage = currentVoltage;
+            CurrentPressure = currentPressure;
             MeasureLevel = measureLevel;
             MeasureResult = measureResult;
         }
@@ -79,6 +85,9 @@ namespace AnalogSignalAnalysisWpf
 
             //恢复配置参数
             SystemParamManager = SystemParamManager.GetInstance();
+
+            PressureK = SystemParamManager.SystemParam.PNVoltageMeasureParams.PressureK;
+            CriticalPressure = SystemParamManager.SystemParam.PNVoltageMeasureParams.CriticalPressure;
             MinVoltageThreshold = SystemParamManager.SystemParam.PNVoltageMeasureParams.MinVoltageThreshold;
             MaxVoltageThreshold = SystemParamManager.SystemParam.PNVoltageMeasureParams.MaxVoltageThreshold;
             FrequencyErrLimit = SystemParamManager.SystemParam.PNVoltageMeasureParams.FrequencyErrLimit;
@@ -272,6 +281,53 @@ namespace AnalogSignalAnalysisWpf
         #endregion
 
         #region 配置参数
+
+        private double pressureK = 1;
+
+        /// <summary>
+        /// 气压系数(K=P/V)
+        /// </summary>
+        public double PressureK
+        {
+            get
+            {
+                return pressureK;
+            }
+            set
+            {
+                if (value <= 0)
+                {
+                    value = 1;
+                }
+
+                pressureK = value;
+                NotifyOfPropertyChange(() => PressureK);
+
+                SystemParamManager.SystemParam.PNVoltageMeasureParams.PressureK = value;
+                SystemParamManager.SaveParams();
+            }
+        }
+
+        private double criticalPressure = 3;
+
+        /// <summary>
+        /// 临界气压
+        /// </summary>
+        public double CriticalPressure
+        {
+            get
+            {
+                return criticalPressure;
+            }
+            set
+            {
+                criticalPressure = value;
+                NotifyOfPropertyChange(() => CriticalPressure);
+
+                SystemParamManager.SystemParam.PNVoltageMeasureParams.CriticalPressure = value;
+                SystemParamManager.SaveParams();
+            }
+        }
 
         private double minVoltageThreshold = 1.5;
 
@@ -516,7 +572,26 @@ namespace AnalogSignalAnalysisWpf
                 NotifyOfPropertyChange(() => CurrentVoltage);
             }
         }
-        
+
+        private double currentPressure;
+
+        /// <summary>
+        /// 当前气压
+        /// </summary>
+        public double CurrentPressure
+        {
+            get
+            {
+                return currentPressure; 
+            }
+            set
+            { 
+                currentPressure = value;
+                NotifyOfPropertyChange(() => CurrentPressure);
+            }
+        }
+
+
         private double pVoltage;
 
         /// <summary>
@@ -755,18 +830,17 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public void Start()
         {
-            if ((Scope?.IsConnect != true) ||
-                (PLC?.IsConnect != true))
-            {
-                throw new Exception("scope/plc invalid");
-            }
-
             lock (lockObject)
             {
                 if (IsMeasuring)
                 {
                     return;
                 }
+            }
+
+            if (MinVoltage > MaxVoltage)
+            {
+                throw new ArgumentException("MinVoltage > MaxVoltage");
             }
 
             if (!IsHardwareValid)
@@ -801,11 +875,6 @@ namespace AnalogSignalAnalysisWpf
 
             measureThread = new Thread(() =>
             {
-                if (MinVoltage > MaxVoltage)
-                {
-                    throw new ArgumentException("MinVoltage > MaxVoltage");
-                }
-
                 lock (lockObject)
                 {
                     IsMeasuring = true;
@@ -817,8 +886,15 @@ namespace AnalogSignalAnalysisWpf
 
                 RunningStatus = "查找吸合电压";
 
+                //临界电压(V)
+                var criticalV = CriticalPressure / PressureK;
+
                 //设置采样时间
                 Scope.SampleTime = SampleTime;
+
+                //设置PWM
+                PWM.Frequency = 0;
+                PWM.DutyRatio = 50;
 
                 double currentVoltage = MinVoltage;
                 PLC.Voltage = currentVoltage;
@@ -837,10 +913,13 @@ namespace AnalogSignalAnalysisWpf
                     double[] filterData;
                     Analysis.MeanFilter(originalData, 7, out filterData);
 
+                    //获取平均值
+                    CurrentPressure = Analysis.Mean(filterData) * PressureK;
+
                     //阈值查找边沿
                     List<int> edgeIndexs;
                     DigitEdgeType digitEdgeType;
-                    Analysis.FindEdgeByThreshold(filterData, MinVoltageThreshold, MaxVoltageThreshold, out edgeIndexs, out digitEdgeType);
+                    Analysis.FindEdgeByThreshold(filterData, criticalV, criticalV, out edgeIndexs, out digitEdgeType);
 
                     CurrentVoltage = currentVoltage;
                     
@@ -872,7 +951,7 @@ namespace AnalogSignalAnalysisWpf
                                     stopwatch.Start();
 
                                     //MeasurementInfos.Add(new PNVoltageMeasurementInfo("吸合", CurrentVoltage, "H", "吸合电压"));
-                                    MeasurementInfos.Insert(0, new PNVoltageMeasurementInfo("吸合", CurrentVoltage, "H", "吸合电压"));
+                                    MeasurementInfos.Insert(0, new PNVoltageMeasurementInfo("已吸合", CurrentVoltage, CurrentPressure, "H", "吸合电压"));
                                 }, null);
                             });
                         }).Start();
@@ -906,7 +985,7 @@ namespace AnalogSignalAnalysisWpf
 
                                     stopwatch.Start();
 
-                                    MeasurementInfos.Insert(0, new PNVoltageMeasurementInfo("测量吸合", CurrentVoltage, "L", "无效"));
+                                    MeasurementInfos.Insert(0, new PNVoltageMeasurementInfo("测量吸合", CurrentVoltage, CurrentPressure, "L", "无效"));
                                 }, null);
                             });
                         }).Start();
@@ -938,7 +1017,7 @@ namespace AnalogSignalAnalysisWpf
                         //阈值查找边沿
                         List<int> edgeIndexs;
                         DigitEdgeType digitEdgeType;
-                        Analysis.FindEdgeByThreshold(filterData, MinVoltageThreshold, MaxVoltageThreshold, out edgeIndexs, out digitEdgeType);
+                        Analysis.FindEdgeByThreshold(filterData, criticalV, criticalV, out edgeIndexs, out digitEdgeType);
 
                         CurrentVoltage = currentVoltage;
 
@@ -976,7 +1055,7 @@ namespace AnalogSignalAnalysisWpf
 
                                         stopwatch.Start();
 
-                                        MeasurementInfos.Insert(0, new PNVoltageMeasurementInfo("释放", CurrentVoltage, "L", "释放电压"));
+                                        MeasurementInfos.Insert(0, new PNVoltageMeasurementInfo("已释放", CurrentVoltage, CurrentPressure, "L", "释放电压"));
                                     }, null);
                                 });
                             }).Start();
@@ -1010,7 +1089,7 @@ namespace AnalogSignalAnalysisWpf
 
                                         stopwatch.Start();
 
-                                        MeasurementInfos.Insert(0, new PNVoltageMeasurementInfo("测量释放", CurrentVoltage, "H", "无效"));
+                                        MeasurementInfos.Insert(0, new PNVoltageMeasurementInfo("测量释放", CurrentVoltage, CurrentPressure, "H", "无效"));
                                     }, null);
                                 });
                             }).Start();

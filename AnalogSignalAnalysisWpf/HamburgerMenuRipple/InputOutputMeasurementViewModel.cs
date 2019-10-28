@@ -608,18 +608,18 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public void Start()
         {
-            if ((Scope?.IsConnect != true) ||
-                (PLC?.IsConnect != true))
-            {
-                throw new Exception("scope/plc invalid");
-            }
-
             lock (lockObject)
             {
                 if (IsMeasuring)
                 {
                     return;
                 }
+            }
+
+            if (!IsHardwareValid)
+            {
+                RunningStatus = "硬件无效";
+                return;
             }
 
             RunningStatus = "运行中";

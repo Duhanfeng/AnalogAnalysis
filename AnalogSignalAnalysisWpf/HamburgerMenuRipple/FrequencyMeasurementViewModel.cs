@@ -695,6 +695,8 @@ namespace AnalogSignalAnalysisWpf
         /// <param name="e"></param>
         protected void OnMeasurementCompleted(FrequencyMeasurementCompletedEventArgs e)
         {
+            PLC.EnableOutput = false;
+
             PWM.Frequency = 0;
             if (e.IsSuccess == true)
             {
@@ -711,6 +713,7 @@ namespace AnalogSignalAnalysisWpf
             {
                 IsMeasuring = false;
             }
+
             MeasurementCompleted?.Invoke(this, e);
         }
 
@@ -865,6 +868,7 @@ namespace AnalogSignalAnalysisWpf
 
                 //使能PLC输出
                 PLC.Voltage = OutputVoltage;
+                PLC.EnableOutput = true;
 
                 foreach (var item in TestDatas)
                 {
@@ -1012,8 +1016,8 @@ namespace AnalogSignalAnalysisWpf
             }
 
             //显示数据
-            ScopeCHACollection = new ObservableCollection<Data>(MeasurementInfos[0].ScopeCHACollection);
-            ScopeCHAEdgeCollection = new ObservableCollection<Data>(MeasurementInfos[0].ScopeCHAEdgeCollection);
+            ScopeCHACollection = new ObservableCollection<Data>(MeasurementInfos[index].ScopeCHACollection);
+            ScopeCHAEdgeCollection = new ObservableCollection<Data>(MeasurementInfos[index].ScopeCHAEdgeCollection);
         }
 
         /// <summary>

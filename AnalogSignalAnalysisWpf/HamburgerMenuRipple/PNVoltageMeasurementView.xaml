@@ -97,7 +97,9 @@
                     <Ellipse Width="20" Height="20" Fill="{Binding IsMeasuring, Converter={StaticResource BoolToColorConverter}}" Margin="0,0,10,0"/>
                     <TextBox Text="{Binding RunningStatus}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
                     <TextBlock Text="输出电压:" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <TextBox Text="{Binding CurrentVoltage}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
+                    <TextBox Text="{Binding CurrentVoltage, StringFormat={}{0:F3}}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
+                    <TextBlock Text="测量气压:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBox Text="{Binding CurrentPressure, StringFormat={}{0:F3}}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
                     <TextBlock Text="吸合电压:" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <TextBox Text="{Binding PVoltage}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
                     <TextBlock Text="释放电压:" VerticalAlignment="Center" Margin="0,0,10,0"/>
@@ -109,7 +111,8 @@
                             <GridView>
                                 <GridViewColumn DisplayMemberBinding="{Binding DateTime}" Header="时间"/>
                                 <GridViewColumn DisplayMemberBinding="{Binding CurrentStatus}" Header="状态"/>
-                                <GridViewColumn DisplayMemberBinding="{Binding CurrentVoltage}" Header="输出电压"/>
+                                <GridViewColumn DisplayMemberBinding="{Binding CurrentVoltage, StringFormat={}{0:F3}}" Header="输出电压"/>
+                                <GridViewColumn DisplayMemberBinding="{Binding CurrentPressure, StringFormat={}{0:F3}}" Header="检测气压"/>
                                 <GridViewColumn DisplayMemberBinding="{Binding MeasureLevel}" Header="测量电平"/>
                                 <GridViewColumn DisplayMemberBinding="{Binding MeasureResult}" Header="测试结果" Width="100"/>
                             </GridView>
@@ -125,10 +128,18 @@
                 <StackPanel>
                     <TextBlock Text="配置参数" Foreground="Green" Margin="0,10,0,0"/>
                     <DockPanel Margin="0,10,0,0">
+                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">气压系数(P/V)</TextBlock>
+                        <TextBox Text="{Binding PressureK, UpdateSourceTrigger=Explicit}" KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+                    </DockPanel>
+                    <DockPanel Margin="0,10,0,0">
+                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">临界气压</TextBlock>
+                        <TextBox Text="{Binding CriticalPressure, UpdateSourceTrigger=Explicit}" KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+                    </DockPanel>
+                    <DockPanel Margin="0,10,0,0" Visibility="Collapsed">
                         <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">最小电压阈值(V)</TextBlock>
                         <TextBox Text="{Binding MinVoltageThreshold, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
                     </DockPanel>
-                    <DockPanel Margin="0,10,0,0">
+                    <DockPanel Margin="0,10,0,0" Visibility="Collapsed">
                         <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">最大电压阈值(V)</TextBlock>
                         <TextBox Text="{Binding MaxVoltageThreshold, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
                     </DockPanel>

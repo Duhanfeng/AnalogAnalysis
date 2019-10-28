@@ -764,7 +764,7 @@ namespace AnalogSignalAnalysisWpf
             var collection = new ObservableCollection<Data>();
             for (int i = 0; i < data.Length / SampleInterval; i++)
             {
-                collection.Add(new Data() { Value1 = data[i * SampleInterval], Value = i * 1000.0 / ((int)Scope.SampleRate) * SampleInterval });
+                collection.Add(new Data() { Value1 = data[i * SampleInterval], Value = (i * 1000.0) / DerivativeK * SampleInterval });
             }
 
             DerivativeCollection = collection;
@@ -844,12 +844,6 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public void Start()
         {
-            if ((Scope?.IsConnect != true) ||
-                (PLC?.IsConnect != true))
-            {
-                throw new Exception("scope/plc invalid");
-            }
-
             lock (lockObject)
             {
                 if (IsMeasuring)
@@ -861,6 +855,12 @@ namespace AnalogSignalAnalysisWpf
             if (MinVoltageThreshold >= MaxVoltageThreshold)
             {
                 throw new ArgumentException("MinVoltageThreshold >= MaxVoltageThreshold");
+            }
+
+            if (!IsHardwareValid)
+            {
+                RunningStatus = "硬件无效";
+                return;
             }
 
             //复位示波器设置
@@ -972,7 +972,7 @@ namespace AnalogSignalAnalysisWpf
                     }
                     else
                     {
-                        var deadZoneCount = filterData2.Length * (DeadZone / 100);
+                        var deadZoneCount = (int)(filterData2.Length * ((double)DeadZone / 100));
 
                         for (int i = deadZoneCount; i < filterData2.Length - (deadZoneCount * 2); i++)
                         {
@@ -980,12 +980,11 @@ namespace AnalogSignalAnalysisWpf
                             {
                                 start = i;
                             }
-                            else if ((filterData2[i - 1] >= CriticalValue) && (filterData2[i] < CriticalValue))
+                            else if ((filterData2[i - 1] >= CriticalValue) && (start != -1) && (filterData2[i] < CriticalValue))
                             {
                                 end = i;
                             }
                         }
-
 
                         if ((start != -1) && (end != -1))
                         {

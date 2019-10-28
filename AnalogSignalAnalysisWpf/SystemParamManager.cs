@@ -127,6 +127,16 @@ namespace AnalogSignalAnalysisWpf
     public class PNVoltageMeasureParams
     {
         /// <summary>
+        /// 气压系数(K=P/V)
+        /// </summary>
+        public double PressureK { get; set; } = 1;
+
+        /// <summary>
+        /// 临界气压
+        /// </summary>
+        public double CriticalPressure { get; set; } = 3;
+
+        /// <summary>
         /// 最小电压阈值(单位:V)
         /// </summary>
         public double MinVoltageThreshold { get; set; } = 1.5;
