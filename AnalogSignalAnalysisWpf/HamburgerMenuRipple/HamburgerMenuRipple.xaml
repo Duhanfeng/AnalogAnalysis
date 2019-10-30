@@ -247,15 +247,24 @@
                                 <local:InputOutputMeasurementView />
                             </Controls:HamburgerMenuIconItem.Tag>
                         </Controls:HamburgerMenuIconItem>
+                        <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="老化测试">
+                            <Controls:HamburgerMenuIconItem.Tag>
+                                <local:InputOutputMeasurementView />
+                            </Controls:HamburgerMenuIconItem.Tag>
+                        </Controls:HamburgerMenuIconItem>
                     </Controls:HamburgerMenuItemCollection>
                 </Controls:HamburgerMenu.ItemsSource>
 
                 <!--  Options  -->
                 <Controls:HamburgerMenu.OptionsItemsSource>
                     <Controls:HamburgerMenuItemCollection>
+                        <Controls:HamburgerMenuIconItem Icon="{iconPacks:Material Kind=Settings}" Label="报告">
+                            <Controls:HamburgerMenuIconItem.Tag>
+                                <local:SettingsView/>
+                            </Controls:HamburgerMenuIconItem.Tag>
+                        </Controls:HamburgerMenuIconItem>
                         <Controls:HamburgerMenuIconItem Icon="{iconPacks:Material Kind=Settings}" Label="设置">
                             <Controls:HamburgerMenuIconItem.Tag>
-                                <!--<ContentControl Content="{Binding Path=PWMControlView}"/>-->
                                 <local:SettingsView/>
                             </Controls:HamburgerMenuIconItem.Tag>
                         </Controls:HamburgerMenuIconItem>

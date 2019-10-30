@@ -7,6 +7,8 @@ using Caliburn.Micro;
 using DataAnalysis;
 using Framework.Infrastructure.Serialization;
 using MahApps.Metro;
+using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -1574,6 +1576,7 @@ namespace AnalogSignalAnalysisWpf
 
         public void ThrowWarning()
         {
+            //((MetroWindow)Application.Current.MainWindow).ShowModalLoginExternal("11", "22");
             OnMessageRaised(MessageLevel.Warning, "警告信息");
         }
 
@@ -1655,6 +1658,12 @@ namespace AnalogSignalAnalysisWpf
         /// 通气量测试Model
         /// </summary>
         public ThroughputMeasurementViewModel ThroughputMeasurementViewModel { get; set; }
+
+        #endregion
+
+        #region 管理员权限
+
+
 
         #endregion
 

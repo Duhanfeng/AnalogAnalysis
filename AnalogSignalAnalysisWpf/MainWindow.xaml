@@ -138,6 +138,12 @@
                     <MenuItem Header="抛警告" cal:Message.Attach="ThrowWarning"/>
                     <MenuItem Header="触发消息" cal:Message.Attach="ThrowMessage"/>
                 </MenuItem>
+                <MenuItem Header="权限">
+                    <MenuItem Header="登录"/>
+                    <Separator/>
+                    <MenuItem Header="修改密码"/>
+                    <MenuItem Header="注销"/>
+                </MenuItem>
             </Menu>
             <StackPanel MinWidth="50"/>
             <StackPanel Orientation="Horizontal" Margin="10,0">
