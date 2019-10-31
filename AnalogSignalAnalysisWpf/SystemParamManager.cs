@@ -480,6 +480,17 @@ namespace AnalogSignalAnalysisWpf
         #endregion
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    public class User
+    {
+        public string UserName { get; set; } = "Admin";
+
+        public string Password { get; set; } = "123";
+
+    }
+
     public class SystemParamManager
     {
         #region 单例模式
@@ -578,5 +589,49 @@ namespace AnalogSignalAnalysisWpf
 
         #endregion
 
+        #region 账户密码
+
+        public User User { get; private set; }
+
+        /// <summary>
+        /// 加载用户名
+        /// </summary>
+        /// <returns></returns>
+        public bool LoadUser()
+        {
+            var dataPath = System.Environment.GetEnvironmentVariable("appdata");
+            var file = $"{dataPath}/.aa";
+
+            bool result = true;
+            if (File.Exists(file))
+            {
+                User = JsonSerialization.DeserializeObjectFromFile<User>(file);
+            }
+
+            if (User == null)
+            {
+                User = new User();
+                result = false;
+            }
+
+            //保存参数到默认配置文件
+            JsonSerialization.SerializeObjectToFile(User, file);
+
+            return result;
+        }
+
+        /// <summary>
+        /// 保存用户名
+        /// </summary>
+        public void SaveUser()
+        {
+            var dataPath = System.Environment.GetEnvironmentVariable("appdata");
+            var file = $"{dataPath}/.aa";
+
+            //保存参数到默认配置文件
+            JsonSerialization.SerializeObjectToFile(User, file);
+        }
+
+        #endregion
     }
 }

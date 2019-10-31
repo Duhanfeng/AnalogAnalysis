@@ -178,7 +178,7 @@
                 </StackPanel>
             </Expander>
             <Expander Header="高级设置" Margin="0,10,0,0">
-                <StackPanel>
+                <StackPanel IsEnabled="{Binding IsAdmin}">
                     <TextBlock Text="滤波参数" Foreground="Green" Margin="0,10,0,0"/>
                     <DockPanel Margin="0,10,0,0">
                         <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">电压滤波系数</TextBlock>

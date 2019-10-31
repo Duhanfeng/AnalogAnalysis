@@ -211,6 +211,10 @@ namespace AnalogSignalAnalysisWpf
             PNVoltageMeasurementViewModel.MessageRaised += PNVoltageMeasurementViewModel_MessageRaised;
             ThroughputMeasurementViewModel.MessageRaised += ThroughputMeasurementViewModel_MessageRaised;
 
+            //获取用户名
+            SystemParamManager.LoadUser();
+            
+
         }
 
         private void ThroughputMeasurementViewModel_MeasurementCompleted(object sender, ThroughputMeasurementCompletedEventArgs e)
@@ -1576,7 +1580,6 @@ namespace AnalogSignalAnalysisWpf
 
         public void ThrowWarning()
         {
-            //((MetroWindow)Application.Current.MainWindow).ShowModalLoginExternal("11", "22");
             OnMessageRaised(MessageLevel.Warning, "警告信息");
         }
 
@@ -1663,7 +1666,112 @@ namespace AnalogSignalAnalysisWpf
 
         #region 管理员权限
 
+        private string operaMsg = "操作员";
 
+        /// <summary>
+        /// 操作信息
+        /// </summary>
+        public string OperaMsg
+        {
+            get 
+            {
+                return operaMsg;
+            }
+            set
+            { 
+                operaMsg = value;
+                NotifyOfPropertyChange(() => OperaMsg);
+            }
+        }
+
+        private bool isAdmin = false;
+
+        /// <summary>
+        /// 管理员权限
+        /// </summary>
+        public bool IsAdmin
+        {
+            get 
+            {
+                return isAdmin; 
+            }
+            set 
+            {
+                if (value)
+                {
+                    OperaMsg = "管理员";
+                }
+                else
+                {
+                    OperaMsg = "操作员";
+                }
+                isAdmin = value;
+                NotifyOfPropertyChange(() => IsAdmin);
+            }
+        }
+
+        /// <summary>
+        /// 登录
+        /// </summary>
+        public void Login()
+        {
+            LoginDialogSettings settings = new LoginDialogSettings();
+            settings.InitialUsername = "Admin";
+            settings.NegativeButtonVisibility = Visibility.Visible;
+            settings.EnablePasswordPreview = true;
+            
+            var result = ((MetroWindow)Application.Current.MainWindow).ShowModalLoginExternal("登录管理员账户", "", settings);
+            if ((result?.Username?.Equals(SystemParamManager.User?.UserName) == true) &&
+                (result?.Password?.Equals(SystemParamManager.User?.Password) == true))
+            {
+                IsAdmin = true;
+                //OnMessageRaised(MessageLevel.Message, "登录成功");
+
+                FrequencyMeasurementViewModel.IsAdmin = IsAdmin;
+                InputOutputMeasurementViewModel.IsAdmin = IsAdmin;
+                PNVoltageMeasurementViewModel.IsAdmin = IsAdmin;
+                ThroughputMeasurementViewModel.IsAdmin = IsAdmin;
+            }
+            else
+            {
+                IsAdmin = false;
+
+                FrequencyMeasurementViewModel.IsAdmin = IsAdmin;
+                InputOutputMeasurementViewModel.IsAdmin = IsAdmin;
+                PNVoltageMeasurementViewModel.IsAdmin = IsAdmin;
+                ThroughputMeasurementViewModel.IsAdmin = IsAdmin;
+                OnMessageRaised(MessageLevel.Err, "登录失败");
+            }
+        }
+
+        /// <summary>
+        /// 注销
+        /// </summary>
+        public void Logout()
+        {
+            IsAdmin = false;
+
+            FrequencyMeasurementViewModel.IsAdmin = IsAdmin;
+            InputOutputMeasurementViewModel.IsAdmin = IsAdmin;
+            PNVoltageMeasurementViewModel.IsAdmin = IsAdmin;
+            ThroughputMeasurementViewModel.IsAdmin = IsAdmin;
+        }
+
+        /// <summary>
+        /// 修改密码
+        /// </summary>
+        public void MotifyPassword()
+        {
+            MetroDialogSettings settings = new MetroDialogSettings();
+            var result = ((MetroWindow)Application.Current.MainWindow).ShowModalInputExternal("修改管理员密码", "输入新密码", settings);
+
+            if (!string.IsNullOrWhiteSpace(result))
+            {
+                SystemParamManager.User.Password = result;
+                SystemParamManager.SaveUser();
+            }
+            
+        }
 
         #endregion
 

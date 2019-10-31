@@ -149,7 +149,7 @@
                 </StackPanel>
             </Expander>
             <Expander Header="高级设置" Margin="0,10,0,0">
-                <StackPanel>
+                <StackPanel IsEnabled="{Binding IsAdmin}">
                     <TextBlock Text="示波器配置" Foreground="Green"/>
                     <DockPanel Margin="0,10,0,0">
                         <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">探头衰减</TextBlock>

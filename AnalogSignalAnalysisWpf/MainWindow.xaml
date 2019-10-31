@@ -23,6 +23,7 @@
 
     <Window.Resources>
         <ResourceDictionary>
+            <converters:BoolToInvertConverter x:Key="BoolToInvertConverter" />
             <converters:BoolToColorConverter x:Key="BoolToColorConverter" />
             <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
 
@@ -139,12 +140,15 @@
                     <MenuItem Header="触发消息" cal:Message.Attach="ThrowMessage"/>
                 </MenuItem>
                 <MenuItem Header="权限">
-                    <MenuItem Header="登录"/>
+                    <MenuItem Header="登录" cal:Message.Attach="Login" IsEnabled="{Binding IsAdmin, Converter={StaticResource BoolToInvertConverter}}"/>
                     <Separator/>
-                    <MenuItem Header="修改密码"/>
-                    <MenuItem Header="注销"/>
+                    <MenuItem Header="修改密码" cal:Message.Attach="MotifyPassword" IsEnabled="{Binding IsAdmin}"/>
+                    <MenuItem Header="注销" cal:Message.Attach="Logout" IsEnabled="{Binding IsAdmin}"/>
                 </MenuItem>
             </Menu>
+            <StackPanel MinWidth="50"/>
+            <Label VerticalAlignment="Center" FontSize="13">当前账户:</Label>
+            <Label VerticalAlignment="Center" FontSize="13" Content="{Binding OperaMsg}"/>
             <StackPanel MinWidth="50"/>
             <StackPanel Orientation="Horizontal" Margin="10,0">
                 <iconPacks:PackIconMaterial Kind="AppleKeyboardOption" VerticalAlignment="Center" Margin="10,0,0,0" />

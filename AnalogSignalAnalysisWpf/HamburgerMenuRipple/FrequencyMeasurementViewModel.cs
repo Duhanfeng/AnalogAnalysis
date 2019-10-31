@@ -112,6 +112,23 @@ namespace AnalogSignalAnalysisWpf
     {
         #region 构造函数
 
+        private bool isAdmin = false;
+
+        /// <summary>
+        /// 管理员权限
+        /// </summary>
+        public bool IsAdmin
+        {
+            get
+            {
+                return isAdmin;
+            }
+            set
+            {
+                isAdmin = value;
+                NotifyOfPropertyChange(() => IsAdmin);
+            }
+        }
 
         /// <summary>
         /// 系统参数管理器
@@ -174,6 +191,7 @@ namespace AnalogSignalAnalysisWpf
 
             UpdateHardware();
 
+            IsAdmin = false;
         }
 
         public FrequencyMeasurementViewModel(IScopeBase scope, IPLC plc, IPWM pwm) : this()

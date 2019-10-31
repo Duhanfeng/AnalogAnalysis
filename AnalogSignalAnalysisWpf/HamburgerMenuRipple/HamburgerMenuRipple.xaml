@@ -9,6 +9,7 @@
              xmlns:materialDesignConverters="clr-namespace:MaterialDesignThemes.Wpf.Converters;assembly=MaterialDesignThemes.Wpf"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:cal="http://www.caliburnproject.org"
+             xmlns:converters="clr-namespace:AnalogSignalAnalysisWpf.Converters"
              Loaded="UserControl_Loaded"
              d:DataContext="{d:DesignInstance local:MainWindowViewModel}"
              d:DesignHeight="500"
@@ -82,8 +83,7 @@
                                         SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
                                 <Grid Margin="{TemplateBinding BorderThickness}">
                                     <Grid HorizontalAlignment="Left"
-                                          VerticalAlignment="Center"
-                                          Visibility="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Controls:HamburgerMenu}}, Path=ShowSelectionIndicator, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                          VerticalAlignment="Center">
                                         <Rectangle x:Name="SelectionIndicator"
                                                    Width="{DynamicResource HamburgerMenuSelectionIndicatorThemeWidth}"
                                                    Height="{DynamicResource HamburgerMenuSelectionIndicatorThemeHeight}"
@@ -159,7 +159,9 @@
                 <Setter Property="PaneForeground" Value="{DynamicResource MahApps.Brushes.Text}" />
                 <Setter Property="ShowSelectionIndicator" Value="True" />
             </Style>
-
+            <converters:BoolToInvertConverter x:Key="BoolToInvertConverter" />
+            <converters:BoolToColorConverter x:Key="BoolToColorConverter" />
+            <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
         </ResourceDictionary>
     </UserControl.Resources>
 
