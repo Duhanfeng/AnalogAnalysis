@@ -434,6 +434,33 @@ namespace AnalogSignalAnalysisWpf
 
     #endregion
 
+    /// <summary>
+    /// 全局参数
+    /// </summary>
+    public class GlobalParam
+    {
+        /// <summary>
+        /// 气压系数
+        /// </summary>
+        public double PressureK { get; set; } = 1.0;
+
+        /// <summary>
+        /// 衰减档位
+        /// </summary>
+        public EScale Scale { get; set; } = EScale.x10;
+
+        /// <summary>
+        /// CHA电压档位
+        /// </summary>
+        public EVoltageDIV VoltageDIV { get; set; } = EVoltageDIV.DIV_2V5;
+
+        /// <summary>
+        /// 采样率
+        /// </summary>
+        public ESampleRate SampleRate { get; set; } = ESampleRate.Sps_49K;
+
+    }
+
     public class SystemParam
     {
         #region 硬件参数
@@ -478,6 +505,13 @@ namespace AnalogSignalAnalysisWpf
         public ThroughputMeasureParams ThroughputMeasureParams { get; set; } = new ThroughputMeasureParams();
 
         #endregion
+
+        #region 全局参数
+
+        public GlobalParam GlobalParam { get; set; } = new GlobalParam();
+
+        #endregion
+
     }
 
     /// <summary>

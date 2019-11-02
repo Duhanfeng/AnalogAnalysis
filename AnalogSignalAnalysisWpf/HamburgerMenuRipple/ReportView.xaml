@@ -1,0 +1,76 @@
+﻿<UserControl x:Class="AnalogSignalAnalysisWpf.ReportView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:AnalogSignalAnalysisWpf"
+             xmlns:livedata="clr-namespace:AnalogSignalAnalysisWpf.LiveData"
+             xmlns:cal="http://www.caliburnproject.org"
+             xmlns:chart="http://sparrowtoolkit.codeplex.com/wpf"
+             xmlns:converters="clr-namespace:AnalogSignalAnalysisWpf.Converters"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance local:MainWindowViewModel}"
+             d:DesignHeight="800" d:DesignWidth="800"
+             MinWidth="600">
+    <Grid>
+        <WrapPanel>
+            <StackPanel MinWidth="200" Margin="20,10,0,0">
+                <TextBlock Text="极限频率测试" Foreground="Green"/>
+                <DockPanel Margin="0,10,0,0">
+                    <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">测试状态</TextBlock>
+                    <TextBox Text="{Binding FrequencyMeasureStatus}" IsReadOnly="True"/>
+                </DockPanel>
+                <DockPanel Margin="0,10,0,0">
+                    <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">极限频率(Hz)</TextBlock>
+                    <TextBox Text="{Binding MaxLimitFrequency}" IsReadOnly="True"/>
+                </DockPanel>
+            </StackPanel>
+
+            <StackPanel MinWidth="200" Margin="20,10,0,0">
+                <TextBlock Text="吸合电压与释放电压测量" Foreground="Green"/>
+                <DockPanel Margin="0,10,0,0">
+                    <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">测试状态</TextBlock>
+                    <TextBox Text="{Binding PNMeasureStatus}" IsReadOnly="True"/>
+                </DockPanel>
+                <DockPanel Margin="0,10,0,0">
+                    <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">吸合电压(V)</TextBlock>
+                    <TextBox Text="{Binding PositiveVoltage}" IsReadOnly="True"/>
+                </DockPanel>
+                <DockPanel Margin="0,10,0,0">
+                    <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">释放电压(V)</TextBlock>
+                    <TextBox Text="{Binding NegativeVoltage}" IsReadOnly="True"/>
+                </DockPanel>
+            </StackPanel>
+
+            <StackPanel MinWidth="200" Margin="20,10,0,0">
+                <TextBlock Text="输入输出关系曲线测试" Foreground="Green"/>
+                <DockPanel Margin="0,10,0,0">
+                    <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">测试状态</TextBlock>
+                    <TextBox Text="{Binding IOMeasureStatus}" IsReadOnly="True"/>
+                </DockPanel>
+                <ListView ItemsSource="{Binding InputOutputInfos}" MinHeight="100" Margin="0,10,0,0">
+                    <ListView.View>
+                        <GridView>
+                            <!--<GridViewColumn DisplayMemberBinding="{Binding DateTime}" Header="时间"/>-->
+                            <GridViewColumn DisplayMemberBinding="{Binding Input, StringFormat={}{0:F3}}" Header="输入电压"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding Output, StringFormat={}{0:F3}}" Header="传感器电压"/>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </StackPanel>
+
+            <StackPanel MinWidth="200" Margin="20,10,0,0">
+                <TextBlock Text="流量测试" Foreground="Green"/>
+                <DockPanel Margin="0,10,0,0">
+                    <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">测试状态</TextBlock>
+                    <TextBox Text="{Binding FlowMeasureStatus}" IsReadOnly="True"/>
+                </DockPanel>
+                <DockPanel Margin="0,10,0,0">
+                    <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">流量(?)</TextBlock>
+                    <TextBox Text="{Binding Flow}" IsReadOnly="True"/>
+                </DockPanel>
+            </StackPanel>
+
+        </WrapPanel>
+    </Grid>
+</UserControl>

@@ -24,13 +24,31 @@ namespace AnalogSignalAnalysisWpf
             if (DataContext is MainWindowViewModel)
             {
                 var collection = HamburgerMenuControl.ItemsSource as HamburgerMenuItemCollection;
-                if (collection?.Count == 4)
+
+                foreach (var item in collection)
                 {
-                    (collection[0].Tag as UserControl).DataContext = (DataContext as MainWindowViewModel).FrequencyMeasurementViewModel;
-                    (collection[1].Tag as UserControl).DataContext = (DataContext as MainWindowViewModel).PNVoltageMeasurementViewModel;
-                    (collection[2].Tag as UserControl).DataContext = (DataContext as MainWindowViewModel).ThroughputMeasurementViewModel;
-                    (collection[3].Tag as UserControl).DataContext = (DataContext as MainWindowViewModel).InputOutputMeasurementViewModel;
+                    if (item.Tag is FrequencyMeasurementView)
+                    {
+                        (item.Tag as FrequencyMeasurementView).DataContext = (DataContext as MainWindowViewModel).FrequencyMeasurementViewModel;
+                    }
+                    else if (item.Tag is PNVoltageMeasurementView)
+                    {
+                        (item.Tag as PNVoltageMeasurementView).DataContext = (DataContext as MainWindowViewModel).PNVoltageMeasurementViewModel;
+                    }
+                    else if (item.Tag is InputOutputMeasurementView)
+                    {
+                        (item.Tag as InputOutputMeasurementView).DataContext = (DataContext as MainWindowViewModel).InputOutputMeasurementViewModel;
+                    }
+                    else if (item.Tag is ThroughputMeasurementView)
+                    {
+                        (item.Tag as ThroughputMeasurementView).DataContext = (DataContext as MainWindowViewModel).ThroughputMeasurementViewModel;
+                    }
+                    else if (item.Tag is BurnInTestView)
+                    {
+                        (item.Tag as BurnInTestView).DataContext = (DataContext as MainWindowViewModel).BurnInTestViewModel;
+                    }
                 }
+
             }
             
             var collection2 = HamburgerMenuControl.OptionsItemsSource as HamburgerMenuItemCollection;

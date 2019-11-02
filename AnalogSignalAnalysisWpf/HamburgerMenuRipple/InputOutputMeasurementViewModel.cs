@@ -660,9 +660,6 @@ namespace AnalogSignalAnalysisWpf
 
             measureThread = new System.Threading.Thread(() =>
             {
-                List<double> inputs = new List<double>();
-                List<double> outputs = new List<double>();
-
                 if (MinVoltage > MaxVoltage)
                 {
                     throw new ArgumentException("MinVoltage > MaxVoltage");
@@ -673,6 +670,7 @@ namespace AnalogSignalAnalysisWpf
                     IsMeasuring = true;
                 }
 
+                var infos = new List<InputOutputMeasurementInfo>();
                 MeasurementInfos = new ObservableCollection<InputOutputMeasurementInfo>();
 
                 double currentVoltage = MinVoltage;
@@ -684,8 +682,6 @@ namespace AnalogSignalAnalysisWpf
                 {
                     //设置当前电压
                     PLC.Voltage = currentVoltage;
-                    inputs.Add(currentVoltage);
-                    
                     Thread.Sleep(ComDelay);
 
                     //读取Scope数据
@@ -703,9 +699,9 @@ namespace AnalogSignalAnalysisWpf
                         OnMeasurementCompleted(new InputOutputMeasurementCompletedEventArgs());
                     }
 
-                    outputs.Add(medianData);
                     CurrentInput = currentVoltage;
                     CurrentOutput = medianData;
+                    infos.Add(new InputOutputMeasurementInfo(currentVoltage, medianData));
 
                     new Thread(delegate ()
                     {
@@ -740,7 +736,7 @@ namespace AnalogSignalAnalysisWpf
                 }
 
                 //输出结果
-                OnMeasurementCompleted(new InputOutputMeasurementCompletedEventArgs(true, inputs, outputs));
+                OnMeasurementCompleted(new InputOutputMeasurementCompletedEventArgs(true, infos));
 
             });
 

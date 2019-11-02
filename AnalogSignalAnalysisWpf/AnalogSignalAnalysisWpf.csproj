@@ -207,14 +207,21 @@
     <Compile Include="EventArgs\PNVoltageMeasurementCompletedEventArgs.cs" />
     <Compile Include="EventArgs\ThroughputMeasurementCompletedEventArgs.cs" />
     <Compile Include="EventArgs\MessageRaisedEventArgs.cs" />
+    <Compile Include="HamburgerMenuRipple\BurnInTestView.xaml.cs">
+      <DependentUpon>BurnInTestView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="HamburgerMenuRipple\FrequencyMeasurementView.xaml.cs">
       <DependentUpon>FrequencyMeasurementView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="HamburgerMenuRipple\BurnInTestViewModel.cs" />
     <Compile Include="HamburgerMenuRipple\FrequencyMeasurementViewModel.cs" />
     <Compile Include="HamburgerMenuRipple\HamburgerMenuRipple.xaml.cs">
       <DependentUpon>HamburgerMenuRipple.xaml</DependentUpon>
     </Compile>
     <Compile Include="HamburgerMenuRipple\InputOutputMeasurementViewModel.cs" />
+    <Compile Include="HamburgerMenuRipple\ReportView.xaml.cs">
+      <DependentUpon>ReportView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="HamburgerMenuRipple\ThroughputMeasurementView.xaml.cs">
       <DependentUpon>ThroughputMeasurementView.xaml</DependentUpon>
     </Compile>
@@ -252,6 +259,10 @@
       <DependentUpon>ScopeControlView2.xaml</DependentUpon>
     </Compile>
     <Compile Include="SystemParamManager.cs" />
+    <Page Include="HamburgerMenuRipple\BurnInTestView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="HamburgerMenuRipple\FrequencyMeasurementView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -259,6 +270,10 @@
     <Page Include="HamburgerMenuRipple\HamburgerMenuRipple.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="HamburgerMenuRipple\ReportView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="HamburgerMenuRipple\ThroughputMeasurementView.xaml">
       <Generator>MSBuild:Compile</Generator>

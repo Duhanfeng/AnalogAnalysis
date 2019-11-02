@@ -13,11 +13,10 @@ namespace AnalogSignalAnalysisWpf
             IsSuccess = false;
         }
 
-        public InputOutputMeasurementCompletedEventArgs(bool isSuccess, List<double> inputs, List<double> outputs)
+        public InputOutputMeasurementCompletedEventArgs(bool isSuccess, List<InputOutputMeasurementInfo> infos)
         {
             IsSuccess = isSuccess;
-            Inputs = inputs;
-            Outputs = outputs;
+            Infos = infos;
 
         }
 
@@ -27,14 +26,9 @@ namespace AnalogSignalAnalysisWpf
         public bool IsSuccess { get; }
 
         /// <summary>
-        /// 输入信号
+        /// 输入输出信息
         /// </summary>
-        public List<double> Inputs { get; private set; } = new List<double>();
-
-        /// <summary>
-        /// 输出信号
-        /// </summary>
-        public List<double> Outputs { get; private set; } = new List<double>();
+        public List<InputOutputMeasurementInfo> Infos { get; private set; } = new List<InputOutputMeasurementInfo>();
 
     }
 }

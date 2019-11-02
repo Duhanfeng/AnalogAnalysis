@@ -55,6 +55,8 @@ namespace AnalogSignalAnalysisWpf
     {
         #region 构造、析构接口
 
+        private object measureLock = new object();
+
         /// <summary>
         /// 创建MainWindowViewModel新实例
         /// </summary>
@@ -217,29 +219,119 @@ namespace AnalogSignalAnalysisWpf
 
         }
 
-        private void ThroughputMeasurementViewModel_MeasurementCompleted(object sender, ThroughputMeasurementCompletedEventArgs e)
+        private void MeasurementViewModel_MeasurementStarted(object sender, EventArgs e)
         {
-            IsMeasuring = false;
-        }
+            lock (measureLock)
+            {
+                IsMeasuring = true;
 
-        private void PNVoltageMeasurementViewModel_MeasurementCompleted(object sender, PNVoltageMeasurementCompletedEventArgs e)
-        {
-            IsMeasuring = false;
-        }
-
-        private void InputOutputMeasurementViewModel_MeasurementCompleted(object sender, InputOutputMeasurementCompletedEventArgs e)
-        {
-            IsMeasuring = false;
+                if (sender is FrequencyMeasurementViewModel)
+                {
+                    FrequencyMeasureStatus = "测试中";
+                }
+                else if (sender is PNVoltageMeasurementViewModel)
+                {
+                    PNMeasureStatus = "测试中";
+                }
+                else if (sender is InputOutputMeasurementViewModel)
+                {
+                    IOMeasureStatus = "测试中";
+                }
+                else if (sender is ThroughputMeasurementViewModel)
+                {
+                    FlowMeasureStatus = "测试中";
+                }
+            }
         }
 
         private void FrequencyMeasurementViewModel_MeasurementCompleted(object sender, FrequencyMeasurementCompletedEventArgs e)
         {
-            IsMeasuring = false;
+            lock (measureLock)
+            {
+                IsMeasuring = false;
+            }
+
+            if (e.IsSuccess)
+            {
+                FrequencyMeasureStatus = "测试完成";
+                MaxLimitFrequency = e.MaxLimitFrequency;
+            }
+            else
+            {
+                FrequencyMeasureStatus = "测试失败";
+                MaxLimitFrequency = -1;
+            }
         }
 
-        private void MeasurementViewModel_MeasurementStarted(object sender, EventArgs e)
+        private void PNVoltageMeasurementViewModel_MeasurementCompleted(object sender, PNVoltageMeasurementCompletedEventArgs e)
         {
-            IsMeasuring = true;
+            lock (measureLock)
+            {
+                IsMeasuring = false;
+            }
+            
+            if (e.IsSuccess)
+            {
+                PNMeasureStatus = "测试完成";
+                PositiveVoltage = e.PositiveVoltage;
+                NegativeVoltage = e.NegativeVoltage;
+            }
+            else
+            {
+                PNMeasureStatus = "测试失败";
+                PositiveVoltage = -1;
+                NegativeVoltage = -1;
+            }
+
+        }
+
+        private void InputOutputMeasurementViewModel_MeasurementCompleted(object sender, InputOutputMeasurementCompletedEventArgs e)
+        {
+            lock (measureLock)
+            {
+                IsMeasuring = false;
+            }
+
+            new Thread(delegate ()
+            {
+                ThreadPool.QueueUserWorkItem(delegate
+                {
+                    System.Threading.SynchronizationContext.SetSynchronizationContext(new System.Windows.Threading.DispatcherSynchronizationContext(System.Windows.Application.Current.Dispatcher));
+                    System.Threading.SynchronizationContext.Current.Send(pl =>
+                    {
+                        if (e.IsSuccess)
+                        {
+                            IOMeasureStatus = "测试完成";
+                            InputOutputInfos = new ObservableCollection<InputOutputMeasurementInfo>(e.Infos);
+                        }
+                        else
+                        {
+                            IOMeasureStatus = "测试失败";
+                            InputOutputInfos = new ObservableCollection<InputOutputMeasurementInfo>();
+                        }
+                    }, null);
+                });
+            }).Start();
+            
+        }
+
+        private void ThroughputMeasurementViewModel_MeasurementCompleted(object sender, ThroughputMeasurementCompletedEventArgs e)
+        {
+            lock (measureLock)
+            {
+                IsMeasuring = false;
+            }
+
+            if (e.IsSuccess)
+            {
+                FlowMeasureStatus = "测试完成";
+                Flow = e.Time;
+            }
+            else
+            {
+                FlowMeasureStatus = "测试失败";
+                Flow = -1;
+            }
         }
 
         private void FrequencyMeasurementViewModel_MessageRaised(object sender, MessageRaisedEventArgs e)
@@ -576,6 +668,7 @@ namespace AnalogSignalAnalysisWpf
             NotifyOfPropertyChange(() => ScopeCHAEnable);
             NotifyOfPropertyChange(() => ScopeCHBEnable);
 
+            NotifyOfPropertyChange(() => IsHardwareValid);
         }
 
         private readonly int SampleInterval = 1;
@@ -1328,6 +1421,8 @@ namespace AnalogSignalAnalysisWpf
             NotifyOfPropertyChange(() => PLCRealityCurrent);
             NotifyOfPropertyChange(() => PLCRealityTemperature);
 
+            NotifyOfPropertyChange(() => IsHardwareValid);
+
             //lock (plcLock)
             //{
             //    if (isPLCThreadRunning)
@@ -1475,6 +1570,8 @@ namespace AnalogSignalAnalysisWpf
             NotifyOfPropertyChange(() => PWMSerialPort);
             NotifyOfPropertyChange(() => PWMFrequency);
             NotifyOfPropertyChange(() => PWMDutyRatio);
+
+            NotifyOfPropertyChange(() => IsHardwareValid);
         }
 
         #endregion
@@ -1538,6 +1635,48 @@ namespace AnalogSignalAnalysisWpf
         #endregion
 
         #endregion
+
+
+        /// <summary>
+        /// 硬件有效标志
+        /// </summary>
+        public bool IsHardwareValid
+        {
+            get
+            {
+                if ((Scope?.IsConnect == true) && (PLC?.IsConnect == true) && (PWM?.IsConnect == true))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 更新硬件
+        /// </summary>
+        public void UpdateHardware()
+        {
+            if (Scope?.IsConnect != true)
+            {
+                Scope?.Connect();
+            }
+
+            if (PLC?.IsConnect != true)
+            {
+                PLC?.Connect();
+            }
+
+            if (PWM?.IsConnect != true)
+            {
+                PWM?.Connect();
+            }
+
+            NotifyOfPropertyChange(() => IsHardwareValid);
+        }
 
         #endregion
 
@@ -1661,6 +1800,286 @@ namespace AnalogSignalAnalysisWpf
         /// 通气量测试Model
         /// </summary>
         public ThroughputMeasurementViewModel ThroughputMeasurementViewModel { get; set; }
+
+        /// <summary>
+        /// 老化测试
+        /// </summary>
+        public BurnInTestViewModel BurnInTestViewModel { get; set; }
+
+        /// <summary>
+        /// 使能测试
+        /// </summary>
+        public bool IsEnableTest
+        {
+            get
+            {
+                //假如硬件无效,则禁止使能测试
+                if (!IsHardwareValid)
+                {
+                    return false;
+                }
+
+                //正在测试中,则禁止使能测试
+                lock (measureLock)
+                {
+                    if (IsMeasuring)
+                    {
+                        return false;
+                    }
+                }
+
+                return true; 
+            }
+        }
+
+        /// <summary>
+        /// 测试全部
+        /// </summary>
+        public void TestAll()
+        {
+            lock (measureLock)
+            {
+                if (IsMeasuring)
+                {
+                    return;
+                }
+            }
+
+            new Thread(() =>
+            {
+                FrequencyMeasurementViewModel.Start();
+                Thread.Sleep(1000);
+
+                //等待测试完成
+                while (true)
+                {
+                    lock (measureLock)
+                    {
+                        if (!IsMeasuring)
+                        {
+                            break;
+                        }
+                    }
+                    Thread.Sleep(20);
+                }
+
+                InputOutputMeasurementViewModel.Start();
+                Thread.Sleep(1000);
+
+                //等待测试完成
+                while (true)
+                {
+                    lock (measureLock)
+                    {
+                        if (!IsMeasuring)
+                        {
+                            break;
+                        }
+                    }
+                    Thread.Sleep(20);
+                }
+
+                PNVoltageMeasurementViewModel.Start();
+                Thread.Sleep(1000);
+
+                //等待测试完成
+                while (true)
+                {
+                    lock (measureLock)
+                    {
+                        if (!IsMeasuring)
+                        {
+                            break;
+                        }
+                    }
+                    Thread.Sleep(20);
+                }
+
+                ThroughputMeasurementViewModel.Start();
+                Thread.Sleep(1000);
+
+                //等待测试完成
+                while (true)
+                {
+                    lock (measureLock)
+                    {
+                        if (!IsMeasuring)
+                        {
+                            break;
+                        }
+                    }
+                    Thread.Sleep(20);
+                }
+
+                NotifyOfPropertyChange(() => IsEnableTest);
+
+            }).Start();
+
+        }
+
+        #region 测试结果
+
+        private string frequencyMeasureStatus = "就绪";
+
+        /// <summary>
+        /// 频率测量状态
+        /// </summary>
+        public string FrequencyMeasureStatus
+        {
+            get 
+            { 
+                return frequencyMeasureStatus; 
+            }
+            set 
+            { 
+                frequencyMeasureStatus = value;
+                NotifyOfPropertyChange(() => FrequencyMeasureStatus);
+            }
+        }
+
+        private int maxLimitFrequency;
+
+        /// <summary>
+        /// 极限频率
+        /// </summary>
+        public int MaxLimitFrequency
+        {
+            get 
+            { 
+                return maxLimitFrequency; 
+            }
+            set 
+            { 
+                maxLimitFrequency = value;
+                NotifyOfPropertyChange(() => MaxLimitFrequency);
+            }
+        }
+
+        private string pnMeasureStatus = "就绪";
+
+        /// <summary>
+        /// 吸合/释放电压测试状态
+        /// </summary>
+        public string PNMeasureStatus
+        {
+            get 
+            { 
+                return pnMeasureStatus; 
+            }
+            set 
+            { 
+                pnMeasureStatus = value; 
+                NotifyOfPropertyChange(() => PNMeasureStatus);
+            }
+        }
+
+        private double positiveVoltage;
+
+        /// <summary>
+        /// 有效电压/吸合电压(V)
+        /// </summary>
+        public double PositiveVoltage
+        {
+            get 
+            { 
+                return positiveVoltage;
+            }
+            set 
+            {
+                positiveVoltage = value;
+            }
+        }
+
+        private double negativeVoltage;
+
+        /// <summary>
+        /// 无效电压/释放电压(V)
+        /// </summary>
+        public double NegativeVoltage
+        {
+            get
+            { 
+                return negativeVoltage;
+            }
+            set 
+            { 
+                negativeVoltage = value; 
+            }
+        }
+
+        private string ioMeasureStatus = "就绪";
+
+        /// <summary>
+        /// 输入输出测试状态
+        /// </summary>
+        public string IOMeasureStatus
+        {
+            get
+            {
+                return ioMeasureStatus;
+            }
+            set
+            {
+                ioMeasureStatus = value;
+                NotifyOfPropertyChange(() => IOMeasureStatus);
+            }
+        }
+
+        private ObservableCollection<InputOutputMeasurementInfo> inputOutputInfos;
+
+        /// <summary>
+        /// 输入输出信息
+        /// </summary>
+        public ObservableCollection<InputOutputMeasurementInfo> InputOutputInfos
+        {
+            get 
+            { 
+                return inputOutputInfos; 
+            }
+            set 
+            {
+                inputOutputInfos = value;
+                NotifyOfPropertyChange(() => InputOutputInfos);
+            }
+        }
+
+        private string flowMeasureStatus = "就绪";
+
+        /// <summary>
+        /// 通气量测试状态
+        /// </summary>
+        public string FlowMeasureStatus
+        {
+            get
+            {
+                return flowMeasureStatus;
+            }
+            set
+            {
+                flowMeasureStatus = value;
+                NotifyOfPropertyChange(() => FlowMeasureStatus);
+            }
+        }
+
+        private double flow;
+
+        /// <summary>
+        /// 流量
+        /// </summary>
+        public double Flow
+        {
+            get 
+            {
+                return flow; 
+            }
+            set 
+            { 
+                flow = value;
+                NotifyOfPropertyChange(() => Flow);
+            }
+        }
+
+        #endregion
 
         #endregion
 
@@ -1809,6 +2228,78 @@ namespace AnalogSignalAnalysisWpf
             }
 
         }
+
+        #region 默认全局参数
+
+        /// <summary>
+        /// 全局气压比例系数(P/V)
+        /// </summary>
+        public double GlobalPressureK 
+        {
+            get
+            {
+                return SystemParamManager.SystemParam.GlobalParam.PressureK;
+            }
+            set
+            {
+                SystemParamManager.SystemParam.GlobalParam.PressureK = value;
+                NotifyOfPropertyChange(() => GlobalPressureK);
+                SystemParamManager.SaveParams();
+            }
+        }
+
+        /// <summary>
+        /// CHA探头衰变
+        /// </summary>
+        public string GlobalScopeCHAScale
+        {
+            get
+            {
+                return EnumHelper.GetDescription(SystemParamManager.SystemParam.GlobalParam.Scale);
+            }
+            set
+            {
+                SystemParamManager.SystemParam.GlobalParam.Scale = EnumHelper.GetEnum<EScale>(value);
+                NotifyOfPropertyChange(() => GlobalScopeCHAScale);
+                SystemParamManager.SaveParams();
+            }
+        }
+
+        /// <summary>
+        /// CHA电压档位
+        /// </summary>
+        public string GlobalScopeCHAVoltageDIV
+        {
+            get
+            {
+                return EnumHelper.GetDescription(SystemParamManager.SystemParam.GlobalParam.VoltageDIV);
+            }
+            set
+            {
+                SystemParamManager.SystemParam.GlobalParam.VoltageDIV = EnumHelper.GetEnum<EVoltageDIV>(value);
+                NotifyOfPropertyChange(() => GlobalScopeCHAVoltageDIV);
+                SystemParamManager.SaveParams();
+            }
+        }
+
+        /// <summary>
+        /// 采样率
+        /// </summary>
+        public string GlobalScopeSampleRate
+        {
+            get
+            {
+                return EnumHelper.GetDescription(SystemParamManager.SystemParam.GlobalParam.SampleRate);
+            }
+            set
+            {
+                SystemParamManager.SystemParam.GlobalParam.SampleRate = EnumHelper.GetEnum<ESampleRate>(value);
+                NotifyOfPropertyChange(() => GlobalScopeSampleRate);
+                SystemParamManager.SaveParams();
+            }
+        }
+
+        #endregion
 
         #endregion
 

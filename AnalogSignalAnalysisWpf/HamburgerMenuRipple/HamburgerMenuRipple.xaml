@@ -239,19 +239,19 @@
                                 <local:PNVoltageMeasurementView />
                             </Controls:HamburgerMenuIconItem.Tag>
                         </Controls:HamburgerMenuIconItem>
-                        <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="流量测试">
-                            <Controls:HamburgerMenuIconItem.Tag>
-                                <local:ThroughputMeasurementView />
-                            </Controls:HamburgerMenuIconItem.Tag>
-                        </Controls:HamburgerMenuIconItem>
                         <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="输入输出关系曲线测试">
                             <Controls:HamburgerMenuIconItem.Tag>
                                 <local:InputOutputMeasurementView />
                             </Controls:HamburgerMenuIconItem.Tag>
                         </Controls:HamburgerMenuIconItem>
+                        <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="流量测试">
+                            <Controls:HamburgerMenuIconItem.Tag>
+                                <local:ThroughputMeasurementView />
+                            </Controls:HamburgerMenuIconItem.Tag>
+                        </Controls:HamburgerMenuIconItem>
                         <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="老化测试">
                             <Controls:HamburgerMenuIconItem.Tag>
-                                <local:InputOutputMeasurementView />
+                                <local:BurnInTestView />
                             </Controls:HamburgerMenuIconItem.Tag>
                         </Controls:HamburgerMenuIconItem>
                     </Controls:HamburgerMenuItemCollection>
@@ -260,9 +260,9 @@
                 <!--  Options  -->
                 <Controls:HamburgerMenu.OptionsItemsSource>
                     <Controls:HamburgerMenuItemCollection>
-                        <Controls:HamburgerMenuIconItem Icon="{iconPacks:Material Kind=Settings}" Label="报告">
+                        <Controls:HamburgerMenuIconItem Icon="{iconPacks:Material Kind=FileDocumentBoxCheckOutline}" Label="报告">
                             <Controls:HamburgerMenuIconItem.Tag>
-                                <local:SettingsView/>
+                                <local:ReportView/>
                             </Controls:HamburgerMenuIconItem.Tag>
                         </Controls:HamburgerMenuIconItem>
                         <Controls:HamburgerMenuIconItem Icon="{iconPacks:Material Kind=Settings}" Label="设置">
