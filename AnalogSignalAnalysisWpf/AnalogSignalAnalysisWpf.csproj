@@ -237,11 +237,11 @@
     <Compile Include="HamburgerMenuRipple\InputOutputMeasurementView.xaml.cs">
       <DependentUpon>InputOutputMeasurementView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Hardware\PLC\ModbusPLC.cs" />
     <Compile Include="Hardware\Power\IPower.cs" />
     <Compile Include="Hardware\IPLCCommunication.cs" />
     <Compile Include="Hardware\Power\ModbusPower.cs" />
-    <Compile Include="Hardware\PWM\IPWM.cs" />
-    <Compile Include="Hardware\PWM\SerialPortPWM.cs" />
+    <Compile Include="Hardware\PLC\IPLC.cs" />
     <Compile Include="Hardware\Scope\IScopeBase.cs" />
     <Compile Include="Hardware\Scope\LOTOA02.cs" />
     <Compile Include="Hardware\Scope\MyDLLimport.cs" />
@@ -253,8 +253,8 @@
     <Compile Include="PowerControlView.xaml.cs">
       <DependentUpon>PowerControlView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="PWMControlView.xaml.cs">
-      <DependentUpon>PWMControlView.xaml</DependentUpon>
+    <Compile Include="PLCControlView.xaml.cs">
+      <DependentUpon>PLCControlView.xaml</DependentUpon>
     </Compile>
     <Compile Include="ScopeControlView2.xaml.cs">
       <DependentUpon>ScopeControlView2.xaml</DependentUpon>
@@ -313,7 +313,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="PWMControlView.xaml">
+    <Page Include="PLCControlView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

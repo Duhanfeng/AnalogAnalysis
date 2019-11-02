@@ -299,9 +299,9 @@ namespace AnalogSignalAnalysisWpf
         public int Frequency { get; set; }
 
         /// <summary>
-        /// PWM次数
+        /// PLC次数
         /// </summary>
-        public int PWMCount { get; set; }
+        public int PLCCount { get; set; }
 
     }
 
@@ -376,7 +376,7 @@ namespace AnalogSignalAnalysisWpf
 
     }
 
-    public class PWMParams
+    public class PLCParams
     {
         /// <summary>
         /// 串口
@@ -395,7 +395,7 @@ namespace AnalogSignalAnalysisWpf
     }
 
     /// <summary>
-    /// PWM参数
+    /// PLC参数
     /// </summary>
     public class PowerParams
     {
@@ -493,9 +493,9 @@ namespace AnalogSignalAnalysisWpf
         public ScopeParams ScopeParams { get; set; } = new ScopeParams();
 
         /// <summary>
-        /// PWM参数
+        /// PLC参数
         /// </summary>
-        public PWMParams PWMParams { get; set; } = new PWMParams();
+        public PLCParams PLCParams { get; set; } = new PLCParams();
 
         /// <summary>
         /// Power参数

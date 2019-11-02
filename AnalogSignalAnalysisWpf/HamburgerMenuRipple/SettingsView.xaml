@@ -108,10 +108,10 @@
                     <local:PowerControlView DataContext="{Binding}"/>
                 </StackPanel>
             </TabItem>
-            <TabItem Header="PWM调试">
+            <TabItem Header="PLC调试">
                 <StackPanel Margin="10,5" Orientation="Horizontal">
-                    <!--<Label Foreground="DarkGreen" FontSize="16">PWM</Label>-->
-                    <local:PWMControlView DataContext="{Binding}"/>
+                    <!--<Label Foreground="DarkGreen" FontSize="16">PLC</Label>-->
+                    <local:PLCControlView DataContext="{Binding}"/>
                 </StackPanel>
             </TabItem>
         </TabControl>

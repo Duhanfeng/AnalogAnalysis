@@ -1,5 +1,5 @@
 ﻿using AnalogSignalAnalysisWpf.Hardware;
-using AnalogSignalAnalysisWpf.Hardware.PWM;
+using AnalogSignalAnalysisWpf.Hardware;
 using AnalogSignalAnalysisWpf.Hardware.Scope;
 using AnalogSignalAnalysisWpf.LiveData;
 using Caliburn.Micro;
@@ -96,7 +96,7 @@ namespace AnalogSignalAnalysisWpf
             //恢复配置参数
             SystemParamManager = SystemParamManager.GetInstance();
             Frequency = SystemParamManager.SystemParam.BurnInTestParams.Frequency;
-            PWMCount = SystemParamManager.SystemParam.BurnInTestParams.PWMCount;
+            PLCCount = SystemParamManager.SystemParam.BurnInTestParams.PLCCount;
 
             MeasurementInfos = new ObservableCollection<BurnInTestInfo>();
 
@@ -105,7 +105,7 @@ namespace AnalogSignalAnalysisWpf
             IsAdmin = false;
         }
 
-        public BurnInTestViewModel(IScopeBase scope, IPower power, IPWM pwm) : this()
+        public BurnInTestViewModel(IScopeBase scope, IPower power, IPLC plc) : this()
         {
             if (scope == null)
             {
@@ -117,14 +117,14 @@ namespace AnalogSignalAnalysisWpf
                 throw new ArgumentException("power invalid");
             }
 
-            if (pwm == null)
+            if (plc == null)
             {
-                throw new ArgumentException("pwm invalid");
+                throw new ArgumentException("plc invalid");
             }
 
             Scope = scope;
             Power = power;
-            PWM = pwm;
+            PLC = plc;
 
             if (!IsHardwareValid)
             {
@@ -153,7 +153,7 @@ namespace AnalogSignalAnalysisWpf
         /// <summary>
         /// Power接口
         /// </summary>
-        public IPWM PWM { get; set; }
+        public IPLC PLC { get; set; }
 
         /// <summary>
         /// 硬件有效标志
@@ -162,7 +162,7 @@ namespace AnalogSignalAnalysisWpf
         {
             get
             {
-                if ((Scope?.IsConnect == true) && (Power?.IsConnect == true) && (PWM?.IsConnect == true))
+                if ((Scope?.IsConnect == true) && (Power?.IsConnect == true) && (PLC?.IsConnect == true))
                 {
                     return true;
                 }
@@ -188,9 +188,9 @@ namespace AnalogSignalAnalysisWpf
                 Power?.Connect();
             }
 
-            if (PWM?.IsConnect != true)
+            if (PLC?.IsConnect != true)
             {
-                PWM?.Connect();
+                PLC?.Connect();
             }
 
             NotifyOfPropertyChange(() => IsHardwareValid);
@@ -314,22 +314,22 @@ namespace AnalogSignalAnalysisWpf
             }
         }
 
-        private int pwmCount;
+        private int plcCount;
 
         /// <summary>
         /// 测试次数
         /// </summary>
-        public int PWMCount
+        public int PLCCount
         {
             get 
             { 
-                return pwmCount; 
+                return plcCount; 
             }
             set 
             {
-                pwmCount = value;
-                NotifyOfPropertyChange(() => PWMCount);
-                SystemParamManager.SystemParam.BurnInTestParams.PWMCount = value;
+                plcCount = value;
+                NotifyOfPropertyChange(() => PLCCount);
+                SystemParamManager.SystemParam.BurnInTestParams.PLCCount = value;
                 SystemParamManager.SaveParams();
             }
         }
@@ -364,7 +364,7 @@ namespace AnalogSignalAnalysisWpf
         {
             Power.EnableOutput = false;
 
-            PWM.Frequency = 0;
+            PLC.Frequency = 0;
             if (e.IsSuccess == true)
             {
                 RunningStatus = "成功";
@@ -561,18 +561,18 @@ namespace AnalogSignalAnalysisWpf
                 }
 
                 //获取运行时长(单位:MS)
-                double testTime = (double)PWMCount * 1000.0 / Frequency;
+                double testTime = (double)PLCCount * 1000.0 / Frequency;
 
                 //设置频率
-                PWM.Frequency = 0;
-                PWM.DutyRatio = SystemParamManager.SystemParam.FrequencyMeasureParams.DutyRatio; ;
+                PLC.Frequency = 0;
+                PLC.DutyRatio = SystemParamManager.SystemParam.FrequencyMeasureParams.DutyRatio; ;
 
                 //使能Power输出
                 Power.Voltage = SystemParamManager.SystemParam.FrequencyMeasureParams.OutputVoltage;
                 Power.EnableOutput = true;
 
                 //设置实际输出频率
-                PWM.Frequency = Frequency;
+                PLC.Frequency = Frequency;
 
                 //设置Scope采集时长
                 Scope.SampleTime = 1000;

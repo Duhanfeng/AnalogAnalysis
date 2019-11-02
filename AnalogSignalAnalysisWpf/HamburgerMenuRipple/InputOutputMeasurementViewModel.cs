@@ -1,5 +1,5 @@
 ﻿using AnalogSignalAnalysisWpf.Hardware;
-using AnalogSignalAnalysisWpf.Hardware.PWM;
+using AnalogSignalAnalysisWpf.Hardware;
 using AnalogSignalAnalysisWpf.Hardware.Scope;
 using AnalogSignalAnalysisWpf.LiveData;
 using Caliburn.Micro;
@@ -102,7 +102,7 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         /// <param name="scope">示波器</param>
         /// <param name="power">Power</param>
-        public InputOutputMeasurementViewModel(IScopeBase scope, IPower power, IPWM pwm) : this()
+        public InputOutputMeasurementViewModel(IScopeBase scope, IPower power, IPLC plc) : this()
         {
             if (scope == null)
             {
@@ -114,14 +114,14 @@ namespace AnalogSignalAnalysisWpf
                 throw new ArgumentException("power invalid");
             }
 
-            if (pwm == null)
+            if (plc == null)
             {
-                throw new ArgumentException("pwm invalid");
+                throw new ArgumentException("plc invalid");
             }
 
             Scope = scope;
             Power = power;
-            PWM = pwm;
+            PLC = plc;
 
             if (!IsHardwareValid)
             {
@@ -150,7 +150,7 @@ namespace AnalogSignalAnalysisWpf
         /// <summary>
         /// Power接口
         /// </summary>
-        public IPWM PWM { get; set; }
+        public IPLC PLC { get; set; }
 
         /// <summary>
         /// 硬件有效标志
@@ -159,7 +159,7 @@ namespace AnalogSignalAnalysisWpf
         {
             get
             {
-                if ((Scope?.IsConnect == true) && (Power?.IsConnect == true) && (PWM?.IsConnect == true))
+                if ((Scope?.IsConnect == true) && (Power?.IsConnect == true) && (PLC?.IsConnect == true))
                 {
                     return true;
                 }
@@ -185,9 +185,9 @@ namespace AnalogSignalAnalysisWpf
                 Power?.Connect();
             }
 
-            if (PWM?.IsConnect != true)
+            if (PLC?.IsConnect != true)
             {
-                PWM?.Connect();
+                PLC?.Connect();
             }
 
             NotifyOfPropertyChange(() => IsHardwareValid);

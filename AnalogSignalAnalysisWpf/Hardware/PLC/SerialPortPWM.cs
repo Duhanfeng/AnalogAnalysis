@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace AnalogSignalAnalysisWpf.Hardware.PWM
 {
-    public class SerialPortPWM : IPWM
+    public class SerialPortPWM : IPLC
     {
         /// <summary>
         /// 创建SerialPortPWM新实例

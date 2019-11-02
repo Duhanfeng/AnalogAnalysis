@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace AnalogSignalAnalysisWpf
 {
     /// <summary>
-    /// PWMControlView.xaml 的交互逻辑
+    /// PLCControlView.xaml 的交互逻辑
     /// </summary>
-    public partial class PWMControlView : UserControl
+    public partial class PLCControlView : UserControl
     {
-        public PWMControlView()
+        public PLCControlView()
         {
             InitializeComponent();
         }

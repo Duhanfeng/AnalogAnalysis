@@ -160,7 +160,7 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void PWMMenuItem_Click(object sender, RoutedEventArgs e)
+        private void PLCMenuItem_Click(object sender, RoutedEventArgs e)
         {
             for (int i = 0; i < Flyouts.Items.Count; i++)
             {
