@@ -70,8 +70,8 @@ namespace AnalogSignalAnalysisWpf
 
             CurrentFrequency = pulseMessage;
 
-            ScopeCHACollection = scopeCHACollection;
-            ScopeCHAEdgeCollection = scopeCHAEdgeCollection;
+            ScopeCHACollection = new ObservableCollection<Data>(scopeCHACollection);
+            ScopeCHAEdgeCollection = new ObservableCollection<Data>(scopeCHAEdgeCollection);
         }
 
     }
@@ -821,6 +821,29 @@ namespace AnalogSignalAnalysisWpf
         }
 
         /// <summary>
+        /// 显示测量信息
+        /// </summary>
+        /// <param name="currentInputFrequency"></param>
+        /// <param name="currentSampleTime"></param>
+        /// <param name="pulseFrequencies"></param>
+        /// <param name="scopeCHACollection"></param>
+        /// <param name="scopeCHAEdgeCollection"></param>
+        private void ShowMeasureInfos(int currentInputFrequency, int currentSampleTime, List<double> pulseFrequencies, ObservableCollection<Data> scopeCHACollection, ObservableCollection<Data> scopeCHAEdgeCollection)
+        {
+            new Thread(delegate ()
+            {
+                ThreadPool.QueueUserWorkItem(delegate
+                {
+                    SynchronizationContext.SetSynchronizationContext(new System.Windows.Threading.DispatcherSynchronizationContext(System.Windows.Application.Current.Dispatcher));
+                    SynchronizationContext.Current.Send(pl =>
+                    {
+                        MeasurementInfos.Insert(0, new FrequencyMeasurementInfo(currentInputFrequency, currentSampleTime, pulseFrequencies, scopeCHACollection, scopeCHAEdgeCollection));
+                    }, null);
+                });
+            }).Start();
+        }
+
+        /// <summary>
         /// 启动
         /// </summary>
         public void Start()
@@ -925,17 +948,9 @@ namespace AnalogSignalAnalysisWpf
                     //显示分析结果
                     CurrentInputFrequency = item.Frequency;
                     CurrentSampleTime = item.SampleTime;
-                    new Thread(delegate ()
-                    {
-                        ThreadPool.QueueUserWorkItem(delegate
-                        {
-                            System.Threading.SynchronizationContext.SetSynchronizationContext(new System.Windows.Threading.DispatcherSynchronizationContext(System.Windows.Application.Current.Dispatcher));
-                            System.Threading.SynchronizationContext.Current.Send(pl =>
-                            {
-                                MeasurementInfos.Insert(0, new FrequencyMeasurementInfo(CurrentInputFrequency, CurrentSampleTime, pulseFrequencies, ScopeCHACollection, ScopeCHAEdgeCollection));
-                            }, null);
-                        });
-                    }).Start();
+
+                    //显示测量信息
+                    ShowMeasureInfos(CurrentInputFrequency, CurrentSampleTime, pulseFrequencies, ScopeCHACollection, ScopeCHAEdgeCollection);
 
                     if (pulseFrequencies.Count > 0)
                     {

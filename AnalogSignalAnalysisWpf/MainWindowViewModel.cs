@@ -197,6 +197,7 @@ namespace AnalogSignalAnalysisWpf
             InputOutputMeasurementViewModel = new InputOutputMeasurementViewModel(Scope, PLC, PWM);
             PNVoltageMeasurementViewModel = new PNVoltageMeasurementViewModel(Scope, PLC, PWM);
             ThroughputMeasurementViewModel = new ThroughputMeasurementViewModel(Scope, PLC, PWM);
+            BurnInTestViewModel = new BurnInTestViewModel(Scope, PLC, PWM);
 
             FrequencyMeasurementViewModel.MeasurementStarted += MeasurementViewModel_MeasurementStarted;
             InputOutputMeasurementViewModel.MeasurementStarted += MeasurementViewModel_MeasurementStarted;

@@ -7,6 +7,7 @@ using DataAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -14,7 +15,55 @@ using System.Threading.Tasks;
 
 namespace AnalogSignalAnalysisWpf
 {
-   
+    public class BurnInTestInfo
+    {
+        /// <summary>
+        /// 时间
+        /// </summary>
+        public string DateTime { get; set; }
+
+        /// <summary>
+        /// 输入频率
+        /// </summary>
+        public int InputFrequency { get; set; }
+
+        /// <summary>
+        /// 采样时间
+        /// </summary>
+        public int SampleTime { get; set; }
+
+        /// <summary>
+        /// 当前频率
+        /// </summary>
+        public string CurrentFrequency { get; set; }
+
+        /// <summary>
+        /// 创建FrequencyMeasurementInfo新实例
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="sampleTime"></param>
+        /// <param name="currentFrequency"></param>
+        public BurnInTestInfo(int input, int sampleTime, List<double> pulseFrequencies)
+        {
+            DateTime = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            InputFrequency = input;
+            SampleTime = sampleTime;
+
+            string pulseMessage = "";
+
+            if (pulseFrequencies != null)
+            {
+                foreach (var item in pulseFrequencies)
+                {
+                    pulseMessage += item.ToString("F2") + ", ";
+                }
+            }
+
+            CurrentFrequency = pulseMessage;
+        }
+
+    }
+
     public class BurnInTestViewModel : Screen
     {
         #region 构造函数
@@ -44,46 +93,12 @@ namespace AnalogSignalAnalysisWpf
 
         public BurnInTestViewModel()
         {
-            
             //恢复配置参数
             SystemParamManager = SystemParamManager.GetInstance();
-            FrequencyErrLimit = SystemParamManager.SystemParam.FrequencyMeasureParams.FrequencyErrLimit;
- 
+            Frequency = SystemParamManager.SystemParam.BurnInTestParams.Frequency;
+            PWMCount = SystemParamManager.SystemParam.BurnInTestParams.PWMCount;
 
-            OutputVoltage = SystemParamManager.SystemParam.FrequencyMeasureParams.OutputVoltage;
-            DutyRatio = SystemParamManager.SystemParam.FrequencyMeasureParams.DutyRatio;
-            VoltageFilterCount = SystemParamManager.SystemParam.FrequencyMeasureParams.VoltageFilterCount;
-
-            
-            if ((SystemParamManager.SystemParam.FrequencyMeasureParams.TestDatas == null) || (SystemParamManager.SystemParam.FrequencyMeasureParams.TestDatas.Count == 0))
-            {
-                SystemParamManager.SystemParam.FrequencyMeasureParams.TestDatas = new ObservableCollection<FrequencyTestData>
-                {
-                    new FrequencyTestData(5, 1000),
-                    new FrequencyTestData(10, 500),
-                    new FrequencyTestData(15, 500),
-                    new FrequencyTestData(20, 500),
-                    new FrequencyTestData(25, 500),
-                    new FrequencyTestData(30, 500),
-                    new FrequencyTestData(35, 300),
-                    new FrequencyTestData(40, 300),
-                    new FrequencyTestData(45, 300),
-                    new FrequencyTestData(50, 300),
-                    new FrequencyTestData(55, 200),
-                    new FrequencyTestData(60, 200),
-                    new FrequencyTestData(65, 200),
-                    new FrequencyTestData(70, 200),
-                    new FrequencyTestData(75, 200),
-                    new FrequencyTestData(80, 200),
-                    new FrequencyTestData(85, 100),
-                    new FrequencyTestData(90, 100),
-                    new FrequencyTestData(95, 100),
-                    new FrequencyTestData(100, 100),
-                };
-            }
-            TestDatas = SystemParamManager.SystemParam.FrequencyMeasureParams.TestDatas;
-
-            MeasurementInfos = new ObservableCollection<FrequencyMeasurementInfo>();
+            MeasurementInfos = new ObservableCollection<BurnInTestInfo>();
 
             UpdateHardware();
 
@@ -181,17 +196,16 @@ namespace AnalogSignalAnalysisWpf
             NotifyOfPropertyChange(() => IsHardwareValid);
         }
 
-
         #endregion
 
         #region 测量信息
 
-        private ObservableCollection<FrequencyMeasurementInfo> measurementInfos;
+        private ObservableCollection<BurnInTestInfo> measurementInfos;
 
         /// <summary>
         /// 测量信息
         /// </summary>
-        public ObservableCollection<FrequencyMeasurementInfo> MeasurementInfos
+        public ObservableCollection<BurnInTestInfo> MeasurementInfos
         {
             get
             {
@@ -203,46 +217,6 @@ namespace AnalogSignalAnalysisWpf
                 NotifyOfPropertyChange(() => MeasurementInfos);
             }
         }
-
-        private ObservableCollection<FrequencyTestData> testDatas;
-
-        /// <summary>
-        /// 测试数据
-        /// </summary>
-        public ObservableCollection<FrequencyTestData> TestDatas
-        {
-            get
-            {
-                return testDatas;
-            }
-            set
-            {
-                testDatas = value;
-                NotifyOfPropertyChange(() => TestDatas);
-
-                SystemParamManager.SystemParam.FrequencyMeasureParams.TestDatas = value;
-                SystemParamManager.SaveParams();
-            }
-        }
-
-        private int testDatasIndex;
-
-        /// <summary>
-        /// 测试数据索引
-        /// </summary>
-        public int TestDatasIndex
-        {
-            get 
-            { 
-                return testDatasIndex; 
-            }
-            set 
-            {
-                testDatasIndex = value;
-                NotifyOfPropertyChange(() => TestDatasIndex);
-            }
-        }
-
 
         private bool isMeasuring;
 
@@ -316,165 +290,46 @@ namespace AnalogSignalAnalysisWpf
             }
         }
 
-        private int maxFrequency;
-
-        /// <summary>
-        /// 极限频率
-        /// </summary>
-        public int MaxFrequency
-        {
-            get
-            {
-                return maxFrequency;
-            }
-            set
-            {
-                maxFrequency = value;
-                NotifyOfPropertyChange(() => MaxFrequency);
-            }
-        }
-
         #endregion
 
         #region 配置参数
 
-        private double minVoltageThreshold = 1.5;
+        private int frequency;
 
         /// <summary>
-        /// 最小电压阈值(单位:V)
+        /// 测试频率(Hz)
         /// </summary>
-        public double MinVoltageThreshold
+        public int Frequency
         {
             get 
-            {
-                return minVoltageThreshold;
-            }
-            set
             { 
-                minVoltageThreshold = value;
-                NotifyOfPropertyChange(() => MinVoltageThreshold);
-
-                //保存参数
+                return frequency; 
+            }
+            set 
+            { 
+                frequency = value;
+                NotifyOfPropertyChange(() => Frequency);
+                SystemParamManager.SystemParam.BurnInTestParams.Frequency = value;
                 SystemParamManager.SaveParams();
             }
         }
 
-        private double maxVoltageThreshold = 8.0;
+        private int pwmCount;
 
         /// <summary>
-        /// 最大电压阈值(单位:V)
+        /// 测试次数
         /// </summary>
-        public double MaxVoltageThreshold
+        public int PWMCount
         {
-            get
-            {
-                return maxVoltageThreshold;
+            get 
+            { 
+                return pwmCount; 
             }
-            set
+            set 
             {
-                maxVoltageThreshold = value;
-                NotifyOfPropertyChange(() => MaxVoltageThreshold);
-
-                //保存参数
-                SystemParamManager.SaveParams();
-            }
-        }
-
-        private double frequencyErrLimit = 0.2;
-
-        /// <summary>
-        /// 频率误差
-        /// </summary>
-        public double FrequencyErrLimit
-        {
-            get
-            {
-                return frequencyErrLimit;
-            }
-            set
-            {
-                frequencyErrLimit = value;
-                NotifyOfPropertyChange(() => FrequencyErrLimit);
-
-                //保存参数
-                SystemParamManager.SystemParam.FrequencyMeasureParams.FrequencyErrLimit = value;
-                SystemParamManager.SaveParams();
-            }
-        }
-
-        private double outputVoltage = 24;
-
-        /// <summary>
-        /// 输出电压(吸合电压)
-        /// </summary>
-        public double OutputVoltage
-        {
-            get
-            {
-                return outputVoltage;
-            }
-            set
-            {
-                outputVoltage = value;
-                NotifyOfPropertyChange(() => OutputVoltage);
-
-                SystemParamManager.SystemParam.FrequencyMeasureParams.OutputVoltage = value;
-                SystemParamManager.SaveParams();
-            }
-        }
-
-        private int dutyRatio = 50;
-
-        /// <summary>
-        /// 占空比
-        /// </summary>
-        public int DutyRatio
-        {
-            get
-            {
-                return dutyRatio;
-            }
-            set
-            {
-                if (value > 100)
-                {
-                    value = 100;
-                }
-                else if (value < 1)
-                {
-                    value = 1;
-                }
-
-                dutyRatio = value;
-                NotifyOfPropertyChange(() => DutyRatio);
-
-                SystemParamManager.SystemParam.FrequencyMeasureParams.DutyRatio = value;
-                SystemParamManager.SaveParams();
-            }
-        }
-
-        private int voltageFilterCount = 7;
-
-        /// <summary>
-        /// 电压滤波系数
-        /// </summary>
-        public int VoltageFilterCount
-        {
-            get
-            {
-                return voltageFilterCount;
-            }
-            set
-            {
-                if (value < 3)
-                {
-                    value = 3;
-                }
-
-                voltageFilterCount = value;
-                NotifyOfPropertyChange(() => VoltageFilterCount);
-
-                SystemParamManager.SystemParam.FrequencyMeasureParams.VoltageFilterCount = value;
+                pwmCount = value;
+                NotifyOfPropertyChange(() => PWMCount);
+                SystemParamManager.SystemParam.BurnInTestParams.PWMCount = value;
                 SystemParamManager.SaveParams();
             }
         }
@@ -499,13 +354,13 @@ namespace AnalogSignalAnalysisWpf
         /// <summary>
         /// 测量完成事件
         /// </summary>
-        public event EventHandler<FrequencyMeasurementCompletedEventArgs> MeasurementCompleted;
+        public event EventHandler<BurnInTestCompletedEventArgs> MeasurementCompleted;
 
         /// <summary>
         /// 测量完成事件
         /// </summary>
         /// <param name="e"></param>
-        protected void OnMeasurementCompleted(FrequencyMeasurementCompletedEventArgs e)
+        protected void OnMeasurementCompleted(BurnInTestCompletedEventArgs e)
         {
             PLC.EnableOutput = false;
 
@@ -513,12 +368,10 @@ namespace AnalogSignalAnalysisWpf
             if (e.IsSuccess == true)
             {
                 RunningStatus = "成功";
-                MaxFrequency = e.MaxLimitFrequency;
             }
             else
             {
                 RunningStatus = "失败";
-                MaxFrequency = -1;
             }
 
             lock (lockObject)
@@ -624,6 +477,51 @@ namespace AnalogSignalAnalysisWpf
         private Thread measureThread;
 
         /// <summary>
+        /// 电压转气压
+        /// </summary>
+        /// <param name="pressure"></param>
+        /// <returns></returns>
+        private double PressureToVoltage(double pressure)
+        {
+
+            return pressure / SystemParamManager.SystemParam.GlobalParam.PressureK;
+        }
+
+        /// <summary>
+        /// 气压转电压
+        /// </summary>
+        /// <param name="voltage"></param>
+        /// <returns></returns>
+        private double VoltageToPressure(double voltage)
+        {
+
+            return voltage * SystemParamManager.SystemParam.GlobalParam.PressureK;
+        }
+
+        /// <summary>
+        /// 显示测量信息
+        /// </summary>
+        /// <param name="currentInputFrequency"></param>
+        /// <param name="currentSampleTime"></param>
+        /// <param name="pulseFrequencies"></param>
+        /// <param name="scopeCHACollection"></param>
+        /// <param name="scopeCHAEdgeCollection"></param>
+        private void ShowMeasureInfos(int currentInputFrequency, int currentSampleTime, List<double> pulseFrequencies)
+        {
+            new Thread(delegate ()
+            {
+                ThreadPool.QueueUserWorkItem(delegate
+                {
+                    SynchronizationContext.SetSynchronizationContext(new System.Windows.Threading.DispatcherSynchronizationContext(System.Windows.Application.Current.Dispatcher));
+                    SynchronizationContext.Current.Send(pl =>
+                    {
+                        MeasurementInfos.Insert(0, new  BurnInTestInfo(currentInputFrequency, currentSampleTime, pulseFrequencies));
+                    }, null);
+                });
+            }).Start();
+        }
+
+        /// <summary>
         /// 启动
         /// </summary>
         public void Start()
@@ -636,12 +534,6 @@ namespace AnalogSignalAnalysisWpf
                 }
             }
 
-            if ((TestDatas == null) || (TestDatas.Count == 0))
-            {
-                RunningStatus = "运行数据无效";
-                return;
-            }
-
             if (!IsHardwareValid)
             {
                 RunningStatus = "硬件无效";
@@ -650,14 +542,14 @@ namespace AnalogSignalAnalysisWpf
 
             RunningStatus = "运行中";
 
-            SystemParamManager.SystemParam.FrequencyMeasureParams.TestDatas = TestDatas;
-            SystemParamManager.SaveParams();
-
             //复位示波器设置
             Scope.Disconnect();
             Scope.Connect();
+            Scope.CHAScale = SystemParamManager.SystemParam.GlobalParam.Scale;
+            Scope.SampleRate = SystemParamManager.SystemParam.GlobalParam.SampleRate;
+            Scope.CHAVoltageDIV = SystemParamManager.SystemParam.GlobalParam.VoltageDIV;
 
-            MeasurementInfos = new ObservableCollection<FrequencyMeasurementInfo>();
+            MeasurementInfos = new ObservableCollection<BurnInTestInfo>();
 
             OnMeasurementStarted();
 
@@ -667,225 +559,97 @@ namespace AnalogSignalAnalysisWpf
                 {
                     IsMeasuring = true;
                 }
-                
-                MaxFrequency = -1;
-                int lastFrequency = -1;
+
+                //获取运行时长(单位:MS)
+                double testTime = (double)PWMCount * 1000.0 / Frequency;
 
                 //设置频率
                 PWM.Frequency = 0;
-                PWM.DutyRatio = DutyRatio;
+                PWM.DutyRatio = SystemParamManager.SystemParam.FrequencyMeasureParams.DutyRatio; ;
 
                 //使能PLC输出
-                PLC.Voltage = OutputVoltage;
+                PLC.Voltage = SystemParamManager.SystemParam.FrequencyMeasureParams.OutputVoltage;
                 PLC.EnableOutput = true;
 
-                foreach (var item in TestDatas)
+                //设置实际输出频率
+                PWM.Frequency = Frequency;
+
+                //设置Scope采集时长
+                Scope.SampleTime = 1000;
+
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
+
+                while (stopwatch.Elapsed.TotalMilliseconds < testTime)
                 {
-                    //设置PLC频率
-                    PWM.Frequency = item.Frequency;
-                    OnMessageRaised(MessageLevel.Message, $"F: [Frequency- {PWM.Frequency}]");
-                    Thread.Sleep(123);
-
-                    //设置Scope采集时长
-                    Scope.SampleTime = item.SampleTime;
-                    OnMessageRaised(MessageLevel.Message, $"F: [SampleTime- {Scope.SampleTime}]");
-
                     //读取Scope数据
                     double[] originalData;
                     Scope.ReadDataBlock(0, out originalData);
 
+                    //假如读取不到示波器数据,则报测量失败
                     if ((originalData == null) || (originalData.Length == 0))
                     {
                         //测试失败
-                        OnMessageRaised(MessageLevel.Warning, $"F: ReadDataBlock Fail");
-                        OnMeasurementCompleted(new FrequencyMeasurementCompletedEventArgs(false));
+                        OnMeasurementCompleted(new BurnInTestCompletedEventArgs());
                         return;
                     }
 
                     //数据滤波
                     double[] filterData;
-                    Analysis.MeanFilter(originalData, VoltageFilterCount, out filterData);
+                    Analysis.MeanFilter(originalData, SystemParamManager.SystemParam.FrequencyMeasureParams.VoltageFilterCount, out filterData);
+
+                    //电压转气压
+                    double[] pressureData = filterData.ToList().ConvertAll(x => VoltageToPressure(x)).ToArray();
 
                     //阈值查找边沿
                     List<int> edgeIndexs;
                     DigitEdgeType digitEdgeType;
-                    Analysis.FindEdgeByThreshold(filterData, MinVoltageThreshold, MaxVoltageThreshold, out edgeIndexs, out digitEdgeType);
+                    Analysis.FindEdgeByThreshold(pressureData, SystemParamManager.SystemParam.FrequencyMeasureParams.MinPressure, 
+                        SystemParamManager.SystemParam.FrequencyMeasureParams.MaxPressure, 
+                        out edgeIndexs, out digitEdgeType);
 
-                    //显示波形
-                    ShowEdgeData(filterData, edgeIndexs, digitEdgeType);
+                    ////显示波形
+                    ShowEdgeData(pressureData, edgeIndexs, digitEdgeType);
 
                     //分析脉冲数据
                     List<double> pulseFrequencies;
                     List<double> dutyRatios;
                     Analysis.AnalysePulseData(edgeIndexs, digitEdgeType, (int)Scope.SampleRate, out pulseFrequencies, out dutyRatios);
 
-                    //显示分析结果
-                    CurrentInputFrequency = item.Frequency;
-                    CurrentSampleTime = item.SampleTime;
-                    new Thread(delegate ()
-                    {
-                        ThreadPool.QueueUserWorkItem(delegate
-                        {
-                            System.Threading.SynchronizationContext.SetSynchronizationContext(new System.Windows.Threading.DispatcherSynchronizationContext(System.Windows.Application.Current.Dispatcher));
-                            System.Threading.SynchronizationContext.Current.Send(pl =>
-                            {
-                                MeasurementInfos.Insert(0, new FrequencyMeasurementInfo(CurrentInputFrequency, CurrentSampleTime, pulseFrequencies, ScopeCHACollection, ScopeCHAEdgeCollection));
-                            }, null);
-                        });
-                    }).Start();
-
-                    {
-                        string pulseMessage = "";
-                        foreach (var item2 in pulseFrequencies)
-                        {
-                            pulseMessage += item2.ToString("F2") + " ";
-                        }
-                        OnMessageRaised(MessageLevel.Message, $"F: Frequency-{pulseMessage}");
-                    }
+                    //显示测量信息
+                    ShowMeasureInfos(CurrentInputFrequency, CurrentSampleTime, pulseFrequencies);
 
                     if (pulseFrequencies.Count > 0)
                     {
                         //检测脉冲是否异常
-                        double minFrequency = item.Frequency * (1 - FrequencyErrLimit);
-                        double maxFrequency = item.Frequency * (1 + FrequencyErrLimit);
+                        double minFrequency = Frequency * (1 - SystemParamManager.SystemParam.FrequencyMeasureParams.FrequencyErrLimit);
+                        double maxFrequency = Frequency * (1 + SystemParamManager.SystemParam.FrequencyMeasureParams.FrequencyErrLimit);
+                        
+                        //若波形不符,则退出测试
                         if (!Analysis.CheckFrequency(pulseFrequencies, minFrequency, maxFrequency, 1))
                         {
-                            if (lastFrequency != -1)
-                            {
-                                //测试完成
-                                OnMessageRaised(MessageLevel.Message, $"F: Success, max = {lastFrequency}");
-                                OnMeasurementCompleted(new FrequencyMeasurementCompletedEventArgs(true, lastFrequency));
-                            }
-                            else
-                            {
-                                //测试失败
-                                OnMessageRaised(MessageLevel.Warning, $"F: Fail");
-                                OnMeasurementCompleted(new FrequencyMeasurementCompletedEventArgs(false));
-                            }
+                            //测试失败
+                            OnMeasurementCompleted(new BurnInTestCompletedEventArgs());
                             return;
-                        }
-                        else
-                        {
-                            lastFrequency = item.Frequency;
                         }
                     }
                     else
                     {
-                        if (lastFrequency != -1)
-                        {
-                            //测试完成
-                            OnMessageRaised(MessageLevel.Message, $"F: Success, max = {lastFrequency}");
-                            OnMeasurementCompleted(new FrequencyMeasurementCompletedEventArgs(true, lastFrequency));
-                        }
-                        else
-                        {
-                            //测试失败
-                            OnMessageRaised(MessageLevel.Warning, $"F: Fail");
-                            OnMeasurementCompleted(new FrequencyMeasurementCompletedEventArgs(false));
-                        }
+                        //测试失败
+                        OnMeasurementCompleted(new BurnInTestCompletedEventArgs());
                         return;
                     }
+
+                    Thread.Sleep(200);
                 }
 
-                if (lastFrequency != -1)
-                {
-                    //测试完成
-                    OnMessageRaised(MessageLevel.Message, $"F: Success, max = {lastFrequency}");
-                    OnMeasurementCompleted(new FrequencyMeasurementCompletedEventArgs(true, lastFrequency));
-                }
-                else
-                {
-                    //测试失败
-                    OnMessageRaised(MessageLevel.Warning, $"F: Fail");
-                    OnMeasurementCompleted(new FrequencyMeasurementCompletedEventArgs(false));
-                }
+                //测试成功
+                OnMeasurementCompleted(new BurnInTestCompletedEventArgs(true));
 
+                stopwatch.Stop();
             });
 
             measureThread.Start();
-        }
-
-        /// <summary>
-        /// 显示示波器数据
-        /// </summary>
-        /// <param name="index"></param>
-        public void ShowScopeListView(int index)
-        {
-            lock (lockObject)
-            {
-                if (IsMeasuring)
-                {
-                    return;
-                }
-            }
-
-            if (index < 0)
-            {
-                return;
-            }
-
-            //显示数据
-            ScopeCHACollection = new ObservableCollection<Data>(MeasurementInfos[index].ScopeCHACollection);
-            ScopeCHAEdgeCollection = new ObservableCollection<Data>(MeasurementInfos[index].ScopeCHAEdgeCollection);
-        }
-
-        /// <summary>
-        /// 插入测试数据
-        /// </summary>
-        public void InsertTestData()
-        {
-            lock (lockObject)
-            {
-                if (IsMeasuring)
-                {
-                    return;
-                }
-            }
-
-            if (TestDatasIndex < 0)
-            {
-                return;
-            }
-
-            TestDatas.Insert(TestDatasIndex, new FrequencyTestData(0, 0));
-        }
-
-        /// <summary>
-        /// 删除测试数据
-        /// </summary>
-        public void DeleteTestData()
-        {
-            lock (lockObject)
-            {
-                if (IsMeasuring)
-                {
-                    return;
-                }
-            }
-
-            if (TestDatasIndex < 0)
-            {
-                return;
-            }
-
-            TestDatas.RemoveAt(TestDatasIndex);
-        }
-
-        /// <summary>
-        /// 清空测试数据
-        /// </summary>
-        public void ClearTestDatas()
-        {
-            TestDatas = new ObservableCollection<FrequencyTestData>();
-        }
-
-        /// <summary>
-        /// 保存测试数据
-        /// </summary>
-        public void SaveTestDatas()
-        {
-            SystemParamManager.SystemParam.FrequencyMeasureParams.TestDatas = TestDatas;
-            SystemParamManager.SaveParams();
         }
 
         #endregion

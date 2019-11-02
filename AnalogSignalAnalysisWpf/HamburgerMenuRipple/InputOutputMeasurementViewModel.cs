@@ -544,7 +544,6 @@ namespace AnalogSignalAnalysisWpf
             }).Start();
         }
 
-
         /// <summary>
         /// 电压转气压
         /// </summary>

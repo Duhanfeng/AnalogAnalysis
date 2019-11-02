@@ -202,6 +202,7 @@
     <Compile Include="Converters\BoolToColorConverter.cs" />
     <Compile Include="Converters\BoolToVisibilityConverter.cs" />
     <Compile Include="EnumHelper.cs" />
+    <Compile Include="EventArgs\BurnInTestCompletedEventArgs.cs" />
     <Compile Include="EventArgs\FrequencyMeasurementCompletedEventArgs.cs" />
     <Compile Include="EventArgs\InputOutputMeasurementCompletedEventArgs.cs" />
     <Compile Include="EventArgs\PNVoltageMeasurementCompletedEventArgs.cs" />

@@ -288,6 +288,23 @@ namespace AnalogSignalAnalysisWpf
 
     }
 
+    /// <summary>
+    /// 老化测试参数
+    /// </summary>
+    public class BurnInTestParams
+    {
+        /// <summary>
+        /// 频率(Hz)
+        /// </summary>
+        public int Frequency { get; set; }
+
+        /// <summary>
+        /// PWM次数
+        /// </summary>
+        public int PWMCount { get; set; }
+
+    }
+
     #endregion
 
     #region 硬件参数
@@ -508,6 +525,11 @@ namespace AnalogSignalAnalysisWpf
         /// 通气量测量参数
         /// </summary>
         public ThroughputMeasureParams ThroughputMeasureParams { get; set; } = new ThroughputMeasureParams();
+
+        /// <summary>
+        /// 老化测试参数
+        /// </summary>
+        public BurnInTestParams BurnInTestParams { get; set; } = new BurnInTestParams();
 
         #endregion
 
