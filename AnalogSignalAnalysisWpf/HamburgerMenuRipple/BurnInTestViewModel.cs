@@ -44,24 +44,17 @@ namespace AnalogSignalAnalysisWpf
 
         public BurnInTestViewModel()
         {
-            ScopeScale = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<EScale>());
-            ScopeSampleRateCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<ESampleRate>());
-            ScopeVoltageDIVCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<EVoltageDIV>());
-
+            
             //恢复配置参数
             SystemParamManager = SystemParamManager.GetInstance();
-            MinVoltageThreshold = SystemParamManager.SystemParam.FrequencyMeasureParams.MinVoltageThreshold;
-            MaxVoltageThreshold = SystemParamManager.SystemParam.FrequencyMeasureParams.MaxVoltageThreshold;
             FrequencyErrLimit = SystemParamManager.SystemParam.FrequencyMeasureParams.FrequencyErrLimit;
-            ComDelay = SystemParamManager.SystemParam.FrequencyMeasureParams.ComDelay;
+ 
 
             OutputVoltage = SystemParamManager.SystemParam.FrequencyMeasureParams.OutputVoltage;
             DutyRatio = SystemParamManager.SystemParam.FrequencyMeasureParams.DutyRatio;
             VoltageFilterCount = SystemParamManager.SystemParam.FrequencyMeasureParams.VoltageFilterCount;
 
-            CHAScale = SystemParamManager.SystemParam.FrequencyMeasureParams.CHAScale;
-            CHAVoltageDIV = SystemParamManager.SystemParam.FrequencyMeasureParams.CHAVoltageDIV;
-            SampleRate = SystemParamManager.SystemParam.FrequencyMeasureParams.SampleRate;
+            
             if ((SystemParamManager.SystemParam.FrequencyMeasureParams.TestDatas == null) || (SystemParamManager.SystemParam.FrequencyMeasureParams.TestDatas.Count == 0))
             {
                 SystemParamManager.SystemParam.FrequencyMeasureParams.TestDatas = new ObservableCollection<FrequencyTestData>
@@ -89,10 +82,6 @@ namespace AnalogSignalAnalysisWpf
                 };
             }
             TestDatas = SystemParamManager.SystemParam.FrequencyMeasureParams.TestDatas;
-
-            NotifyOfPropertyChange(() => ScopeCHAScale);
-            NotifyOfPropertyChange(() => ScopeCHAVoltageDIV);
-            NotifyOfPropertyChange(() => ScopeSampleRate);
 
             MeasurementInfos = new ObservableCollection<FrequencyMeasurementInfo>();
 
@@ -192,83 +181,6 @@ namespace AnalogSignalAnalysisWpf
             NotifyOfPropertyChange(() => IsHardwareValid);
         }
 
-        /// <summary>
-        /// 放大倍数
-        /// </summary>
-        public ObservableCollection<string> ScopeScale { get; set; }
-
-        /// <summary>
-        /// 电压档位
-        /// </summary>
-        public ObservableCollection<string> ScopeVoltageDIVCollection { get; set; }
-
-        /// <summary>
-        /// 采样率
-        /// </summary>
-        public ObservableCollection<string> ScopeSampleRateCollection { get; set; }
-
-        private EScale CHAScale = EScale.x10;
-
-        /// <summary>
-        /// CHA探头衰变
-        /// </summary>
-        public string ScopeCHAScale
-        {
-            get
-            {
-                return EnumHelper.GetDescription(CHAScale);
-            }
-            set
-            {
-                CHAScale = EnumHelper.GetEnum<EScale>(value);
-                NotifyOfPropertyChange(() => ScopeCHAScale);
-
-                SystemParamManager.SystemParam.FrequencyMeasureParams.CHAScale = CHAScale;
-                SystemParamManager.SaveParams();
-            }
-        }
-
-        private EVoltageDIV CHAVoltageDIV = EVoltageDIV.DIV_2V5;
-
-        /// <summary>
-        /// CHA电压档位
-        /// </summary>
-        public string ScopeCHAVoltageDIV
-        {
-            get
-            {
-                return EnumHelper.GetDescription(CHAVoltageDIV);
-            }
-            set
-            {
-                CHAVoltageDIV = EnumHelper.GetEnum<EVoltageDIV>(value);
-                NotifyOfPropertyChange(() => ScopeCHAVoltageDIV);
-
-                SystemParamManager.SystemParam.FrequencyMeasureParams.CHAVoltageDIV = CHAVoltageDIV;
-                SystemParamManager.SaveParams();
-            }
-        }
-
-        private ESampleRate SampleRate = ESampleRate.Sps_49K;
-
-        /// <summary>
-        /// 采样率
-        /// </summary>
-        public string ScopeSampleRate
-        {
-            get
-            {
-                return EnumHelper.GetDescription(SampleRate);
-            }
-            set
-            {
-                SampleRate = EnumHelper.GetEnum<ESampleRate>(value);
-                NotifyOfPropertyChange(() => ScopeSampleRate);
-
-                SystemParamManager.SystemParam.FrequencyMeasureParams.SampleRate = SampleRate;
-                SystemParamManager.SaveParams();
-            }
-        }
 
         #endregion
 
@@ -443,7 +355,6 @@ namespace AnalogSignalAnalysisWpf
                 NotifyOfPropertyChange(() => MinVoltageThreshold);
 
                 //保存参数
-                SystemParamManager.SystemParam.FrequencyMeasureParams.MinVoltageThreshold = value;
                 SystemParamManager.SaveParams();
             }
         }
@@ -465,7 +376,6 @@ namespace AnalogSignalAnalysisWpf
                 NotifyOfPropertyChange(() => MaxVoltageThreshold);
 
                 //保存参数
-                SystemParamManager.SystemParam.FrequencyMeasureParams.MaxVoltageThreshold = value;
                 SystemParamManager.SaveParams();
             }
         }
@@ -491,29 +401,6 @@ namespace AnalogSignalAnalysisWpf
                 SystemParamManager.SaveParams();
             }
         }
-
-        private int comDelay = 200;
-
-        /// <summary>
-        /// 通信延迟(MS)
-        /// </summary>
-        public int ComDelay
-        {
-            get
-            {
-                return comDelay;
-            }
-            set
-            {
-                comDelay = value;
-                NotifyOfPropertyChange(() => ComDelay);
-
-                //保存参数
-                SystemParamManager.SystemParam.FrequencyMeasureParams.ComDelay = value;
-                SystemParamManager.SaveParams();
-            }
-        }
-
 
         private double outputVoltage = 24;
 
@@ -769,9 +656,6 @@ namespace AnalogSignalAnalysisWpf
             //复位示波器设置
             Scope.Disconnect();
             Scope.Connect();
-            Scope.CHAScale = CHAScale;
-            Scope.SampleRate = SampleRate;
-            Scope.CHAVoltageDIV = CHAVoltageDIV;
 
             MeasurementInfos = new ObservableCollection<FrequencyMeasurementInfo>();
 
@@ -800,7 +684,7 @@ namespace AnalogSignalAnalysisWpf
                     //设置PLC频率
                     PWM.Frequency = item.Frequency;
                     OnMessageRaised(MessageLevel.Message, $"F: [Frequency- {PWM.Frequency}]");
-                    Thread.Sleep(ComDelay);
+                    Thread.Sleep(123);
 
                     //设置Scope采集时长
                     Scope.SampleTime = item.SampleTime;

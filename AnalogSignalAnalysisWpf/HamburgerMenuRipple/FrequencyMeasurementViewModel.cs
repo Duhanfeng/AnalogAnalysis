@@ -42,7 +42,7 @@ namespace AnalogSignalAnalysisWpf
         public ObservableCollection<Data> ScopeCHACollection { get; set; }
 
         /// <summary>
-        /// 通道B边沿数据
+        /// 通道A边沿数据
         /// </summary>
         public ObservableCollection<Data> ScopeCHAEdgeCollection { get; set; }
 
@@ -137,24 +137,16 @@ namespace AnalogSignalAnalysisWpf
 
         public FrequencyMeasurementViewModel()
         {
-            ScopeScale = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<EScale>());
-            ScopeSampleRateCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<ESampleRate>());
-            ScopeVoltageDIVCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<EVoltageDIV>());
-
             //恢复配置参数
             SystemParamManager = SystemParamManager.GetInstance();
-            MinVoltageThreshold = SystemParamManager.SystemParam.FrequencyMeasureParams.MinVoltageThreshold;
-            MaxVoltageThreshold = SystemParamManager.SystemParam.FrequencyMeasureParams.MaxVoltageThreshold;
+            MinPressure = SystemParamManager.SystemParam.FrequencyMeasureParams.MinPressure;
+            MaxPressure = SystemParamManager.SystemParam.FrequencyMeasureParams.MaxPressure;
             FrequencyErrLimit = SystemParamManager.SystemParam.FrequencyMeasureParams.FrequencyErrLimit;
-            ComDelay = SystemParamManager.SystemParam.FrequencyMeasureParams.ComDelay;
 
             OutputVoltage = SystemParamManager.SystemParam.FrequencyMeasureParams.OutputVoltage;
             DutyRatio = SystemParamManager.SystemParam.FrequencyMeasureParams.DutyRatio;
             VoltageFilterCount = SystemParamManager.SystemParam.FrequencyMeasureParams.VoltageFilterCount;
 
-            CHAScale = SystemParamManager.SystemParam.FrequencyMeasureParams.CHAScale;
-            CHAVoltageDIV = SystemParamManager.SystemParam.FrequencyMeasureParams.CHAVoltageDIV;
-            SampleRate = SystemParamManager.SystemParam.FrequencyMeasureParams.SampleRate;
             if ((SystemParamManager.SystemParam.FrequencyMeasureParams.TestDatas == null) || (SystemParamManager.SystemParam.FrequencyMeasureParams.TestDatas.Count == 0))
             {
                 SystemParamManager.SystemParam.FrequencyMeasureParams.TestDatas = new ObservableCollection<FrequencyTestData>
@@ -182,10 +174,6 @@ namespace AnalogSignalAnalysisWpf
                 };
             }
             TestDatas = SystemParamManager.SystemParam.FrequencyMeasureParams.TestDatas;
-
-            NotifyOfPropertyChange(() => ScopeCHAScale);
-            NotifyOfPropertyChange(() => ScopeCHAVoltageDIV);
-            NotifyOfPropertyChange(() => ScopeSampleRate);
 
             MeasurementInfos = new ObservableCollection<FrequencyMeasurementInfo>();
 
@@ -285,6 +273,8 @@ namespace AnalogSignalAnalysisWpf
             NotifyOfPropertyChange(() => IsHardwareValid);
         }
 
+#if false
+        
         /// <summary>
         /// 放大倍数
         /// </summary>
@@ -362,6 +352,8 @@ namespace AnalogSignalAnalysisWpf
                 SystemParamManager.SaveParams();
             }
         }
+#endif
+
 
         #endregion
 
@@ -413,11 +405,11 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public int TestDatasIndex
         {
-            get 
-            { 
-                return testDatasIndex; 
+            get
+            {
+                return testDatasIndex;
             }
-            set 
+            set
             {
                 testDatasIndex = value;
                 NotifyOfPropertyChange(() => TestDatasIndex);
@@ -519,46 +511,46 @@ namespace AnalogSignalAnalysisWpf
 
         #region 配置参数
 
-        private double minVoltageThreshold = 1.5;
+        private double minPressure = 1.5;
 
         /// <summary>
         /// 最小电压阈值(单位:V)
         /// </summary>
-        public double MinVoltageThreshold
+        public double MinPressure
         {
-            get 
+            get
             {
-                return minVoltageThreshold;
+                return minPressure;
             }
             set
-            { 
-                minVoltageThreshold = value;
-                NotifyOfPropertyChange(() => MinVoltageThreshold);
+            {
+                minPressure = value;
+                NotifyOfPropertyChange(() => MinPressure);
 
                 //保存参数
-                SystemParamManager.SystemParam.FrequencyMeasureParams.MinVoltageThreshold = value;
+                SystemParamManager.SystemParam.FrequencyMeasureParams.MinPressure = value;
                 SystemParamManager.SaveParams();
             }
         }
 
-        private double maxVoltageThreshold = 8.0;
+        private double maxPressure = 3;
 
         /// <summary>
-        /// 最大电压阈值(单位:V)
+        /// 最小电压阈值(单位:V)
         /// </summary>
-        public double MaxVoltageThreshold
+        public double MaxPressure
         {
             get
             {
-                return maxVoltageThreshold;
+                return maxPressure;
             }
             set
             {
-                maxVoltageThreshold = value;
-                NotifyOfPropertyChange(() => MaxVoltageThreshold);
+                maxPressure = value;
+                NotifyOfPropertyChange(() => MaxPressure);
 
                 //保存参数
-                SystemParamManager.SystemParam.FrequencyMeasureParams.MaxVoltageThreshold = value;
+                SystemParamManager.SystemParam.FrequencyMeasureParams.MaxPressure = value;
                 SystemParamManager.SaveParams();
             }
         }
@@ -584,29 +576,6 @@ namespace AnalogSignalAnalysisWpf
                 SystemParamManager.SaveParams();
             }
         }
-
-        private int comDelay = 200;
-
-        /// <summary>
-        /// 通信延迟(MS)
-        /// </summary>
-        public int ComDelay
-        {
-            get
-            {
-                return comDelay;
-            }
-            set
-            {
-                comDelay = value;
-                NotifyOfPropertyChange(() => ComDelay);
-
-                //保存参数
-                SystemParamManager.SystemParam.FrequencyMeasureParams.ComDelay = value;
-                SystemParamManager.SaveParams();
-            }
-        }
-
 
         private double outputVoltage = 24;
 
@@ -830,6 +799,28 @@ namespace AnalogSignalAnalysisWpf
         private Thread measureThread;
 
         /// <summary>
+        /// 电压转气压
+        /// </summary>
+        /// <param name="pressure"></param>
+        /// <returns></returns>
+        private double PressureToVoltage(double pressure)
+        {
+
+            return pressure / SystemParamManager.SystemParam.GlobalParam.PressureK;
+        }
+
+        /// <summary>
+        /// 气压转电压
+        /// </summary>
+        /// <param name="voltage"></param>
+        /// <returns></returns>
+        private double VoltageToPressure(double voltage)
+        {
+
+            return voltage * SystemParamManager.SystemParam.GlobalParam.PressureK;
+        }
+
+        /// <summary>
         /// 启动
         /// </summary>
         public void Start()
@@ -862,9 +853,9 @@ namespace AnalogSignalAnalysisWpf
             //复位示波器设置
             Scope.Disconnect();
             Scope.Connect();
-            Scope.CHAScale = CHAScale;
-            Scope.SampleRate = SampleRate;
-            Scope.CHAVoltageDIV = CHAVoltageDIV;
+            Scope.CHAScale = SystemParamManager.SystemParam.GlobalParam.Scale;
+            Scope.SampleRate = SystemParamManager.SystemParam.GlobalParam.SampleRate;
+            Scope.CHAVoltageDIV = SystemParamManager.SystemParam.GlobalParam.VoltageDIV;
 
             MeasurementInfos = new ObservableCollection<FrequencyMeasurementInfo>();
 
@@ -876,7 +867,7 @@ namespace AnalogSignalAnalysisWpf
                 {
                     IsMeasuring = true;
                 }
-                
+
                 MaxFrequency = -1;
                 int lastFrequency = -1;
 
@@ -893,7 +884,7 @@ namespace AnalogSignalAnalysisWpf
                     //设置PLC频率
                     PWM.Frequency = item.Frequency;
                     OnMessageRaised(MessageLevel.Message, $"F: [Frequency- {PWM.Frequency}]");
-                    Thread.Sleep(ComDelay);
+                    Thread.Sleep(SystemParamManager.SystemParam.GlobalParam.PowerCommonDelay);
 
                     //设置Scope采集时长
                     Scope.SampleTime = item.SampleTime;
@@ -915,13 +906,16 @@ namespace AnalogSignalAnalysisWpf
                     double[] filterData;
                     Analysis.MeanFilter(originalData, VoltageFilterCount, out filterData);
 
+                    //电压转气压
+                    double[] pressureData = filterData.ToList().ConvertAll(x => VoltageToPressure(x)).ToArray();
+
                     //阈值查找边沿
                     List<int> edgeIndexs;
                     DigitEdgeType digitEdgeType;
-                    Analysis.FindEdgeByThreshold(filterData, MinVoltageThreshold, MaxVoltageThreshold, out edgeIndexs, out digitEdgeType);
+                    Analysis.FindEdgeByThreshold(pressureData, MinPressure, MaxPressure, out edgeIndexs, out digitEdgeType);
 
                     //显示波形
-                    ShowEdgeData(filterData, edgeIndexs, digitEdgeType);
+                    ShowEdgeData(pressureData, edgeIndexs, digitEdgeType);
 
                     //分析脉冲数据
                     List<double> pulseFrequencies;
@@ -942,15 +936,6 @@ namespace AnalogSignalAnalysisWpf
                             }, null);
                         });
                     }).Start();
-
-                    {
-                        string pulseMessage = "";
-                        foreach (var item2 in pulseFrequencies)
-                        {
-                            pulseMessage += item2.ToString("F2") + " ";
-                        }
-                        OnMessageRaised(MessageLevel.Message, $"F: Frequency-{pulseMessage}");
-                    }
 
                     if (pulseFrequencies.Count > 0)
                     {

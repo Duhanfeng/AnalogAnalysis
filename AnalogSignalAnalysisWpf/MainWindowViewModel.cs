@@ -2249,6 +2249,23 @@ namespace AnalogSignalAnalysisWpf
         }
 
         /// <summary>
+        /// 全局电源模块通信延迟(MS)
+        /// </summary>
+        public int GlobalPowerCommonDelay
+        {
+            get
+            {
+                return SystemParamManager.SystemParam.GlobalParam.PowerCommonDelay;
+            }
+            set
+            {
+                SystemParamManager.SystemParam.GlobalParam.PowerCommonDelay = value;
+                NotifyOfPropertyChange(() => GlobalPowerCommonDelay);
+                SystemParamManager.SaveParams();
+            }
+        }
+
+        /// <summary>
         /// CHA探头衰变
         /// </summary>
         public string GlobalScopeCHAScale

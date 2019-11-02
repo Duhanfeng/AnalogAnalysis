@@ -96,29 +96,14 @@ namespace AnalogSignalAnalysisWpf
 
         public PNVoltageMeasurementViewModel()
         {
-            ScopeScale = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<EScale>());
-            ScopeSampleRateCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<ESampleRate>());
-            ScopeVoltageDIVCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<EVoltageDIV>());
-
-
             //恢复配置参数
             SystemParamManager = SystemParamManager.GetInstance();
 
-            PressureK = SystemParamManager.SystemParam.PNVoltageMeasureParams.PressureK;
             CriticalPressure = SystemParamManager.SystemParam.PNVoltageMeasureParams.CriticalPressure;
-            MinVoltageThreshold = SystemParamManager.SystemParam.PNVoltageMeasureParams.MinVoltageThreshold;
-            MaxVoltageThreshold = SystemParamManager.SystemParam.PNVoltageMeasureParams.MaxVoltageThreshold;
-            FrequencyErrLimit = SystemParamManager.SystemParam.PNVoltageMeasureParams.FrequencyErrLimit;
             VoltageInterval = SystemParamManager.SystemParam.PNVoltageMeasureParams.VoltageInterval;
             MinVoltage = SystemParamManager.SystemParam.PNVoltageMeasureParams.MinVoltage;
             MaxVoltage = SystemParamManager.SystemParam.PNVoltageMeasureParams.MaxVoltage;
             SampleTime = SystemParamManager.SystemParam.PNVoltageMeasureParams.SampleTime;
-
-            ComDelay = SystemParamManager.SystemParam.PNVoltageMeasureParams.ComDelay;
-            CHAScale = SystemParamManager.SystemParam.PNVoltageMeasureParams.CHAScale;
-            CHAVoltageDIV = SystemParamManager.SystemParam.PNVoltageMeasureParams.CHAVoltageDIV;
-            SampleRate = SystemParamManager.SystemParam.PNVoltageMeasureParams.SampleRate;
-
         }
 
         /// <summary>
@@ -218,113 +203,9 @@ namespace AnalogSignalAnalysisWpf
             NotifyOfPropertyChange(() => IsHardwareValid);
         }
 
-        /// <summary>
-        /// 放大倍数
-        /// </summary>
-        public ObservableCollection<string> ScopeScale { get; set; }
-
-        /// <summary>
-        /// 电压档位
-        /// </summary>
-        public ObservableCollection<string> ScopeVoltageDIVCollection { get; set; }
-
-        /// <summary>
-        /// 采样率
-        /// </summary>
-        public ObservableCollection<string> ScopeSampleRateCollection { get; set; }
-
-        private EScale CHAScale = EScale.x10;
-
-        /// <summary>
-        /// CHA探头衰变
-        /// </summary>
-        public string ScopeCHAScale
-        {
-            get
-            {
-                return EnumHelper.GetDescription(CHAScale);
-            }
-            set
-            {
-                CHAScale = EnumHelper.GetEnum<EScale>(value);
-                NotifyOfPropertyChange(() => ScopeCHAScale);
-
-                SystemParamManager.SystemParam.PNVoltageMeasureParams.CHAScale = CHAScale;
-                SystemParamManager.SaveParams();
-            }
-        }
-
-        private EVoltageDIV CHAVoltageDIV = EVoltageDIV.DIV_2V5;
-
-        /// <summary>
-        /// CHA电压档位
-        /// </summary>
-        public string ScopeCHAVoltageDIV
-        {
-            get
-            {
-                return EnumHelper.GetDescription(CHAVoltageDIV);
-            }
-            set
-            {
-                CHAVoltageDIV = EnumHelper.GetEnum<EVoltageDIV>(value);
-                NotifyOfPropertyChange(() => ScopeCHAVoltageDIV);
-
-                SystemParamManager.SystemParam.PNVoltageMeasureParams.CHAVoltageDIV = CHAVoltageDIV;
-                SystemParamManager.SaveParams();
-            }
-        }
-
-        private ESampleRate SampleRate = ESampleRate.Sps_49K;
-
-        /// <summary>
-        /// 采样率
-        /// </summary>
-        public string ScopeSampleRate
-        {
-            get
-            {
-                return EnumHelper.GetDescription(SampleRate);
-            }
-            set
-            {
-                SampleRate = EnumHelper.GetEnum<ESampleRate>(value);
-                NotifyOfPropertyChange(() => ScopeSampleRate);
-
-                SystemParamManager.SystemParam.PNVoltageMeasureParams.SampleRate = SampleRate;
-                SystemParamManager.SaveParams();
-            }
-        }
-
         #endregion
 
         #region 配置参数
-
-        private double pressureK = 1;
-
-        /// <summary>
-        /// 气压系数(K=P/V)
-        /// </summary>
-        public double PressureK
-        {
-            get
-            {
-                return pressureK;
-            }
-            set
-            {
-                if (value <= 0)
-                {
-                    value = 1;
-                }
-
-                pressureK = value;
-                NotifyOfPropertyChange(() => PressureK);
-
-                SystemParamManager.SystemParam.PNVoltageMeasureParams.PressureK = value;
-                SystemParamManager.SaveParams();
-            }
-        }
 
         private double criticalPressure = 3;
 
@@ -343,69 +224,6 @@ namespace AnalogSignalAnalysisWpf
                 NotifyOfPropertyChange(() => CriticalPressure);
 
                 SystemParamManager.SystemParam.PNVoltageMeasureParams.CriticalPressure = value;
-                SystemParamManager.SaveParams();
-            }
-        }
-
-        private double minVoltageThreshold = 1.5;
-
-        /// <summary>
-        /// 最小电压阈值(单位:V)
-        /// </summary>
-        public double MinVoltageThreshold
-        {
-            get
-            {
-                return minVoltageThreshold;
-            }
-            set
-            {
-                minVoltageThreshold = value;
-                NotifyOfPropertyChange(() => MinVoltageThreshold);
-
-                SystemParamManager.SystemParam.PNVoltageMeasureParams.MinVoltageThreshold = value;
-                SystemParamManager.SaveParams();
-            }
-        }
-
-        private double maxVoltageThreshold = 8.0;
-
-        /// <summary>
-        /// 最大电压阈值(单位:V)
-        /// </summary>
-        public double MaxVoltageThreshold
-        {
-            get
-            {
-                return maxVoltageThreshold;
-            }
-            set
-            {
-                maxVoltageThreshold = value;
-                NotifyOfPropertyChange(() => MaxVoltageThreshold);
-
-                SystemParamManager.SystemParam.PNVoltageMeasureParams.MaxVoltageThreshold = value;
-                SystemParamManager.SaveParams();
-            }
-        }
-
-        private double frequencyErrLimit = 0.2;
-
-        /// <summary>
-        /// 频率误差
-        /// </summary>
-        public double FrequencyErrLimit
-        {
-            get
-            {
-                return frequencyErrLimit;
-            }
-            set
-            {
-                frequencyErrLimit = value;
-                NotifyOfPropertyChange(() => FrequencyErrLimit);
-
-                SystemParamManager.SystemParam.PNVoltageMeasureParams.FrequencyErrLimit = value;
                 SystemParamManager.SaveParams();
             }
         }
@@ -490,27 +308,6 @@ namespace AnalogSignalAnalysisWpf
                 NotifyOfPropertyChange(() => SampleTime);
 
                 SystemParamManager.SystemParam.PNVoltageMeasureParams.SampleTime = value;
-                SystemParamManager.SaveParams();
-            }
-        }
-
-        private int comDelay = 200;
-
-        /// <summary>
-        /// 通信延迟(MS)
-        /// </summary>
-        public int ComDelay
-        {
-            get
-            {
-                return comDelay;
-            }
-            set
-            {
-                comDelay = value;
-                NotifyOfPropertyChange(() => ComDelay);
-
-                SystemParamManager.SystemParam.PNVoltageMeasureParams.ComDelay = value;
                 SystemParamManager.SaveParams();
             }
         }
@@ -844,6 +641,182 @@ namespace AnalogSignalAnalysisWpf
         private Thread measureThread;
 
         /// <summary>
+        /// 电压转气压
+        /// </summary>
+        /// <param name="pressure"></param>
+        /// <returns></returns>
+        private double PressureToVoltage(double pressure)
+        {
+
+            return pressure / SystemParamManager.SystemParam.GlobalParam.PressureK;
+        }
+
+        /// <summary>
+        /// 气压转电压
+        /// </summary>
+        /// <param name="voltage"></param>
+        /// <returns></returns>
+        private double VoltageToPressure(double voltage)
+        {
+
+            return voltage * SystemParamManager.SystemParam.GlobalParam.PressureK;
+        }
+
+        private void ShowPData(double time, double currentVoltage, double currentPressure, bool isSuccess)
+        {
+            new Thread(delegate ()
+            {
+                ThreadPool.QueueUserWorkItem(delegate
+                {
+                    SynchronizationContext.SetSynchronizationContext(new System.Windows.Threading.DispatcherSynchronizationContext(System.Windows.Application.Current.Dispatcher));
+                    SynchronizationContext.Current.Send(pl =>
+                    {
+                        PVoltageCollection.Add(new Data
+                        {
+                            Value1 = currentVoltage,
+                            Value = time
+                        });
+                        
+                        if (isSuccess)
+                        {
+                            PVoltageEdgeCollection.Add(new Data
+                            {
+                                Value1 = currentVoltage,
+                                Value = time
+                            });
+                            MeasurementInfos.Insert(0, new PNVoltageMeasurementInfo("已吸合", currentVoltage, currentPressure, "H", "吸合电压"));
+                        }
+                        else
+                        {
+                            NVoltageEdgeCollection.Add(new Data
+                            {
+                                Value1 = currentVoltage,
+                                Value = time
+                            });
+                            MeasurementInfos.Insert(0, new PNVoltageMeasurementInfo("测量吸合", currentVoltage, currentPressure, "L", "无效"));
+                        }
+                    }, null);
+                });
+            }).Start();
+        }
+
+        private void ShowNData(double time, double currentVoltage, double currentPressure, bool isSuccess)
+        {
+            new Thread(delegate ()
+            {
+                ThreadPool.QueueUserWorkItem(delegate
+                {
+                    SynchronizationContext.SetSynchronizationContext(new System.Windows.Threading.DispatcherSynchronizationContext(System.Windows.Application.Current.Dispatcher));
+                    SynchronizationContext.Current.Send(pl =>
+                    {
+                        PVoltageCollection.Add(new Data
+                        {
+                            Value1 = currentVoltage,
+                            Value = time
+                        });
+
+                        if (isSuccess)
+                        {
+                            PVoltageEdgeCollection.Add(new Data
+                            {
+                                Value1 = currentVoltage,
+                                Value = time
+                            });
+                            MeasurementInfos.Insert(0, new PNVoltageMeasurementInfo("已释放", currentVoltage, currentPressure, "L", "释放电压"));
+                        }
+                        else
+                        {
+                            NVoltageEdgeCollection.Add(new Data
+                            {
+                                Value1 = currentVoltage,
+                                Value = time
+                            });
+                            MeasurementInfos.Insert(0, new PNVoltageMeasurementInfo("测量释放", currentVoltage, currentPressure, "H", "无效"));
+                        }
+                    }, null);
+                });
+            }).Start();
+        }
+
+#if false
+        
+        /// <summary>
+        /// 显示成功的数据
+        /// </summary>
+        private void ShowSuccessData(double time, double currentVoltage, double currentPressure, bool isPositive)
+        {
+            new Thread(delegate ()
+            {
+                ThreadPool.QueueUserWorkItem(delegate
+                {
+                    SynchronizationContext.SetSynchronizationContext(new System.Windows.Threading.DispatcherSynchronizationContext(System.Windows.Application.Current.Dispatcher));
+                    SynchronizationContext.Current.Send(pl =>
+                    {
+                        PVoltageCollection.Add(new Data
+                        {
+                            Value1 = currentVoltage,
+                            Value = time
+                        });
+                        PVoltageEdgeCollection.Add(new Data
+                        {
+                            Value1 = currentVoltage,
+                            Value = time
+                        });
+
+                        if (isPositive)
+                        {
+                            MeasurementInfos.Insert(0, new PNVoltageMeasurementInfo("已吸合", currentVoltage, currentPressure, "H", "吸合电压"));
+                        }
+                        else
+                        {
+                            MeasurementInfos.Insert(0, new PNVoltageMeasurementInfo("已释放", currentVoltage, currentPressure, "L", "释放电压"));
+                        }
+                    }, null);
+                });
+            }).Start();
+
+        }
+
+        /// <summary>
+        /// 显示成功的数据
+        /// </summary>
+        private void ShowHalfwayData(double time, double currentVoltage, double currentPressure, bool isPositive)
+        {
+            new Thread(delegate ()
+            {
+                ThreadPool.QueueUserWorkItem(delegate
+                {
+                    SynchronizationContext.SetSynchronizationContext(new System.Windows.Threading.DispatcherSynchronizationContext(System.Windows.Application.Current.Dispatcher));
+                    SynchronizationContext.Current.Send(pl =>
+                    {
+                        PVoltageCollection.Add(new Data
+                        {
+                            Value1 = currentVoltage,
+                            Value = time
+                        });
+                        NVoltageEdgeCollection.Add(new Data
+                        {
+                            Value1 = currentVoltage,
+                            Value = time
+                        });
+
+                        if (isPositive)
+                        {
+                            MeasurementInfos.Insert(0, new PNVoltageMeasurementInfo("测量吸合", currentVoltage, currentPressure, "L", "无效"));
+                        }
+                        else
+                        {
+                            MeasurementInfos.Insert(0, new PNVoltageMeasurementInfo("测量释放", currentVoltage, currentPressure, "H", "无效"));
+                        }
+                    }, null);
+                });
+            }).Start();
+
+        }
+
+#endif
+
+        /// <summary>
         /// 启动
         /// </summary>
         public void Start()
@@ -870,10 +843,9 @@ namespace AnalogSignalAnalysisWpf
             //复位示波器设置
             Scope.Disconnect();
             Scope.Connect();
-            Scope.CHAScale = CHAScale;
-            Scope.SampleRate = SampleRate;
-            Scope.CHAVoltageDIV = CHAVoltageDIV;
-            Scope.SampleTime = SampleTime;
+            Scope.CHAScale = SystemParamManager.SystemParam.GlobalParam.Scale;
+            Scope.SampleRate = SystemParamManager.SystemParam.GlobalParam.SampleRate;
+            Scope.CHAVoltageDIV = SystemParamManager.SystemParam.GlobalParam.VoltageDIV;
 
             PVoltage = -1;
             NVoltage = -1;
@@ -901,12 +873,7 @@ namespace AnalogSignalAnalysisWpf
                 bool isSuccess = false;
                 double positiveVoltage = 0;
                 double negativeVoltage = 0;
-
-                RunningStatus = "查找吸合电压";
-
-                //临界电压(V)
-                var criticalV = CriticalPressure / PressureK;
-
+                
                 //设置采样时间
                 Scope.SampleTime = SampleTime;
 
@@ -914,218 +881,144 @@ namespace AnalogSignalAnalysisWpf
                 PWM.Frequency = 0;
                 PWM.DutyRatio = 50;
 
+                //设置电源输出
                 double currentVoltage = MinVoltage;
                 PLC.Voltage = currentVoltage;
                 PLC.EnableOutput = true;
-                while (currentVoltage <= MaxVoltage)
+
+                int measureStep = 0;
+
+                while (true)
                 {
-                    //设置当前电压
-                    PLC.Voltage = currentVoltage;
-                    Thread.Sleep(ComDelay);
-
-                    //读取Scope数据
-                    double[] originalData;
-                    Scope.ReadDataBlock(0, out originalData);
-
-                    //数据滤波
-                    double[] filterData;
-                    Analysis.MeanFilter(originalData, 7, out filterData);
-
-                    //获取平均值
-                    CurrentPressure = Analysis.Mean(filterData) * PressureK;
-
-                    //阈值查找边沿
-                    List<int> edgeIndexs;
-                    DigitEdgeType digitEdgeType;
-                    Analysis.FindEdgeByThreshold(filterData, criticalV, criticalV, out edgeIndexs, out digitEdgeType);
-
-                    CurrentVoltage = currentVoltage;
-                    
-                    //如果为上升沿或者是高电平,则有效
-                    if ((digitEdgeType == DigitEdgeType.FirstRisingEdge) || (digitEdgeType == DigitEdgeType.HeightLevel))
+                    switch (measureStep)
                     {
-                        PVoltage = CurrentVoltage;
+                        case 0:
 
-                        new Thread(delegate ()
-                        {
-                            ThreadPool.QueueUserWorkItem(delegate
+                            RunningStatus = "查找吸合电压";
+
+                            //测量吸合电压
+                            while (currentVoltage <= MaxVoltage)
                             {
-                                System.Threading.SynchronizationContext.SetSynchronizationContext(new System.Windows.Threading.DispatcherSynchronizationContext(System.Windows.Application.Current.Dispatcher));
-                                System.Threading.SynchronizationContext.Current.Send(pl =>
+                                //设置当前电压
+                                PLC.Voltage = currentVoltage;
+                                Thread.Sleep(SystemParamManager.SystemParam.GlobalParam.PowerCommonDelay);
+                                CurrentVoltage = currentVoltage;
+
+                                //读取Scope数据
+                                double[] originalData;
+                                Scope.ReadDataBlock(0, out originalData);
+
+                                //数据滤波
+                                double[] filterData;
+                                Analysis.MeanFilter(originalData, 7, out filterData);
+
+                                //电压转气压
+                                double[] pressureData = filterData.ToList().ConvertAll(x => VoltageToPressure(x)).ToArray();
+
+                                //获取平均值
+                                CurrentPressure = Analysis.Mean(pressureData);
+
+                                stopwatch.Stop();
+
+                                //假如当前气压值大于等于临界值,则认为测试有效
+                                if (CurrentPressure >= CriticalPressure)
                                 {
-                                    stopwatch.Stop();
+                                    ShowPData(stopwatch.Elapsed.TotalMilliseconds, CurrentVoltage, CurrentPressure, true);
 
-                                    PVoltageCollection.Add(new Data
-                                    {
-                                        Value1 = CurrentVoltage,
-                                        Value = stopwatch.Elapsed.TotalMilliseconds
-                                    });
-                                    PVoltageEdgeCollection.Add(new Data
-                                    {
-                                        Value1 = CurrentVoltage,
-                                        Value = stopwatch.Elapsed.TotalMilliseconds
-                                    });
+                                    positiveVoltage = currentVoltage;
+                                    isSuccess = true;
+                                    break;
+                                }
+                                else
+                                {
+                                    ShowPData(stopwatch.Elapsed.TotalMilliseconds, CurrentVoltage, CurrentPressure, false);
+                                }
 
-                                    stopwatch.Start();
+                                stopwatch.Start();
 
-                                    //MeasurementInfos.Add(new PNVoltageMeasurementInfo("吸合", CurrentVoltage, "H", "吸合电压"));
-                                    MeasurementInfos.Insert(0, new PNVoltageMeasurementInfo("已吸合", CurrentVoltage, CurrentPressure, "H", "吸合电压"));
-                                }, null);
-                            });
-                        }).Start();
+                                currentVoltage += VoltageInterval;
+                            }
 
-                        positiveVoltage = currentVoltage;
-                        isSuccess = true;
-                        break;
-                    }
-                    else
-                    {
-                        new Thread(delegate ()
-                        {
-                            ThreadPool.QueueUserWorkItem(delegate
+                            if (isSuccess)
                             {
-                                System.Threading.SynchronizationContext.SetSynchronizationContext(new System.Windows.Threading.DispatcherSynchronizationContext(System.Windows.Application.Current.Dispatcher));
-                                System.Threading.SynchronizationContext.Current.Send(pl =>
-                                {
-                                    stopwatch.Stop();
-
-                                    PVoltageCollection.Add(new Data
-                                    {
-                                        Value1 = CurrentVoltage,
-                                        Value = stopwatch.Elapsed.TotalMilliseconds
-                                    });
-
-                                    NVoltageEdgeCollection.Add(new Data
-                                    {
-                                        Value1 = CurrentVoltage,
-                                        Value = stopwatch.Elapsed.TotalMilliseconds
-                                    });
-
-                                    stopwatch.Start();
-
-                                    MeasurementInfos.Insert(0, new PNVoltageMeasurementInfo("测量吸合", CurrentVoltage, CurrentPressure, "L", "无效"));
-                                }, null);
-                            });
-                        }).Start();
-                    }
-
-                    currentVoltage += VoltageInterval;
-                }
-
-                if (isSuccess)
-                {
-                    RunningStatus = "查找释放电压";
-
-                    isSuccess = false;
-                    currentVoltage = positiveVoltage + 2;
-                    while (currentVoltage > MinVoltage)
-                    {
-                        //设置当前电压
-                        PLC.Voltage = currentVoltage;
-                        Thread.Sleep(ComDelay);
-
-                        //读取Scope数据
-                        double[] originalData;
-                        Scope.ReadDataBlock(0, out originalData);
-
-                        //数据滤波
-                        double[] filterData;
-                        Analysis.MeanFilter(originalData, 7, out filterData);
-
-                        //阈值查找边沿
-                        List<int> edgeIndexs;
-                        DigitEdgeType digitEdgeType;
-                        Analysis.FindEdgeByThreshold(filterData, criticalV, criticalV, out edgeIndexs, out digitEdgeType);
-
-                        CurrentVoltage = currentVoltage;
-
-                        //如果为上升沿或者是高电平,则有效
-                        if ((digitEdgeType == DigitEdgeType.FirstFillingEdge) || (digitEdgeType == DigitEdgeType.LowLevel))
-                        {
-                            NVoltage = CurrentVoltage;
-
-                            new Thread(delegate ()
+                                measureStep++;
+                                isSuccess = false;
+                            }
+                            else
                             {
-                                ThreadPool.QueueUserWorkItem(delegate
-                                {
-                                    System.Threading.SynchronizationContext.SetSynchronizationContext(new System.Windows.Threading.DispatcherSynchronizationContext(System.Windows.Application.Current.Dispatcher));
-                                    System.Threading.SynchronizationContext.Current.Send(pl =>
-                                    {
-                                        stopwatch.Stop();
+                                measureStep = -1;
+                            }
 
-                                        PVoltageCollection.Add(new Data
-                                        {
-                                            Value1 = CurrentVoltage,
-                                            Value = stopwatch.Elapsed.TotalMilliseconds
-                                        });
-
-                                        PVoltageCollection.Add(new Data
-                                        {
-                                            Value1 = 0,
-                                            Value = stopwatch.Elapsed.TotalMilliseconds + 4000
-                                        });
-
-                                        PVoltageEdgeCollection.Add(new Data
-                                        {
-                                            Value1 = CurrentVoltage,
-                                            Value = stopwatch.Elapsed.TotalMilliseconds
-                                        });
-
-                                        stopwatch.Start();
-
-                                        MeasurementInfos.Insert(0, new PNVoltageMeasurementInfo("已释放", CurrentVoltage, CurrentPressure, "L", "释放电压"));
-                                    }, null);
-                                });
-                            }).Start();
-
-                            negativeVoltage = currentVoltage;
-                            isSuccess = true;
                             break;
-                        }
-                        else
-                        {
-                            new Thread(delegate ()
+
+                        case 1:
+
+                            RunningStatus = "查找释放电压";
+
+                            //测量释放电压
+                            while (currentVoltage >= MinVoltage)
                             {
-                                ThreadPool.QueueUserWorkItem(delegate
+                                //设置当前电压
+                                PLC.Voltage = currentVoltage;
+                                Thread.Sleep(SystemParamManager.SystemParam.GlobalParam.PowerCommonDelay);
+                                CurrentVoltage = currentVoltage;
+
+                                //读取Scope数据
+                                double[] originalData;
+                                Scope.ReadDataBlock(0, out originalData);
+
+                                //数据滤波
+                                double[] filterData;
+                                Analysis.MeanFilter(originalData, 7, out filterData);
+
+                                //电压转气压
+                                double[] pressureData = filterData.ToList().ConvertAll(x => VoltageToPressure(x)).ToArray();
+
+                                //获取平均值
+                                CurrentPressure = Analysis.Mean(pressureData);
+
+                                stopwatch.Stop();
+
+                                //假如当前气压值小于等于临界值,则认为测试有效
+                                if (CurrentPressure <= CriticalPressure)
                                 {
-                                    System.Threading.SynchronizationContext.SetSynchronizationContext(new System.Windows.Threading.DispatcherSynchronizationContext(System.Windows.Application.Current.Dispatcher));
-                                    System.Threading.SynchronizationContext.Current.Send(pl =>
-                                    {
-                                        stopwatch.Stop();
+                                    ShowNData(stopwatch.Elapsed.TotalMilliseconds, CurrentVoltage, CurrentPressure, true);
 
-                                        PVoltageCollection.Add(new Data
-                                        {
-                                            Value1 = CurrentVoltage,
-                                            Value = stopwatch.Elapsed.TotalMilliseconds
-                                        });
+                                    negativeVoltage = currentVoltage;
+                                    isSuccess = true;
+                                    break;
+                                }
+                                else
+                                {
+                                    ShowNData(stopwatch.Elapsed.TotalMilliseconds, CurrentVoltage, CurrentPressure, false);
+                                }
 
-                                        NVoltageEdgeCollection.Add(new Data
-                                        {
-                                            Value1 = CurrentVoltage,
-                                            Value = stopwatch.Elapsed.TotalMilliseconds
-                                        });
+                                stopwatch.Start();
 
-                                        stopwatch.Start();
+                                currentVoltage += VoltageInterval;
+                            }
 
-                                        MeasurementInfos.Insert(0, new PNVoltageMeasurementInfo("测量释放", CurrentVoltage, CurrentPressure, "H", "无效"));
-                                    }, null);
-                                });
-                            }).Start();
-                        }
+                            if (isSuccess)
+                            {
+                                measureStep++;
+                            }
+                            else
+                            {
+                                measureStep = -1;
+                            }
 
-                        currentVoltage -= VoltageInterval;
-                    }
+                            break;
 
-                    if (isSuccess)
-                    {
-                        OnMeasurementCompleted(new PNVoltageMeasurementCompletedEventArgs(true, positiveVoltage, negativeVoltage));
-                        return;
+                        case 2:
+                            //测试成功
+                            OnMeasurementCompleted(new PNVoltageMeasurementCompletedEventArgs(true, positiveVoltage, negativeVoltage));
+                            return;
+
+                        default:
+                            OnMeasurementCompleted(new PNVoltageMeasurementCompletedEventArgs());
+                            return;
                     }
                 }
-
-                OnMeasurementCompleted(new PNVoltageMeasurementCompletedEventArgs());
-
-                return;
             });
 
             measureThread.Start();

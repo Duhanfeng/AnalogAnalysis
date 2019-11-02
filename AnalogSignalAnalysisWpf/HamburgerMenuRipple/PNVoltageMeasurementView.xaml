@@ -164,23 +164,6 @@
                         <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">采样时间(MS)</TextBlock>
                         <TextBox Text="{Binding SampleTime, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
                     </DockPanel>
-                    <DockPanel Margin="0,10,0,0">
-                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">通信延迟(MS)</TextBlock>
-                        <TextBox Text="{Binding ComDelay, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
-                    </DockPanel>
-                    <TextBlock Text="示波器配置" Foreground="Green" Margin="0,10,0,0"/>
-                    <DockPanel Margin="0,10,0,0">
-                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">探头衰减</TextBlock>
-                        <ComboBox ItemsSource="{Binding ScopeScale}" SelectedItem="{Binding ScopeCHAScale}"/>
-                    </DockPanel>
-                    <DockPanel Margin="0,10,0,0">
-                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">探头电压档位</TextBlock>
-                        <ComboBox ItemsSource="{Binding ScopeVoltageDIVCollection}" SelectedItem="{Binding ScopeCHAVoltageDIV}"/>
-                    </DockPanel>
-                    <DockPanel Margin="0,10,0,0">
-                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">采样率</TextBlock>
-                        <ComboBox ItemsSource="{Binding ScopeSampleRateCollection}" SelectedItem="{Binding ScopeSampleRate}"/>
-                    </DockPanel>
                 </StackPanel>
             </Expander>
             <Button cal:Message.Attach="UpdateHardware" Margin="0,10,0,0">刷新硬件</Button>

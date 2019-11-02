@@ -134,7 +134,7 @@
                       ItemsSource="{Binding AccentColors, Mode=OneWay}" />
                     </MenuItem>
                 </MenuItem>
-                <MenuItem Header="调试">
+                <MenuItem Header="调试" Visibility="Collapsed">
                     <MenuItem Header="抛异常" cal:Message.Attach="ThrowException"/>
                     <MenuItem Header="抛警告" cal:Message.Attach="ThrowWarning"/>
                     <MenuItem Header="触发消息" cal:Message.Attach="ThrowMessage"/>
@@ -147,10 +147,10 @@
                 </MenuItem>
                 <MenuItem Header="一键测试" cal:Message.Attach="TestAll" IsEnabled="{Binding IsEnableTest}"/>
             </Menu>
-            <StackPanel MinWidth="50"/>
+            <StackPanel MinWidth="40"/>
             <Label VerticalAlignment="Center" FontSize="13">当前账户:</Label>
             <Label VerticalAlignment="Center" FontSize="13" Content="{Binding OperaMsg}"/>
-            <StackPanel MinWidth="50"/>
+            <StackPanel MinWidth="40"/>
             <StackPanel Orientation="Horizontal" Margin="10,0">
                 <iconPacks:PackIconMaterial Kind="AppleKeyboardOption" VerticalAlignment="Center" Margin="10,0,0,0" />
                 <Label VerticalAlignment="Center" FontSize="13">示波器:</Label>
@@ -158,12 +158,12 @@
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="10,0">
                 <iconPacks:PackIconMaterial Kind="BoomGate" VerticalAlignment="Center" Margin="10,0,0,0" />
-                <Label VerticalAlignment="Center" FontSize="13">PLC:</Label>
+                <Label VerticalAlignment="Center" FontSize="13">电源模块:</Label>
                 <Ellipse Width="20" Height="20" Fill="{Binding IsPLCValid, Converter={StaticResource BoolToColorConverter}}"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="10,0">
                 <iconPacks:PackIconFontAwesome Kind="WaveSquareSolid" VerticalAlignment="Center" Margin="10,0,0,0" />
-                <Label VerticalAlignment="Center" FontSize="13">PWM:</Label>
+                <Label VerticalAlignment="Center" FontSize="13">PLC:</Label>
                 <Ellipse Width="20" Height="20" Fill="{Binding IsPWMValid, Converter={StaticResource BoolToColorConverter}}"/>
             </StackPanel>
         </DockPanel>

@@ -48,10 +48,6 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public ThroughputMeasurementViewModel()
         {
-            ScopeScale = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<EScale>());
-            ScopeSampleRateCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<ESampleRate>());
-            ScopeVoltageDIVCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<EVoltageDIV>());
-
             //恢复配置参数
             SystemParamManager = SystemParamManager.GetInstance();
             MeasureType = SystemParamManager.SystemParam.ThroughputMeasureParams.MeasureType;
@@ -72,9 +68,6 @@ namespace AnalogSignalAnalysisWpf
             IsEnableDerivativeFilter = SystemParamManager.SystemParam.ThroughputMeasureParams.IsEnableDerivativeFilter;
             DerivativeFilterCount = SystemParamManager.SystemParam.ThroughputMeasureParams.DerivativeFilterCount;
 
-            CHAScale = SystemParamManager.SystemParam.ThroughputMeasureParams.CHAScale;
-            CHAVoltageDIV = SystemParamManager.SystemParam.ThroughputMeasureParams.CHAVoltageDIV;
-            SampleRate = SystemParamManager.SystemParam.ThroughputMeasureParams.SampleRate;
 
         }
 
@@ -172,84 +165,6 @@ namespace AnalogSignalAnalysisWpf
             }
 
             NotifyOfPropertyChange(() => IsHardwareValid);
-        }
-
-        /// <summary>
-        /// 放大倍数
-        /// </summary>
-        public ObservableCollection<string> ScopeScale { get; set; }
-
-        /// <summary>
-        /// 电压档位
-        /// </summary>
-        public ObservableCollection<string> ScopeVoltageDIVCollection { get; set; }
-
-        /// <summary>
-        /// 采样率
-        /// </summary>
-        public ObservableCollection<string> ScopeSampleRateCollection { get; set; }
-
-        private EScale CHAScale = EScale.x10;
-
-        /// <summary>
-        /// CHA探头衰变
-        /// </summary>
-        public string ScopeCHAScale
-        {
-            get
-            {
-                return EnumHelper.GetDescription(CHAScale);
-            }
-            set
-            {
-                CHAScale = EnumHelper.GetEnum<EScale>(value);
-                NotifyOfPropertyChange(() => ScopeCHAScale);
-
-                SystemParamManager.SystemParam.ThroughputMeasureParams.CHAScale = CHAScale;
-                SystemParamManager.SaveParams();
-            }
-        }
-
-        private EVoltageDIV CHAVoltageDIV = EVoltageDIV.DIV_2V5;
-
-        /// <summary>
-        /// CHA电压档位
-        /// </summary>
-        public string ScopeCHAVoltageDIV
-        {
-            get
-            {
-                return EnumHelper.GetDescription(CHAVoltageDIV);
-            }
-            set
-            {
-                CHAVoltageDIV = EnumHelper.GetEnum<EVoltageDIV>(value);
-                NotifyOfPropertyChange(() => ScopeCHAVoltageDIV);
-
-                SystemParamManager.SystemParam.ThroughputMeasureParams.CHAVoltageDIV = CHAVoltageDIV;
-                SystemParamManager.SaveParams();
-            }
-        }
-
-        private ESampleRate SampleRate = ESampleRate.Sps_49K;
-
-        /// <summary>
-        /// 采样率
-        /// </summary>
-        public string ScopeSampleRate
-        {
-            get
-            {
-                return EnumHelper.GetDescription(SampleRate);
-            }
-            set
-            {
-                SampleRate = EnumHelper.GetEnum<ESampleRate>(value);
-                NotifyOfPropertyChange(() => ScopeSampleRate);
-
-                SystemParamManager.SystemParam.ThroughputMeasureParams.SampleRate = SampleRate;
-                SystemParamManager.SaveParams();
-            }
         }
 
         #endregion
@@ -884,10 +799,9 @@ namespace AnalogSignalAnalysisWpf
             //复位示波器设置
             Scope.Disconnect();
             Scope.Connect();
-            Scope.CHAScale = CHAScale;
-            Scope.SampleRate = SampleRate;
-            Scope.CHAVoltageDIV = CHAVoltageDIV;
-            Scope.SampleTime = SampleTime;
+            Scope.CHAScale = SystemParamManager.SystemParam.GlobalParam.Scale;
+            Scope.SampleRate = SystemParamManager.SystemParam.GlobalParam.SampleRate;
+            Scope.CHAVoltageDIV = SystemParamManager.SystemParam.GlobalParam.VoltageDIV;
 
             RunningStatus = "运行中";
 

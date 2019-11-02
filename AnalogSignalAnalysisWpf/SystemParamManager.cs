@@ -18,24 +18,24 @@ namespace AnalogSignalAnalysisWpf
     public class FrequencyMeasureParams
     {
         /// <summary>
-        /// 最小电压阈值(单位:V)
+        /// 最小气压(MPa)
         /// </summary>
-        public double MinVoltageThreshold { get; set; } = 1.5;
+        public double MinPressure { get; set; } = 1.5;
 
         /// <summary>
-        /// 最大电压阈值(单位:V)
+        /// 最小气压(MPa)
         /// </summary>
-        public double MaxVoltageThreshold { get; set; } = 8.0;
+        public double MaxPressure { get; set; } = 8.0;
 
         /// <summary>
         /// 频率误差
         /// </summary>
         public double FrequencyErrLimit { get; set; } = 0.2;
 
-        /// <summary>
-        /// 通信延迟(MS)
-        /// </summary>
-        public int ComDelay { get; set; } = 200;
+        ///// <summary>
+        ///// 通信延迟(MS)
+        ///// </summary>
+        //public int ComDelay { get; set; } = 200;
 
         /// <summary>
         /// 输出电压(吸合电压)
@@ -52,20 +52,20 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public int VoltageFilterCount { get; set; } = 11;
 
-        /// <summary>
-        /// CHA探头衰变
-        /// </summary>
-        public EScale CHAScale { get; set; } = EScale.x10;
+        ///// <summary>
+        ///// CHA探头衰变
+        ///// </summary>
+        //public EScale CHAScale { get; set; } = EScale.x10;
 
-        /// <summary>
-        /// CHA电压档位
-        /// </summary>
-        public EVoltageDIV CHAVoltageDIV { get; set; } = EVoltageDIV.DIV_2V5;
+        ///// <summary>
+        ///// CHA电压档位
+        ///// </summary>
+        //public EVoltageDIV CHAVoltageDIV { get; set; } = EVoltageDIV.DIV_2V5;
 
-        /// <summary>
-        /// 采样率
-        /// </summary>
-        public ESampleRate SampleRate { get; set; } = ESampleRate.Sps_49K;
+        ///// <summary>
+        ///// 采样率
+        ///// </summary>
+        //public ESampleRate SampleRate { get; set; } = ESampleRate.Sps_49K;
 
         /// <summary>
         /// 测试数据
@@ -99,25 +99,25 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public int SampleTime { get; set; } = 200;
 
-        /// <summary>
-        /// 通信延迟(MS)
-        /// </summary>
-        public int ComDelay { get; set; } = 200;
+        ///// <summary>
+        ///// 通信延迟(MS)
+        ///// </summary>
+        //public int ComDelay { get; set; } = 200;
 
-        /// <summary>
-        /// CHA探头衰变
-        /// </summary>
-        public EScale CHAScale { get; set; } = EScale.x10;
+        ///// <summary>
+        ///// CHA探头衰变
+        ///// </summary>
+        //public EScale CHAScale { get; set; } = EScale.x10;
 
-        /// <summary>
-        /// CHA电压档位
-        /// </summary>
-        public EVoltageDIV CHAVoltageDIV { get; set; } = EVoltageDIV.DIV_2V5;
+        ///// <summary>
+        ///// CHA电压档位
+        ///// </summary>
+        //public EVoltageDIV CHAVoltageDIV { get; set; } = EVoltageDIV.DIV_2V5;
 
-        /// <summary>
-        /// 采样率
-        /// </summary>
-        public ESampleRate SampleRate { get; set; } = ESampleRate.Sps_49K;
+        ///// <summary>
+        ///// 采样率
+        ///// </summary>
+        //public ESampleRate SampleRate { get; set; } = ESampleRate.Sps_49K;
 
     }
 
@@ -126,30 +126,30 @@ namespace AnalogSignalAnalysisWpf
     /// </summary>
     public class PNVoltageMeasureParams
     {
-        /// <summary>
-        /// 气压系数(K=P/V)
-        /// </summary>
-        public double PressureK { get; set; } = 1;
+        ///// <summary>
+        ///// 气压系数(K=P/V)
+        ///// </summary>
+        //public double PressureK { get; set; } = 1;
 
         /// <summary>
         /// 临界气压
         /// </summary>
         public double CriticalPressure { get; set; } = 3;
 
-        /// <summary>
-        /// 最小电压阈值(单位:V)
-        /// </summary>
-        public double MinVoltageThreshold { get; set; } = 1.5;
+        ///// <summary>
+        ///// 最小电压阈值(单位:V)
+        ///// </summary>
+        //public double MinVoltageThreshold { get; set; } = 1.5;
 
-        /// <summary>
-        /// 最大电压阈值(单位:V)
-        /// </summary>
-        public double MaxVoltageThreshold { get; set; } = 8.0;
+        ///// <summary>
+        ///// 最大电压阈值(单位:V)
+        ///// </summary>
+        //public double MaxVoltageThreshold { get; set; } = 8.0;
 
-        /// <summary>
-        /// 频率误差
-        /// </summary>
-        public double FrequencyErrLimit { get; set; } = 0.2;
+        ///// <summary>
+        ///// 频率误差
+        ///// </summary>
+        //public double FrequencyErrLimit { get; set; } = 0.2;
 
         /// <summary>
         /// 电压间隔(V)
@@ -171,25 +171,25 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public int SampleTime { get; set; } = 500;
 
-        /// <summary>
-        /// 通信延迟(MS)
-        /// </summary>
-        public int ComDelay { get; set; } = 200;
+        ///// <summary>
+        ///// 通信延迟(MS)
+        ///// </summary>
+        //public int ComDelay { get; set; } = 200;
 
         /// <summary>
         /// CHA探头衰变
         /// </summary>
-        public EScale CHAScale { get; set; } = EScale.x10;
+        //public EScale CHAScale { get; set; } = EScale.x10;
 
-        /// <summary>
-        /// CHA电压档位
-        /// </summary>
-        public EVoltageDIV CHAVoltageDIV { get; set; } = EVoltageDIV.DIV_2V5;
+        ///// <summary>
+        ///// CHA电压档位
+        ///// </summary>
+        //public EVoltageDIV CHAVoltageDIV { get; set; } = EVoltageDIV.DIV_2V5;
 
-        /// <summary>
-        /// 采样率
-        /// </summary>
-        public ESampleRate SampleRate { get; set; } = ESampleRate.Sps_49K;
+        ///// <summary>
+        ///// 采样率
+        ///// </summary>
+        //public ESampleRate SampleRate { get; set; } = ESampleRate.Sps_49K;
 
     }
 
@@ -254,17 +254,17 @@ namespace AnalogSignalAnalysisWpf
         /// <summary>
         /// CHA探头衰变
         /// </summary>
-        public EScale CHAScale { get; set; } = EScale.x10;
+        //public EScale CHAScale { get; set; } = EScale.x10;
 
-        /// <summary>
-        /// CHA电压档位
-        /// </summary>
-        public EVoltageDIV CHAVoltageDIV { get; set; } = EVoltageDIV.DIV_2V5;
+        ///// <summary>
+        ///// CHA电压档位
+        ///// </summary>
+        //public EVoltageDIV CHAVoltageDIV { get; set; } = EVoltageDIV.DIV_2V5;
 
-        /// <summary>
-        /// 采样率
-        /// </summary>
-        public ESampleRate SampleRate { get; set; } = ESampleRate.Sps_49K;
+        ///// <summary>
+        ///// 采样率
+        ///// </summary>
+        //public ESampleRate SampleRate { get; set; } = ESampleRate.Sps_49K;
 
         /// <summary>
         /// 电压滤波系数
@@ -440,9 +440,14 @@ namespace AnalogSignalAnalysisWpf
     public class GlobalParam
     {
         /// <summary>
-        /// 气压系数
+        /// 气压系数(P/V)
         /// </summary>
         public double PressureK { get; set; } = 1.0;
+
+        /// <summary>
+        /// 电源模块通信延迟(MS)
+        /// </summary>
+        public int PowerCommonDelay { get; set; } = 200;
 
         /// <summary>
         /// 衰减档位
