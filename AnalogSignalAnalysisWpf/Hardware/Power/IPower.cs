@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AnalogSignalAnalysisWpf.Hardware.PLC
+namespace AnalogSignalAnalysisWpf.Hardware
 {
-    public interface IPLC : IPLCCommunication
+    public interface IPower : IModbusCommunication
     {
         #region 控制接口
 

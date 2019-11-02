@@ -7,26 +7,26 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AnalogSignalAnalysisWpf.Hardware.PLC
+namespace AnalogSignalAnalysisWpf.Hardware
 {
-    class ModbusPLC : IPLC
+    class ModbusPower : IPower
     {
         #region 构造函数
 
         /// <summary>
-        /// 创建ModbusPLC新实例
+        /// 创建ModbusPower新实例
         /// </summary>
-        public ModbusPLC() : this("")
+        public ModbusPower() : this("")
         {
 
         }
 
         /// <summary>
-        /// 创建ModbusPLC新实例
+        /// 创建ModbusPower新实例
         /// </summary>
         /// <param name="portName">端口名</param>
         /// <param name="baudRate">波特率</param>
-        public ModbusPLC(string portName, int baudRate = 115200)
+        public ModbusPower(string portName, int baudRate = 115200)
         {
             PrimarySerialPortName = portName;
             SerialPortBaudRate = baudRate;
@@ -36,7 +36,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
 
         #region Modbus接口
 
-        private object plcLock = new object();
+        private object powerLock = new object();
 
         /// <summary>
         /// 写单个寄存器
@@ -62,7 +62,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
                 var factory = new ModbusFactory();
                 IModbusMaster master = factory.CreateRtuMaster(adapter);
 
-                lock (plcLock)
+                lock (powerLock)
                 {
                     //写到寄存器
                     master.WriteSingleRegister(slaveAddress, registerAddress, value);
@@ -95,7 +95,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
                 var factory = new ModbusFactory();
                 IModbusMaster master = factory.CreateRtuMaster(adapter);
 
-                lock (plcLock)
+                lock (powerLock)
                 {
                     //写到寄存器
                     master.WriteMultipleRegisters(slaveAddress, registerAddress, data);
@@ -128,7 +128,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
                 var factory = new ModbusFactory();
                 IModbusMaster master = factory.CreateRtuMaster(adapter);
 
-                lock (plcLock)
+                lock (powerLock)
                 {
                     //读寄存器
                     var values = master.ReadHoldingRegisters(slaveAddress, registerAddress, 1);
@@ -165,7 +165,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
                 var factory = new ModbusFactory();
                 IModbusMaster master = factory.CreateRtuMaster(adapter);
 
-                lock (plcLock)
+                lock (powerLock)
                 {
                     //读寄存器
                     data = master.ReadHoldingRegisters(slaveAddress, registerAddress, numberOfPoints);
@@ -564,7 +564,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.PLC
         }
 
         // TODO: 仅当以上 Dispose(bool disposing) 拥有用于释放未托管资源的代码时才替代终结器。
-        // ~PLC()
+        // ~Power()
         // {
         //   // 请勿更改此代码。将清理代码放入以上 Dispose(bool disposing) 中。
         //   Dispose(false);

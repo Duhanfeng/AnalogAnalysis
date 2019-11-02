@@ -128,11 +128,11 @@ namespace AnalogSignalAnalysisWpf
         }
 
         /// <summary>
-        /// PLC配置界面
+        /// Power配置界面
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void PLCMenuItem_Click(object sender, RoutedEventArgs e)
+        private void PowerMenuItem_Click(object sender, RoutedEventArgs e)
         {
             for (int i = 0; i < Flyouts.Items.Count; i++)
             {
@@ -156,7 +156,7 @@ namespace AnalogSignalAnalysisWpf
         }
 
         /// <summary>
-        /// PLC配置界面
+        /// Power配置界面
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>

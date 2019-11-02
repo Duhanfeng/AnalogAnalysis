@@ -1,4 +1,4 @@
-﻿using AnalogSignalAnalysisWpf.Hardware.PLC;
+﻿using AnalogSignalAnalysisWpf.Hardware;
 using AnalogSignalAnalysisWpf.Hardware.PWM;
 using AnalogSignalAnalysisWpf.Hardware.Scope;
 using AnalogSignalAnalysisWpf.LiveData;
@@ -182,16 +182,16 @@ namespace AnalogSignalAnalysisWpf
             IsAdmin = false;
         }
 
-        public FrequencyMeasurementViewModel(IScopeBase scope, IPLC plc, IPWM pwm) : this()
+        public FrequencyMeasurementViewModel(IScopeBase scope, IPower power, IPWM pwm) : this()
         {
             if (scope == null)
             {
                 throw new ArgumentException("scope invalid");
             }
 
-            if (plc == null)
+            if (power == null)
             {
-                throw new ArgumentException("plc invalid");
+                throw new ArgumentException("power invalid");
             }
 
             if (pwm == null)
@@ -200,7 +200,7 @@ namespace AnalogSignalAnalysisWpf
             }
 
             Scope = scope;
-            PLC = plc;
+            Power = power;
             PWM = pwm;
 
             if (!IsHardwareValid)
@@ -223,12 +223,12 @@ namespace AnalogSignalAnalysisWpf
         public IScopeBase Scope { get; set; }
 
         /// <summary>
-        /// PLC接口
+        /// Power接口
         /// </summary>
-        public IPLC PLC { get; set; }
+        public IPower Power { get; set; }
 
         /// <summary>
-        /// PLC接口
+        /// Power接口
         /// </summary>
         public IPWM PWM { get; set; }
 
@@ -239,7 +239,7 @@ namespace AnalogSignalAnalysisWpf
         {
             get
             {
-                if ((Scope?.IsConnect == true) && (PLC?.IsConnect == true) && (PWM?.IsConnect == true))
+                if ((Scope?.IsConnect == true) && (Power?.IsConnect == true) && (PWM?.IsConnect == true))
                 {
                     return true;
                 }
@@ -260,9 +260,9 @@ namespace AnalogSignalAnalysisWpf
                 Scope?.Connect();
             }
 
-            if (PLC?.IsConnect != true)
+            if (Power?.IsConnect != true)
             {
-                PLC?.Connect();
+                Power?.Connect();
             }
 
             if (PWM?.IsConnect != true)
@@ -682,7 +682,7 @@ namespace AnalogSignalAnalysisWpf
         /// <param name="e"></param>
         protected void OnMeasurementCompleted(FrequencyMeasurementCompletedEventArgs e)
         {
-            PLC.EnableOutput = false;
+            Power.EnableOutput = false;
 
             PWM.Frequency = 0;
             if (e.IsSuccess == true)
@@ -898,13 +898,13 @@ namespace AnalogSignalAnalysisWpf
                 PWM.Frequency = 0;
                 PWM.DutyRatio = DutyRatio;
 
-                //使能PLC输出
-                PLC.Voltage = OutputVoltage;
-                PLC.EnableOutput = true;
+                //使能Power输出
+                Power.Voltage = OutputVoltage;
+                Power.EnableOutput = true;
 
                 foreach (var item in TestDatas)
                 {
-                    //设置PLC频率
+                    //设置Power频率
                     PWM.Frequency = item.Frequency;
                     OnMessageRaised(MessageLevel.Message, $"F: [Frequency- {PWM.Frequency}]");
                     Thread.Sleep(SystemParamManager.SystemParam.GlobalParam.PowerCommonDelay);

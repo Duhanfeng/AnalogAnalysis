@@ -397,7 +397,7 @@ namespace AnalogSignalAnalysisWpf
     /// <summary>
     /// PWM参数
     /// </summary>
-    public class PLCParams
+    public class PowerParams
     {
         #region Modbus配置参数
 
@@ -498,9 +498,9 @@ namespace AnalogSignalAnalysisWpf
         public PWMParams PWMParams { get; set; } = new PWMParams();
 
         /// <summary>
-        /// PLC参数
+        /// Power参数
         /// </summary>
-        public PLCParams PLCParams { get; set; } = new PLCParams();
+        public PowerParams PowerParams { get; set; } = new PowerParams();
 
         #endregion
 

@@ -70,11 +70,11 @@
                     <ContentControl Content="{Binding ScopeControlView}"/>
                 </Grid>
             </Controls:Flyout>
-            <Controls:Flyout Header="PLC控制"
+            <Controls:Flyout Header="Power控制"
                              Position="Right"
                              Theme="Inverse">
                 <Grid MinWidth="400" Margin="10">
-                    <ContentControl Content="{Binding PLCControlView}"/>
+                    <ContentControl Content="{Binding PowerControlView}"/>
                 </Grid>
             </Controls:Flyout>
             <Controls:Flyout Header="PWM控制"
@@ -105,7 +105,7 @@
                 </MenuItem>
                 <MenuItem Header="设备">
                     <MenuItem Header="示波器" Click="ScopeMenuItem_Click"/>
-                    <MenuItem Header="PLC" Click="PLCMenuItem_Click"/>
+                    <MenuItem Header="Power" Click="PowerMenuItem_Click"/>
                     <MenuItem Header="PWM" Click="PWMMenuItem_Click"/>
                 </MenuItem>
                 <MenuItem Header="设置">
@@ -159,11 +159,11 @@
             <StackPanel Orientation="Horizontal" Margin="10,0">
                 <iconPacks:PackIconMaterial Kind="BoomGate" VerticalAlignment="Center" Margin="10,0,0,0" />
                 <Label VerticalAlignment="Center" FontSize="13">电源模块:</Label>
-                <Ellipse Width="20" Height="20" Fill="{Binding IsPLCValid, Converter={StaticResource BoolToColorConverter}}"/>
+                <Ellipse Width="20" Height="20" Fill="{Binding IsPowerValid, Converter={StaticResource BoolToColorConverter}}"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="10,0">
                 <iconPacks:PackIconFontAwesome Kind="WaveSquareSolid" VerticalAlignment="Center" Margin="10,0,0,0" />
-                <Label VerticalAlignment="Center" FontSize="13">PLC:</Label>
+                <Label VerticalAlignment="Center" FontSize="13">Power:</Label>
                 <Ellipse Width="20" Height="20" Fill="{Binding IsPWMValid, Converter={StaticResource BoolToColorConverter}}"/>
             </StackPanel>
         </DockPanel>

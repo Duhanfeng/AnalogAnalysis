@@ -237,9 +237,9 @@
     <Compile Include="HamburgerMenuRipple\InputOutputMeasurementView.xaml.cs">
       <DependentUpon>InputOutputMeasurementView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Hardware\PLC\IPLC.cs" />
-    <Compile Include="Hardware\PLC\IPLCCommunication.cs" />
-    <Compile Include="Hardware\PLC\ModbusPLC.cs" />
+    <Compile Include="Hardware\Power\IPower.cs" />
+    <Compile Include="Hardware\IPLCCommunication.cs" />
+    <Compile Include="Hardware\Power\ModbusPower.cs" />
     <Compile Include="Hardware\PWM\IPWM.cs" />
     <Compile Include="Hardware\PWM\SerialPortPWM.cs" />
     <Compile Include="Hardware\Scope\IScopeBase.cs" />
@@ -250,8 +250,8 @@
       <DependentUpon>LiveDataView.xaml</DependentUpon>
     </Compile>
     <Compile Include="LiveData\LiveDataViewModel.cs" />
-    <Compile Include="PLCControlView.xaml.cs">
-      <DependentUpon>PLCControlView.xaml</DependentUpon>
+    <Compile Include="PowerControlView.xaml.cs">
+      <DependentUpon>PowerControlView.xaml</DependentUpon>
     </Compile>
     <Compile Include="PWMControlView.xaml.cs">
       <DependentUpon>PWMControlView.xaml</DependentUpon>
@@ -309,7 +309,7 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="PLCControlView.xaml">
+    <Page Include="PowerControlView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

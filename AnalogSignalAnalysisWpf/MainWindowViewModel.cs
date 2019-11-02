@@ -1,5 +1,5 @@
 ﻿using AnalogSignalAnalysisWpf.Core;
-using AnalogSignalAnalysisWpf.Hardware.PLC;
+using AnalogSignalAnalysisWpf.Hardware;
 using AnalogSignalAnalysisWpf.Hardware.PWM;
 using AnalogSignalAnalysisWpf.Hardware.Scope;
 using AnalogSignalAnalysisWpf.LiveData;
@@ -118,32 +118,32 @@ namespace AnalogSignalAnalysisWpf
                 AddRunningMessage("打开示波器失败");
             }
 
-            PLC = new ModbusPLC();
-            if (SerialPorts.Contains(SystemParamManager.SystemParam.PLCParams.PrimarySerialPortName))
+            Power = new ModbusPower();
+            if (SerialPorts.Contains(SystemParamManager.SystemParam.PowerParams.PrimarySerialPortName))
             {
                 //配置通信参数
-                PLC.PrimarySerialPortName = SystemParamManager.SystemParam.PLCParams.PrimarySerialPortName;
-                PLC.SerialPortBaudRate = SystemParamManager.SystemParam.PLCParams.SerialPortBaudRate;
-                PLC.SlaveAddress = SystemParamManager.SystemParam.PLCParams.SlaveAddress;
-                PLC.ReadTimeout = SystemParamManager.SystemParam.PLCParams.ReadTimeout;
-                PLC.WriteTimeout = SystemParamManager.SystemParam.PLCParams.WriteTimeout;
+                Power.PrimarySerialPortName = SystemParamManager.SystemParam.PowerParams.PrimarySerialPortName;
+                Power.SerialPortBaudRate = SystemParamManager.SystemParam.PowerParams.SerialPortBaudRate;
+                Power.SlaveAddress = SystemParamManager.SystemParam.PowerParams.SlaveAddress;
+                Power.ReadTimeout = SystemParamManager.SystemParam.PowerParams.ReadTimeout;
+                Power.WriteTimeout = SystemParamManager.SystemParam.PowerParams.WriteTimeout;
 
                 //连接设备
-                if (PLC.Connect())
+                if (Power.Connect())
                 {
-                    AddRunningMessage("连接PLC成功");
-                    PLC.Voltage = SystemParamManager.SystemParam.PLCParams.Voltage;
-                    PLC.Current = SystemParamManager.SystemParam.PLCParams.Current;
-                    PLC.EnableOutput = SystemParamManager.SystemParam.PLCParams.EnableOutput;
+                    AddRunningMessage("连接Power成功");
+                    Power.Voltage = SystemParamManager.SystemParam.PowerParams.Voltage;
+                    Power.Current = SystemParamManager.SystemParam.PowerParams.Current;
+                    Power.EnableOutput = SystemParamManager.SystemParam.PowerParams.EnableOutput;
                 }
                 else
                 {
-                    AddRunningMessage("连接PLC失败");
+                    AddRunningMessage("连接Power失败");
                 }
             }
             else
             {
-                AddRunningMessage($"无有效端口[{SystemParamManager.SystemParam.PWMParams.PrimarySerialPortName ?? "Null"}],连接PLC失败");
+                AddRunningMessage($"无有效端口[{SystemParamManager.SystemParam.PWMParams.PrimarySerialPortName ?? "Null"}],连接Power失败");
             }
 
             PWM = new SerialPortPWM();
@@ -180,9 +180,9 @@ namespace AnalogSignalAnalysisWpf
             ScopeTriggerEdgeCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<ETriggerEdge>());
             ScopeVoltageDIVCollection = new ObservableCollection<string>(EnumHelper.GetAllDescriptions<EVoltageDIV>());
 
-            //创建PLC控件实例
-            PLCControlView = new PLCControlView();
-            PLCControlView.DataContext = this;
+            //创建Power控件实例
+            PowerControlView = new PowerControlView();
+            PowerControlView.DataContext = this;
 
             //创建PWM控件实例
             PWMControlView = new PWMControlView();
@@ -193,11 +193,11 @@ namespace AnalogSignalAnalysisWpf
             SettingsView.DataContext = this;
 
             //设置测试model实例
-            FrequencyMeasurementViewModel = new FrequencyMeasurementViewModel(Scope, PLC, PWM);
-            InputOutputMeasurementViewModel = new InputOutputMeasurementViewModel(Scope, PLC, PWM);
-            PNVoltageMeasurementViewModel = new PNVoltageMeasurementViewModel(Scope, PLC, PWM);
-            ThroughputMeasurementViewModel = new ThroughputMeasurementViewModel(Scope, PLC, PWM);
-            BurnInTestViewModel = new BurnInTestViewModel(Scope, PLC, PWM);
+            FrequencyMeasurementViewModel = new FrequencyMeasurementViewModel(Scope, Power, PWM);
+            InputOutputMeasurementViewModel = new InputOutputMeasurementViewModel(Scope, Power, PWM);
+            PNVoltageMeasurementViewModel = new PNVoltageMeasurementViewModel(Scope, Power, PWM);
+            ThroughputMeasurementViewModel = new ThroughputMeasurementViewModel(Scope, Power, PWM);
+            BurnInTestViewModel = new BurnInTestViewModel(Scope, Power, PWM);
 
             FrequencyMeasurementViewModel.MeasurementStarted += MeasurementViewModel_MeasurementStarted;
             InputOutputMeasurementViewModel.MeasurementStarted += MeasurementViewModel_MeasurementStarted;
@@ -521,21 +521,21 @@ namespace AnalogSignalAnalysisWpf
             }
         }
 
-        private PLCControlView plcControlView;
+        private PowerControlView powerControlView;
 
         /// <summary>
-        /// PLC配置控件
+        /// Power配置控件
         /// </summary>
-        public PLCControlView PLCControlView
+        public PowerControlView PowerControlView
         {
             get
             {
-                return plcControlView;
+                return powerControlView;
             }
             set
             {
-                plcControlView = value;
-                NotifyOfPropertyChange(() => PLCControlView);
+                powerControlView = value;
+                NotifyOfPropertyChange(() => PowerControlView);
             }
         }
 
@@ -1123,132 +1123,132 @@ namespace AnalogSignalAnalysisWpf
 
         #endregion
 
-        #region PLC
+        #region Power
 
         /// <summary>
-        /// PLC
+        /// Power
         /// </summary>
-        public IPLC PLC { get; set; }
+        public IPower Power { get; set; }
 
         /// <summary>
-        /// PLC有效标志
+        /// Power有效标志
         /// </summary>
-        public bool IsPLCValid
+        public bool IsPowerValid
         {
             get
             {
-                return PLC?.IsConnect ?? false;
+                return Power?.IsConnect ?? false;
             }
         }
 
-        private object plcLock = new object();
+        private object powerLock = new object();
 
         #region COM配置
 
         /// <summary>
         /// 串口号
         /// </summary>
-        public string PLCSerialPort
+        public string PowerSerialPort
         {
             get
             {
-                return PLC?.PrimarySerialPortName ?? "Nana";
+                return Power?.PrimarySerialPortName ?? "Nana";
             }
             set
             {
-                if (PLC != null)
+                if (Power != null)
                 {
-                    PLC.PrimarySerialPortName = value;
+                    Power.PrimarySerialPortName = value;
                 }
 
-                NotifyOfPropertyChange(() => PLCSerialPort);
+                NotifyOfPropertyChange(() => PowerSerialPort);
             }
         }
 
         /// <summary>
         /// 串口波特率
         /// </summary>
-        public int PLCSerialPortBaudRate
+        public int PowerSerialPortBaudRate
         {
             get
             {
-                return PLC?.SerialPortBaudRate ?? 115200;
+                return Power?.SerialPortBaudRate ?? 115200;
             }
             set
             {
-                if (PLC != null)
+                if (Power != null)
                 {
-                    PLC.SerialPortBaudRate = value;
+                    Power.SerialPortBaudRate = value;
                 }
 
-                NotifyOfPropertyChange(() => PLCSerialPortBaudRate);
+                NotifyOfPropertyChange(() => PowerSerialPortBaudRate);
             }
         }
 
         /// <summary>
         /// 从站地址
         /// </summary>
-        public byte PLCSlaveAddress
+        public byte PowerSlaveAddress
         {
             get
             {
-                return PLC?.SlaveAddress ?? 0xFF;
+                return Power?.SlaveAddress ?? 0xFF;
             }
             set
             {
-                if (PLC != null)
+                if (Power != null)
                 {
-                    PLC.SlaveAddress = value;
+                    Power.SlaveAddress = value;
                 }
 
-                NotifyOfPropertyChange(() => PLCSlaveAddress);
+                NotifyOfPropertyChange(() => PowerSlaveAddress);
             }
         }
 
         /// <summary>
         /// 超时
         /// </summary>
-        public int PLCTimeout
+        public int PowerTimeout
         {
             get
             {
-                return PLC?.ReadTimeout ?? -1;
+                return Power?.ReadTimeout ?? -1;
             }
             set
             {
-                if (PLC != null)
+                if (Power != null)
                 {
-                    PLC.ReadTimeout = value;
-                    PLC.WriteTimeout = value;
+                    Power.ReadTimeout = value;
+                    Power.WriteTimeout = value;
                 }
 
-                NotifyOfPropertyChange(() => PLCTimeout);
+                NotifyOfPropertyChange(() => PowerTimeout);
             }
         }
 
         /// <summary>
-        /// 连接到PLC
+        /// 连接到Power
         /// </summary>
-        public void ConnectPLC()
+        public void ConnectPower()
         {
-            PLC?.Connect();
-            UpdatePLCStatus();
+            Power?.Connect();
+            UpdatePowerStatus();
 
-            if (IsPLCValid)
+            if (IsPowerValid)
             {
                 //将当前通信配置保存到系统参数中
-                SystemParamManager.SystemParam.PLCParams.PrimarySerialPortName = PLCSerialPort;
-                SystemParamManager.SystemParam.PLCParams.SerialPortBaudRate = PLCSerialPortBaudRate;
-                SystemParamManager.SystemParam.PLCParams.SlaveAddress = PLCSlaveAddress;
-                SystemParamManager.SystemParam.PLCParams.ReadTimeout = PLCTimeout;
-                SystemParamManager.SystemParam.PLCParams.WriteTimeout = PLCTimeout;
+                SystemParamManager.SystemParam.PowerParams.PrimarySerialPortName = PowerSerialPort;
+                SystemParamManager.SystemParam.PowerParams.SerialPortBaudRate = PowerSerialPortBaudRate;
+                SystemParamManager.SystemParam.PowerParams.SlaveAddress = PowerSlaveAddress;
+                SystemParamManager.SystemParam.PowerParams.ReadTimeout = PowerTimeout;
+                SystemParamManager.SystemParam.PowerParams.WriteTimeout = PowerTimeout;
                 SystemParamManager.SaveParams();
 
-                AddRunningMessage("连接PLC成功");
+                AddRunningMessage("连接Power成功");
             }
             else
             {
-                AddRunningMessage("连接PLC失败");
+                AddRunningMessage("连接Power失败");
             }
 
         }
@@ -1256,25 +1256,25 @@ namespace AnalogSignalAnalysisWpf
         /// <summary>
         /// 断开连接
         /// </summary>
-        public void DisconnectPLC()
+        public void DisconnectPower()
         {
-            PLC?.Disconnect();
-            UpdatePLCStatus();
-            AddRunningMessage("断开PLC连接");
+            Power?.Disconnect();
+            UpdatePowerStatus();
+            AddRunningMessage("断开Power连接");
         }
 
         /// <summary>
         /// 连接/断开连接
         /// </summary>
-        public void ConnectOrDisconnectPLC()
+        public void ConnectOrDisconnectPower()
         {
-            if (IsPLCValid)
+            if (IsPowerValid)
             {
-                DisconnectPLC();
+                DisconnectPower();
             }
             else
             {
-                ConnectPLC();
+                ConnectPower();
             }
 
         }
@@ -1284,96 +1284,96 @@ namespace AnalogSignalAnalysisWpf
         #region 输出参数控制
 
         /// <summary>
-        /// PLC电压
+        /// Power电压
         /// </summary>
-        public double PLCVoltage
+        public double PowerVoltage
         {
             get
             {
-                if (IsPLCValid)
+                if (IsPowerValid)
                 {
-                    return PLC.Voltage;
+                    return Power.Voltage;
                 }
                 return -1;
             }
             set
             {
-                if (IsPLCValid == true)
+                if (IsPowerValid == true)
                 {
-                    PLC.Voltage = value;
-                    SystemParamManager.SystemParam.PLCParams.Voltage = value;
+                    Power.Voltage = value;
+                    SystemParamManager.SystemParam.PowerParams.Voltage = value;
                     SystemParamManager.SaveParams();
                 }
 
-                //NotifyOfPropertyChange(() => PLCVoltage);
-                UpdatePLCStatus();
+                //NotifyOfPropertyChange(() => PowerVoltage);
+                UpdatePowerStatus();
             }
         }
 
         /// <summary>
-        /// PLC电流
+        /// Power电流
         /// </summary>
-        public double PLCCurrent
+        public double PowerCurrent
         {
             get
             {
-                if (IsPLCValid)
+                if (IsPowerValid)
                 {
-                    return PLC.Current;
+                    return Power.Current;
                 }
                 return -1;
             }
             set
             {
-                if (IsPLCValid == true)
+                if (IsPowerValid == true)
                 {
-                    PLC.Current = value;
-                    SystemParamManager.SystemParam.PLCParams.Current = value;
+                    Power.Current = value;
+                    SystemParamManager.SystemParam.PowerParams.Current = value;
                     SystemParamManager.SaveParams();
                 }
 
-                //NotifyOfPropertyChange(() => PLCCurrent);
-                UpdatePLCStatus();
+                //NotifyOfPropertyChange(() => PowerCurrent);
+                UpdatePowerStatus();
             }
         }
 
         /// <summary>
-        /// PLC使能输出
+        /// Power使能输出
         /// </summary>
-        public bool PLCEnableOutput
+        public bool PowerEnableOutput
         {
             get
             {
-                if (IsPLCValid)
+                if (IsPowerValid)
                 {
-                    return PLC.EnableOutput;
+                    return Power.EnableOutput;
                 }
                 return false;
             }
             set
             {
-                if (IsPLCValid == true)
+                if (IsPowerValid == true)
                 {
-                    PLC.EnableOutput = value;
-                    SystemParamManager.SystemParam.PLCParams.EnableOutput = value;
+                    Power.EnableOutput = value;
+                    SystemParamManager.SystemParam.PowerParams.EnableOutput = value;
                     SystemParamManager.SaveParams();
                 }
 
-                //NotifyOfPropertyChange(() => PLCEnableOutput);
-                UpdatePLCStatus();
+                //NotifyOfPropertyChange(() => PowerEnableOutput);
+                UpdatePowerStatus();
             }
         }
 
         /// <summary>
         /// 实际电压值
         /// </summary>
-        public double PLCRealityVoltage
+        public double PowerRealityVoltage
         {
             get
             {
-                if (IsPLCValid)
+                if (IsPowerValid)
                 {
-                    return PLC.RealityVoltage;
+                    return Power.RealityVoltage;
                 }
                 return -1;
             }
@@ -1382,13 +1382,13 @@ namespace AnalogSignalAnalysisWpf
         /// <summary>
         /// 实际电流值
         /// </summary>
-        public double PLCRealityCurrent
+        public double PowerRealityCurrent
         {
             get
             {
-                if (IsPLCValid)
+                if (IsPowerValid)
                 {
-                    return PLC.RealityCurrent;
+                    return Power.RealityCurrent;
                 }
                 return -1;
             }
@@ -1397,36 +1397,36 @@ namespace AnalogSignalAnalysisWpf
         /// <summary>
         /// 实际温度值
         /// </summary>
-        public double PLCRealityTemperature
+        public double PowerRealityTemperature
         {
             get
             {
-                if (IsPLCValid)
+                if (IsPowerValid)
                 {
-                    return PLC.RealityTemperature;
+                    return Power.RealityTemperature;
                 }
                 return -1;
             }
         }
 
         /// <summary>
-        /// 更新PLC状态
+        /// 更新Power状态
         /// </summary>
-        public void UpdatePLCStatus()
+        public void UpdatePowerStatus()
         {
-            NotifyOfPropertyChange(() => IsPLCValid);
-            NotifyOfPropertyChange(() => PLCVoltage);
-            NotifyOfPropertyChange(() => PLCCurrent);
-            NotifyOfPropertyChange(() => PLCEnableOutput);
-            NotifyOfPropertyChange(() => PLCRealityVoltage);
-            NotifyOfPropertyChange(() => PLCRealityCurrent);
-            NotifyOfPropertyChange(() => PLCRealityTemperature);
+            NotifyOfPropertyChange(() => IsPowerValid);
+            NotifyOfPropertyChange(() => PowerVoltage);
+            NotifyOfPropertyChange(() => PowerCurrent);
+            NotifyOfPropertyChange(() => PowerEnableOutput);
+            NotifyOfPropertyChange(() => PowerRealityVoltage);
+            NotifyOfPropertyChange(() => PowerRealityCurrent);
+            NotifyOfPropertyChange(() => PowerRealityTemperature);
 
             NotifyOfPropertyChange(() => IsHardwareValid);
 
-            //lock (plcLock)
+            //lock (powerLock)
             //{
-            //    if (isPLCThreadRunning)
+            //    if (isPowerThreadRunning)
             //    {
             //        return;
             //    }
@@ -1434,39 +1434,39 @@ namespace AnalogSignalAnalysisWpf
 
             //new Thread(() =>
             //{
-            //    lock (plcLock)
+            //    lock (powerLock)
             //    {
-            //        isPLCThreadRunning = true;
+            //        isPowerThreadRunning = true;
             //    }
 
             //    for (int i = 0; i < 20; i++)
             //    {
             //        Thread.Sleep(50);
-            //        NotifyOfPropertyChange(() => IsPLCValid);
-            //        NotifyOfPropertyChange(() => PLCVoltage);
-            //        NotifyOfPropertyChange(() => PLCCurrent);
-            //        NotifyOfPropertyChange(() => PLCEnableOutput);
-            //        NotifyOfPropertyChange(() => PLCRealityVoltage);
-            //        NotifyOfPropertyChange(() => PLCRealityCurrent);
-            //        NotifyOfPropertyChange(() => PLCRealityTemperature);
+            //        NotifyOfPropertyChange(() => IsPowerValid);
+            //        NotifyOfPropertyChange(() => PowerVoltage);
+            //        NotifyOfPropertyChange(() => PowerCurrent);
+            //        NotifyOfPropertyChange(() => PowerEnableOutput);
+            //        NotifyOfPropertyChange(() => PowerRealityVoltage);
+            //        NotifyOfPropertyChange(() => PowerRealityCurrent);
+            //        NotifyOfPropertyChange(() => PowerRealityTemperature);
             //    }
 
-            //    lock (plcLock)
+            //    lock (powerLock)
             //    {
-            //        isPLCThreadRunning = false;
+            //        isPowerThreadRunning = false;
             //    }
 
             //}).Start();
         }
 
         /// <summary>
-        /// 使能PLC输出
+        /// 使能Power输出
         /// </summary>
-        public void EnablePLCOutput()
+        public void EnablePowerOutput()
         {
-            if (IsPLCValid)
+            if (IsPowerValid)
             {
-                PLCEnableOutput = !PLCEnableOutput;
+                PowerEnableOutput = !PowerEnableOutput;
             }
         }
 
@@ -1515,7 +1515,7 @@ namespace AnalogSignalAnalysisWpf
         }
 
         /// <summary>
-        /// 连接到PLC
+        /// 连接到Power
         /// </summary>
         public void ConnectPWM()
         {
@@ -1563,7 +1563,7 @@ namespace AnalogSignalAnalysisWpf
         }
 
         /// <summary>
-        /// 更新PLC状态
+        /// 更新Power状态
         /// </summary>
         public void UpdatePWMStatus()
         {
@@ -1645,7 +1645,7 @@ namespace AnalogSignalAnalysisWpf
         {
             get
             {
-                if ((Scope?.IsConnect == true) && (PLC?.IsConnect == true) && (PWM?.IsConnect == true))
+                if ((Scope?.IsConnect == true) && (Power?.IsConnect == true) && (PWM?.IsConnect == true))
                 {
                     return true;
                 }
@@ -1666,9 +1666,9 @@ namespace AnalogSignalAnalysisWpf
                 Scope?.Connect();
             }
 
-            if (PLC?.IsConnect != true)
+            if (Power?.IsConnect != true)
             {
-                PLC?.Connect();
+                Power?.Connect();
             }
 
             if (PWM?.IsConnect != true)

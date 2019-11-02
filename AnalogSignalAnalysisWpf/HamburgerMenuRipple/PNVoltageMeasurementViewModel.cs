@@ -1,4 +1,4 @@
-﻿using AnalogSignalAnalysisWpf.Hardware.PLC;
+﻿using AnalogSignalAnalysisWpf.Hardware;
 using AnalogSignalAnalysisWpf.Hardware.PWM;
 using AnalogSignalAnalysisWpf.Hardware.Scope;
 using AnalogSignalAnalysisWpf.LiveData;
@@ -110,17 +110,17 @@ namespace AnalogSignalAnalysisWpf
         /// 创建PNVoltageMeasurementViewModel新实例
         /// </summary>
         /// <param name="scope">示波器接口</param>
-        /// <param name="plc">PLC接口</param>
-        public PNVoltageMeasurementViewModel(IScopeBase scope, IPLC plc, IPWM pwm) : this()
+        /// <param name="power">Power接口</param>
+        public PNVoltageMeasurementViewModel(IScopeBase scope, IPower power, IPWM pwm) : this()
         {
             if (scope == null)
             {
                 throw new ArgumentException("scope invalid");
             }
 
-            if (plc == null)
+            if (power == null)
             {
-                throw new ArgumentException("plc invalid");
+                throw new ArgumentException("power invalid");
             }
 
             if (pwm == null)
@@ -129,7 +129,7 @@ namespace AnalogSignalAnalysisWpf
             }
 
             Scope = scope;
-            PLC = plc;
+            Power = power;
             PWM = pwm;
 
             if (!IsHardwareValid)
@@ -153,12 +153,12 @@ namespace AnalogSignalAnalysisWpf
         public IScopeBase Scope { get; set; }
 
         /// <summary>
-        /// PLC接口
+        /// Power接口
         /// </summary>
-        public IPLC PLC { get; set; }
+        public IPower Power { get; set; }
 
         /// <summary>
-        /// PLC接口
+        /// Power接口
         /// </summary>
         public IPWM PWM { get; set; }
 
@@ -169,7 +169,7 @@ namespace AnalogSignalAnalysisWpf
         {
             get
             {
-                if ((Scope?.IsConnect == true) && (PLC?.IsConnect == true) && (PWM?.IsConnect == true))
+                if ((Scope?.IsConnect == true) && (Power?.IsConnect == true) && (PWM?.IsConnect == true))
                 {
                     return true;
                 }
@@ -190,9 +190,9 @@ namespace AnalogSignalAnalysisWpf
                 Scope?.Connect();
             }
 
-            if (PLC?.IsConnect != true)
+            if (Power?.IsConnect != true)
             {
-                PLC?.Connect();
+                Power?.Connect();
             }
 
             if (PWM?.IsConnect != true)
@@ -601,9 +601,9 @@ namespace AnalogSignalAnalysisWpf
         {
             RunningStatus = e.IsSuccess ? "成功" : "失败";
 
-            if (PLC?.IsConnect == true)
+            if (Power?.IsConnect == true)
             {
-                PLC.EnableOutput = false;
+                Power.EnableOutput = false;
             }
 
             lock (lockObject)
@@ -897,8 +897,8 @@ namespace AnalogSignalAnalysisWpf
 
                 //设置电源输出
                 double currentVoltage = MinVoltage;
-                PLC.Voltage = currentVoltage;
-                PLC.EnableOutput = true;
+                Power.Voltage = currentVoltage;
+                Power.EnableOutput = true;
 
                 int measureStep = 0;
 
@@ -914,7 +914,7 @@ namespace AnalogSignalAnalysisWpf
                             while (currentVoltage <= MaxVoltage)
                             {
                                 //设置当前电压
-                                PLC.Voltage = currentVoltage;
+                                Power.Voltage = currentVoltage;
                                 Thread.Sleep(SystemParamManager.SystemParam.GlobalParam.PowerCommonDelay);
                                 CurrentVoltage = currentVoltage;
 
@@ -973,7 +973,7 @@ namespace AnalogSignalAnalysisWpf
                             while (currentVoltage >= MinVoltage)
                             {
                                 //设置当前电压
-                                PLC.Voltage = currentVoltage;
+                                Power.Voltage = currentVoltage;
                                 Thread.Sleep(SystemParamManager.SystemParam.GlobalParam.PowerCommonDelay);
                                 CurrentVoltage = currentVoltage;
 

@@ -172,7 +172,7 @@
                             <ComboBox ItemsSource="{Binding ScopeSampleRateCollection}" SelectedItem="{Binding ScopeSampleRate}"/>
                         </DockPanel>
                     </StackPanel>
-                    <TextBlock Text="PLC配置" Foreground="Green" Margin="0,10,0,0"/>
+                    <TextBlock Text="Power配置" Foreground="Green" Margin="0,10,0,0"/>
                     <DockPanel Margin="0,10,0,0">
                         <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">输出(吸合)电压(V)</TextBlock>
                         <TextBox Text="{Binding OutputVoltage, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>

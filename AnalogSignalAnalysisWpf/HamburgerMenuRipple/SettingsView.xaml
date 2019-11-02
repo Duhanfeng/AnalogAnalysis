@@ -102,10 +102,10 @@
                     
                 </DockPanel>
             </TabItem>
-            <TabItem Header="PLC调试">
+            <TabItem Header="电源调试">
                 <StackPanel Margin="10,5" Orientation="Horizontal">
-                    <!--<Label Foreground="CadetBlue" FontSize="16">PLC</Label>-->
-                    <local:PLCControlView DataContext="{Binding}"/>
+                    <!--<Label Foreground="CadetBlue" FontSize="16">Power</Label>-->
+                    <local:PowerControlView DataContext="{Binding}"/>
                 </StackPanel>
             </TabItem>
             <TabItem Header="PWM调试">

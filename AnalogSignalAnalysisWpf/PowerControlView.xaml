@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="AnalogSignalAnalysisWpf.PLCControlView"
+﻿<UserControl x:Class="AnalogSignalAnalysisWpf.PowerControlView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -22,36 +22,36 @@
                 <TextBlock Margin="0,10,0,0" FontSize="14">COM通信配置</TextBlock>
                 <DockPanel Margin="0,10,0,0">
                     <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">串口号</TextBlock>
-                    <ComboBox ItemsSource="{Binding SerialPorts}" SelectedItem="{Binding PLCSerialPort}" />
+                    <ComboBox ItemsSource="{Binding SerialPorts}" SelectedItem="{Binding PowerSerialPort}" />
                 </DockPanel>
                 <DockPanel Margin="0,10,0,0">
                     <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">波特率</TextBlock>
-                    <TextBox Text="{Binding PLCSerialPortBaudRate, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+                    <TextBox Text="{Binding PowerSerialPortBaudRate, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
                 </DockPanel>
                 <DockPanel Margin="0,10,0,0">
                     <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">从站地址</TextBlock>
-                    <TextBox Text="{Binding PLCSlaveAddress, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+                    <TextBox Text="{Binding PowerSlaveAddress, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
                 </DockPanel>
                 <DockPanel Margin="0,10,0,0">
                     <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">超时(MS)</TextBlock>
-                    <TextBox Text="{Binding PLCTimeout, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+                    <TextBox Text="{Binding PowerTimeout, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
                 </DockPanel>
                 <DockPanel Margin="0,10,0,0" Visibility="Visible">
                     <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">连接</TextBlock>
-                    <Button cal:Message.Attach="ConnectOrDisconnectPLC"
-                            Content="{Binding IsPLCValid, Converter={StaticResource BoolToStringConverter}}"/>
+                    <Button cal:Message.Attach="ConnectOrDisconnectPower"
+                            Content="{Binding IsPowerValid, Converter={StaticResource BoolToStringConverter}}"/>
                 </DockPanel>
             </StackPanel>
 
-            <StackPanel IsEnabled="{Binding IsPLCValid}">
+            <StackPanel IsEnabled="{Binding IsPowerValid}">
                 <TextBlock Margin="0,20,0,0" FontSize="14">输出控制</TextBlock>
                 <DockPanel Margin="0,10,0,0">
                     <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">电压(V)</TextBlock>
-                    <TextBox Text="{Binding PLCVoltage, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+                    <TextBox Text="{Binding PowerVoltage, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
                 </DockPanel>
                 <DockPanel Margin="0,10,0,0">
                     <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">电流(A)</TextBlock>
-                    <TextBox Text="{Binding PLCCurrent, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+                    <TextBox Text="{Binding PowerCurrent, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
                 </DockPanel>
                 <DockPanel Margin="0,10,0,0" Visibility="Collapsed">
                     <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">频率(Hz)</TextBlock>
@@ -59,24 +59,24 @@
                 </DockPanel>
                 <DockPanel Margin="0,10,0,0">
                     <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">实际电压(A)</TextBlock>
-                    <TextBox Text="{Binding PLCRealityVoltage, Mode=OneWay}" IsReadOnly="True"/>
+                    <TextBox Text="{Binding PowerRealityVoltage, Mode=OneWay}" IsReadOnly="True"/>
                 </DockPanel>
                 <DockPanel Margin="0,10,0,0">
                     <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">实际电流(A)</TextBlock>
-                    <TextBox Text="{Binding PLCRealityCurrent, Mode=OneWay}" IsReadOnly="True"/>
+                    <TextBox Text="{Binding PowerRealityCurrent, Mode=OneWay}" IsReadOnly="True"/>
                 </DockPanel>
                 <DockPanel Margin="0,10,0,0">
                     <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">实际温度</TextBlock>
-                    <TextBox Text="{Binding PLCRealityTemperature, Mode=OneWay}" IsReadOnly="True"/>
+                    <TextBox Text="{Binding PowerRealityTemperature, Mode=OneWay}" IsReadOnly="True"/>
                 </DockPanel>
                 <DockPanel Margin="0,10,0,0">
                     <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">输出</TextBlock>
-                    <Ellipse Width="20" Height="20" Fill="{Binding PLCEnableOutput, Converter={StaticResource BoolToColorConverter}}"/>
-                    <Button cal:Message.Attach="EnablePLCOutput" Margin="10,0,0,0" Content="使能输出" />
+                    <Ellipse Width="20" Height="20" Fill="{Binding PowerEnableOutput, Converter={StaticResource BoolToColorConverter}}"/>
+                    <Button cal:Message.Attach="EnablePowerOutput" Margin="10,0,0,0" Content="使能输出" />
                 </DockPanel>
                 <DockPanel Margin="0,10,0,0">
                     <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">刷新</TextBlock>
-                    <Button cal:Message.Attach="UpdatePLCStatus" Content="刷新"/>
+                    <Button cal:Message.Attach="UpdatePowerStatus" Content="刷新"/>
                 </DockPanel>
             </StackPanel>
         </StackPanel>  
