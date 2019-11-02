@@ -44,7 +44,7 @@
 
         <StackPanel >
             <DockPanel Grid.Row="0">
-                <TextBlock DockPanel.Dock="Top" FontSize="16">输入电压</TextBlock>
+                <!--<TextBlock DockPanel.Dock="Top" FontSize="16">输入电压</TextBlock>-->
                 <chart:SparrowChart Foreground="White" FontFamily="Arial" ContainerBorderStyle="{StaticResource containerStyle}" Margin="5" MinHeight="200">
                     <chart:SparrowChart.Background>
                         <LinearGradientBrush EndPoint="0.504,1.5" StartPoint="0.504,0.03">
@@ -53,7 +53,7 @@
                         </LinearGradientBrush>
                     </chart:SparrowChart.Background>
                     <chart:SparrowChart.Legend>
-                        <chart:Legend Padding="10" Header="Live Fourier Series"/>
+                        <chart:Legend Padding="10" Header="极限频率测试"/>
                     </chart:SparrowChart.Legend>
                     <chart:SparrowChart.XAxis>
                         <chart:LinearXAxis CrossLineStyle="{StaticResource crossLineStyle}" MinorLineStyle="{StaticResource minorcrossLineStyle}" MajorLineStyle="{StaticResource crossLineStyle}" AxisLineStyle="{StaticResource axisLineStyle}" MinorTicksCount="3" ShowCrossLines="True" Header="Time(ms)" StringFormat="0.0"/>
@@ -72,11 +72,11 @@
                     <TextBlock Text="当前状态:" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <Ellipse Width="20" Height="20" Fill="{Binding IsMeasuring, Converter={StaticResource BoolToColorConverter}}" Margin="0,0,10,0"/>
                     <TextBox Text="{Binding RunningStatus}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
-                    <TextBlock Text="采样时长:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBlock Text="采样时长(MS):" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <TextBox Text="{Binding CurrentSampleTime}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
-                    <TextBlock Text="输入频率:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBlock Text="输入频率(Hz):" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <TextBox Text="{Binding CurrentInputFrequency}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
-                    <TextBlock Text="极限频率:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBlock Text="极限频率(Hz):" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <TextBox Text="{Binding MaxFrequency}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
                 </StackPanel>
                 <Grid>

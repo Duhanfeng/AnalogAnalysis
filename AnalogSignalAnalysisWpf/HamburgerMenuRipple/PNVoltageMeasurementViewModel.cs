@@ -662,6 +662,13 @@ namespace AnalogSignalAnalysisWpf
             return voltage * SystemParamManager.SystemParam.GlobalParam.PressureK;
         }
 
+        /// <summary>
+        /// 显示吸合测试数据
+        /// </summary>
+        /// <param name="time">当前时间</param>
+        /// <param name="currentVoltage">当前电压</param>
+        /// <param name="currentPressure">当前气压</param>
+        /// <param name="isSuccess">执行结果</param>
         private void ShowPData(double time, double currentVoltage, double currentPressure, bool isSuccess)
         {
             new Thread(delegate ()
@@ -700,6 +707,13 @@ namespace AnalogSignalAnalysisWpf
             }).Start();
         }
 
+        /// <summary>
+        /// 显示释放测试数据
+        /// </summary>
+        /// <param name="time">当前时间</param>
+        /// <param name="currentVoltage">当前电压</param>
+        /// <param name="currentPressure">当前气压</param>
+        /// <param name="isSuccess">执行结果</param>
         private void ShowNData(double time, double currentVoltage, double currentPressure, bool isSuccess)
         {
             new Thread(delegate ()

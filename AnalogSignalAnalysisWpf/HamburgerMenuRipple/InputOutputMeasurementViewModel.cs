@@ -511,6 +511,63 @@ namespace AnalogSignalAnalysisWpf
         private Thread measureThread;
 
         /// <summary>
+        /// 显示输入输出数据
+        /// </summary>
+        /// <param name="time">当前时间</param>
+        /// <param name="currentInput">当前输入</param>
+        /// <param name="currentOutput">当前输出</param>
+        /// <param name="isSuccess">执行结果</param>
+        private void ShowIOData(double time, double currentInput, double currentOutput)
+        {
+            new Thread(delegate ()
+            {
+                ThreadPool.QueueUserWorkItem(delegate
+                {
+                    SynchronizationContext.SetSynchronizationContext(new System.Windows.Threading.DispatcherSynchronizationContext(System.Windows.Application.Current.Dispatcher));
+                    SynchronizationContext.Current.Send(pl =>
+                    {
+                        ScopeCHACollection.Add(new Data
+                        {
+                            Value1 = currentInput,
+                            Value = time
+                        });
+
+                        ScopeCHBCollection.Add(new Data
+                        {
+                            Value1 = currentOutput,
+                            Value = time
+                        });
+
+                        MeasurementInfos.Insert(0, new InputOutputMeasurementInfo(currentInput, currentOutput));
+                    }, null);
+                });
+            }).Start();
+        }
+
+
+        /// <summary>
+        /// 电压转气压
+        /// </summary>
+        /// <param name="pressure"></param>
+        /// <returns></returns>
+        private double PressureToVoltage(double pressure)
+        {
+
+            return pressure / SystemParamManager.SystemParam.GlobalParam.PressureK;
+        }
+
+        /// <summary>
+        /// 气压转电压
+        /// </summary>
+        /// <param name="voltage"></param>
+        /// <returns></returns>
+        private double VoltageToPressure(double voltage)
+        {
+
+            return voltage * SystemParamManager.SystemParam.GlobalParam.PressureK;
+        }
+
+        /// <summary>
         /// 启动
         /// </summary>
         public void Start()
@@ -580,8 +637,11 @@ namespace AnalogSignalAnalysisWpf
                     double[] filterData;
                     Analysis.MeanFilter(originalData, 7, out filterData);
 
+                    //电压转气压
+                    double[] pressureData = filterData.ToList().ConvertAll(x => VoltageToPressure(x)).ToArray();
+
                     //获取中值
-                    var medianData = Analysis.Median(filterData);
+                    var medianData = Analysis.Median(pressureData);
                     if (double.IsNaN(medianData))
                     {
                         OnMeasurementCompleted(new InputOutputMeasurementCompletedEventArgs());
@@ -591,33 +651,9 @@ namespace AnalogSignalAnalysisWpf
                     CurrentOutput = medianData;
                     infos.Add(new InputOutputMeasurementInfo(currentVoltage, medianData));
 
-                    new Thread(delegate ()
-                    {
-                        ThreadPool.QueueUserWorkItem(delegate
-                        {
-                            System.Threading.SynchronizationContext.SetSynchronizationContext(new System.Windows.Threading.DispatcherSynchronizationContext(System.Windows.Application.Current.Dispatcher));
-                            System.Threading.SynchronizationContext.Current.Send(pl =>
-                            {
-                                stopwatch.Stop();
-
-                                ScopeCHACollection.Add(new Data
-                                {
-                                    Value1 = CurrentInput,
-                                    Value = stopwatch.Elapsed.TotalMilliseconds
-                                });
-
-                                ScopeCHBCollection.Add(new Data
-                                {
-                                    Value1 = CurrentOutput,
-                                    Value = stopwatch.Elapsed.TotalMilliseconds
-                                });
-
-                                stopwatch.Start();
-
-                                MeasurementInfos.Insert(0, new InputOutputMeasurementInfo(CurrentInput, CurrentOutput));
-                            }, null);
-                        });
-                    }).Start();
+                    stopwatch.Stop();
+                    ShowIOData(stopwatch.Elapsed.TotalMilliseconds, currentVoltage, medianData);
+                    stopwatch.Start();
 
                     currentVoltage += VoltageInterval;
                     count++;

@@ -43,7 +43,7 @@
 
         <StackPanel >
             <DockPanel Grid.Row="0">
-                <TextBlock DockPanel.Dock="Top" FontSize="16">吸合电压及释放电压测试</TextBlock>
+                <!--<TextBlock DockPanel.Dock="Top" FontSize="16">吸合电压及释放电压测试</TextBlock>-->
                 <chart:SparrowChart Foreground="White" FontFamily="Arial" ContainerBorderStyle="{StaticResource containerStyle}" Margin="5" MinHeight="200">
                     <chart:SparrowChart.Background>
                         <LinearGradientBrush EndPoint="0.504,1.5" StartPoint="0.504,0.03">
@@ -52,7 +52,7 @@
                         </LinearGradientBrush>
                     </chart:SparrowChart.Background>
                     <chart:SparrowChart.Legend>
-                        <chart:Legend Padding="10" Header="Live Fourier Series"/>
+                        <chart:Legend Padding="10" Header="吸合电压与释放电压测量"/>
                     </chart:SparrowChart.Legend>
                     <chart:SparrowChart.XAxis>
                         <chart:LinearXAxis CrossLineStyle="{StaticResource crossLineStyle}" MinorLineStyle="{StaticResource minorcrossLineStyle}" MajorLineStyle="{StaticResource crossLineStyle}" AxisLineStyle="{StaticResource axisLineStyle}" MinorTicksCount="3" ShowCrossLines="True" Header="Time(ms)" StringFormat="0.0"/>
@@ -96,13 +96,13 @@
                     <TextBlock Text="当前状态:" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <Ellipse Width="20" Height="20" Fill="{Binding IsMeasuring, Converter={StaticResource BoolToColorConverter}}" Margin="0,0,10,0"/>
                     <TextBox Text="{Binding RunningStatus}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
-                    <TextBlock Text="输出电压:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBlock Text="输出电压(V):" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <TextBox Text="{Binding CurrentVoltage, StringFormat={}{0:F3}}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
-                    <TextBlock Text="测量气压:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBlock Text="测量气压(MPa):" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <TextBox Text="{Binding CurrentPressure, StringFormat={}{0:F3}}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
-                    <TextBlock Text="吸合电压:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBlock Text="吸合电压(V):" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <TextBox Text="{Binding PVoltage}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
-                    <TextBlock Text="释放电压:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBlock Text="释放电压():" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <TextBox Text="{Binding NVoltage}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
                 </StackPanel>
                 <ScrollViewer MaxHeight="300" Margin="0,10,0,0">
