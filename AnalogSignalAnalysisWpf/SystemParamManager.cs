@@ -300,6 +300,18 @@ namespace AnalogSignalAnalysisWpf
 
     }
 
+    /// <summary>
+    /// 流量测量参数
+    /// </summary>
+    public class FlowMeasureParams
+    {
+        /// <summary>
+        /// 采样时间(MS)
+        /// </summary>
+        public int SampleTime { get; set; } = 500;
+
+    }
+
     #endregion
 
     #region 硬件参数
@@ -462,6 +474,11 @@ namespace AnalogSignalAnalysisWpf
         public double PressureK { get; set; } = 1.0;
 
         /// <summary>
+        /// 流量系数
+        /// </summary>
+        public double FlowK { get; set; } = 1.0;
+
+        /// <summary>
         /// 电源模块通信延迟(MS)
         /// </summary>
         public int PowerCommonDelay { get; set; } = 200;
@@ -530,6 +547,11 @@ namespace AnalogSignalAnalysisWpf
         /// 老化测试参数
         /// </summary>
         public BurnInTestParams BurnInTestParams { get; set; } = new BurnInTestParams();
+
+        /// <summary>
+        /// 流量测量参数
+        /// </summary>
+        public FlowMeasureParams FlowMeasureParams { get; set; } = new FlowMeasureParams();
 
         #endregion
 

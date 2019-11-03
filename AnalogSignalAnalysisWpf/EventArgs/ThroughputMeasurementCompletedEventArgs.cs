@@ -14,18 +14,18 @@ namespace AnalogSignalAnalysisWpf
         public ThroughputMeasurementCompletedEventArgs()
         {
             IsSuccess = false;
-            Time = -1;
+            Flow = -1;
         }
 
         /// <summary>
         /// 创建ThroughputMeasurementCompletedEventArgs新实例
         /// </summary>
         /// <param name="isSuccess">成功标志</param>
-        /// <param name="time">测量时间</param>
-        public ThroughputMeasurementCompletedEventArgs(bool isSuccess, double time)
+        /// <param name="flow">流量</param>
+        public ThroughputMeasurementCompletedEventArgs(bool isSuccess, double flow)
         {
             IsSuccess = isSuccess;
-            Time = time;
+            Flow = flow;
         }
 
         /// <summary>
@@ -34,9 +34,9 @@ namespace AnalogSignalAnalysisWpf
         public bool IsSuccess { get; }
 
         /// <summary>
-        /// 时间结果
+        /// 流量
         /// </summary>
-        public double Time { get; }
+        public double Flow { get; }
 
     }
 }

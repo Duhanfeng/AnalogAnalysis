@@ -47,6 +47,11 @@ namespace AnalogSignalAnalysisWpf
                     {
                         (item.Tag as BurnInTestView).DataContext = (DataContext as MainWindowViewModel).BurnInTestViewModel;
                     }
+                    else if (item.Tag is FlowMeasureView)
+                    {
+                        (item.Tag as FlowMeasureView).DataContext = (DataContext as MainWindowViewModel).FlowMeasureViewModel;
+                    }
+                    
                 }
 
             }

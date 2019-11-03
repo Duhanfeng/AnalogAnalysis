@@ -208,6 +208,10 @@
     <Compile Include="EventArgs\PNVoltageMeasurementCompletedEventArgs.cs" />
     <Compile Include="EventArgs\ThroughputMeasurementCompletedEventArgs.cs" />
     <Compile Include="EventArgs\MessageRaisedEventArgs.cs" />
+    <Compile Include="HamburgerMenuRipple\FlowMeasureViewModel.cs" />
+    <Compile Include="HamburgerMenuRipple\FlowMeasureView.xaml.cs">
+      <DependentUpon>FlowMeasureView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="HamburgerMenuRipple\BurnInTestView.xaml.cs">
       <DependentUpon>BurnInTestView.xaml</DependentUpon>
     </Compile>
@@ -260,6 +264,10 @@
       <DependentUpon>ScopeControlView2.xaml</DependentUpon>
     </Compile>
     <Compile Include="SystemParamManager.cs" />
+    <Page Include="HamburgerMenuRipple\FlowMeasureView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="HamburgerMenuRipple\BurnInTestView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

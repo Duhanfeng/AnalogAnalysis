@@ -197,21 +197,25 @@ namespace AnalogSignalAnalysisWpf
             PNVoltageMeasurementViewModel = new PNVoltageMeasurementViewModel(Scope, Power, PLC);
             ThroughputMeasurementViewModel = new ThroughputMeasurementViewModel(Scope, Power, PLC);
             BurnInTestViewModel = new BurnInTestViewModel(Scope, Power, PLC);
+            FlowMeasureViewModel = new FlowMeasureViewModel(Scope, Power, PLC);
 
             FrequencyMeasurementViewModel.MeasurementStarted += MeasurementViewModel_MeasurementStarted;
             InputOutputMeasurementViewModel.MeasurementStarted += MeasurementViewModel_MeasurementStarted;
             PNVoltageMeasurementViewModel.MeasurementStarted += MeasurementViewModel_MeasurementStarted;
             ThroughputMeasurementViewModel.MeasurementStarted += MeasurementViewModel_MeasurementStarted;
+            FlowMeasureViewModel.MeasurementStarted += MeasurementViewModel_MeasurementStarted;
 
             FrequencyMeasurementViewModel.MeasurementCompleted += FrequencyMeasurementViewModel_MeasurementCompleted;
             InputOutputMeasurementViewModel.MeasurementCompleted += InputOutputMeasurementViewModel_MeasurementCompleted;
             PNVoltageMeasurementViewModel.MeasurementCompleted += PNVoltageMeasurementViewModel_MeasurementCompleted;
             ThroughputMeasurementViewModel.MeasurementCompleted += ThroughputMeasurementViewModel_MeasurementCompleted;
+            FlowMeasureViewModel.MeasurementCompleted += ThroughputMeasurementViewModel_MeasurementCompleted;
 
             FrequencyMeasurementViewModel.MessageRaised += FrequencyMeasurementViewModel_MessageRaised;
             InputOutputMeasurementViewModel.MessageRaised += InputOutputMeasurementViewModel_MessageRaised;
             PNVoltageMeasurementViewModel.MessageRaised += PNVoltageMeasurementViewModel_MessageRaised;
             ThroughputMeasurementViewModel.MessageRaised += ThroughputMeasurementViewModel_MessageRaised;
+            FlowMeasureViewModel.MessageRaised += ThroughputMeasurementViewModel_MessageRaised;
 
             //获取用户名
             SystemParamManager.LoadUser();
@@ -325,7 +329,7 @@ namespace AnalogSignalAnalysisWpf
             if (e.IsSuccess)
             {
                 FlowMeasureStatus = "测试完成";
-                Flow = e.Time;
+                Flow = e.Flow;
             }
             else
             {
@@ -1834,6 +1838,11 @@ namespace AnalogSignalAnalysisWpf
         public BurnInTestViewModel BurnInTestViewModel { get; set; }
 
         /// <summary>
+        /// 流量测试
+        /// </summary>
+        public FlowMeasureViewModel FlowMeasureViewModel { get; set; }
+
+        /// <summary>
         /// 使能测试
         /// </summary>
         public bool IsEnableTest
@@ -2271,6 +2280,23 @@ namespace AnalogSignalAnalysisWpf
             {
                 SystemParamManager.SystemParam.GlobalParam.PressureK = value;
                 NotifyOfPropertyChange(() => GlobalPressureK);
+                SystemParamManager.SaveParams();
+            }
+        }
+
+        /// <summary>
+        /// 流量系数
+        /// </summary>
+        public double GlobalFlowK
+        {
+            get
+            {
+                return SystemParamManager.SystemParam.GlobalParam.FlowK;
+            }
+            set
+            {
+                SystemParamManager.SystemParam.GlobalParam.FlowK = value;
+                NotifyOfPropertyChange(() => GlobalFlowK);
                 SystemParamManager.SaveParams();
             }
         }
