@@ -220,12 +220,12 @@ namespace AnalogSignalAnalysisWpf
             SettingsView.DataContext = this;
 
             //设置测试model实例
-            FrequencyMeasurementViewModel = new FrequencyMeasurementViewModel(Scope, Power, PLC);
-            InputOutputMeasurementViewModel = new InputOutputMeasurementViewModel(Scope, Power, PLC);
-            PNVoltageMeasurementViewModel = new PNVoltageMeasurementViewModel(Scope, Power, PLC);
-            ThroughputMeasurementViewModel = new ThroughputMeasurementViewModel(Scope, Power, PLC);
-            BurnInTestViewModel = new BurnInTestViewModel(Scope, Power, PLC);
-            FlowMeasureViewModel = new FlowMeasureViewModel(Scope, Power, PLC);
+            FrequencyMeasurementViewModel = new FrequencyMeasurementViewModel(Scope, Power, PLC, PWM);
+            InputOutputMeasurementViewModel = new InputOutputMeasurementViewModel(Scope, Power, PLC, PWM);
+            PNVoltageMeasurementViewModel = new PNVoltageMeasurementViewModel(Scope, Power, PLC, PWM);
+            ThroughputMeasurementViewModel = new ThroughputMeasurementViewModel(Scope, Power, PLC, PWM);
+            BurnInTestViewModel = new BurnInTestViewModel(Scope, Power, PLC, PWM);
+            FlowMeasureViewModel = new FlowMeasureViewModel(Scope, Power, PLC, PWM);
 
             FrequencyMeasurementViewModel.MeasurementStarted += MeasurementViewModel_MeasurementStarted;
             InputOutputMeasurementViewModel.MeasurementStarted += MeasurementViewModel_MeasurementStarted;
@@ -247,7 +247,6 @@ namespace AnalogSignalAnalysisWpf
 
             //获取用户名
             SystemParamManager.LoadUser();
-
 
         }
 

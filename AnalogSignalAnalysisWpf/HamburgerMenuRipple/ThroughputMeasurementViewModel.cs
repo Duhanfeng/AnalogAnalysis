@@ -71,7 +71,7 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         /// <param name="scope">示波器接口</param>
         /// <param name="power">Power接口</param>
-        public ThroughputMeasurementViewModel(IScopeBase scope, IPower power, IPLC plc) : this()
+        public ThroughputMeasurementViewModel(IScopeBase scope, IPower power, IPLC plc, IPWM pwm) : this()
         {
             if (scope == null)
             {
@@ -88,9 +88,15 @@ namespace AnalogSignalAnalysisWpf
                 throw new ArgumentException("plc invalid");
             }
 
+            if (pwm == null)
+            {
+                throw new ArgumentException("pwm invalid");
+            }
+
             Scope = scope;
             Power = power;
             PLC = plc;
+            PWM = pwm;
 
             if (!IsHardwareValid)
             {
@@ -117,9 +123,14 @@ namespace AnalogSignalAnalysisWpf
         public IPower Power { get; set; }
 
         /// <summary>
-        /// Power接口
+        /// PLC接口
         /// </summary>
         public IPLC PLC { get; set; }
+
+        /// <summary>
+        /// PWM接口
+        /// </summary>
+        public IPWM PWM { get; set; }
 
         /// <summary>
         /// 硬件有效标志
@@ -128,7 +139,10 @@ namespace AnalogSignalAnalysisWpf
         {
             get
             {
-                if ((Scope?.IsConnect == true) && (Power?.IsConnect == true) && (PLC?.IsConnect == true))
+                if ((Scope?.IsConnect == true) &&
+                    (Power?.IsConnect == true) &&
+                    (PLC?.IsConnect == true) &&
+                    (PWM?.IsConnect == true))
                 {
                     return true;
                 }
@@ -157,6 +171,11 @@ namespace AnalogSignalAnalysisWpf
             if (PLC?.IsConnect != true)
             {
                 PLC?.Connect();
+            }
+
+            if (PWM?.IsConnect != true)
+            {
+                PWM?.Connect();
             }
 
             NotifyOfPropertyChange(() => IsHardwareValid);

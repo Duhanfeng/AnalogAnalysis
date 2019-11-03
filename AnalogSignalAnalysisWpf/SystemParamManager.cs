@@ -291,12 +291,12 @@ namespace AnalogSignalAnalysisWpf
         /// <summary>
         /// 频率(Hz)
         /// </summary>
-        public int Frequency { get; set; }
+        public int Frequency { get; set; } = 30;
 
         /// <summary>
         /// PLC次数
         /// </summary>
-        public int PLCCount { get; set; }
+        public int PLCCount { get; set; } = 300;
 
     }
 

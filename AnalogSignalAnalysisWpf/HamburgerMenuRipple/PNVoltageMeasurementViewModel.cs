@@ -108,7 +108,7 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         /// <param name="scope">示波器接口</param>
         /// <param name="power">Power接口</param>
-        public PNVoltageMeasurementViewModel(IScopeBase scope, IPower power, IPLC plc) : this()
+        public PNVoltageMeasurementViewModel(IScopeBase scope, IPower power, IPLC plc, IPWM pwm) : this()
         {
             if (scope == null)
             {
@@ -125,9 +125,15 @@ namespace AnalogSignalAnalysisWpf
                 throw new ArgumentException("plc invalid");
             }
 
+            if (pwm == null)
+            {
+                throw new ArgumentException("pwm invalid");
+            }
+
             Scope = scope;
             Power = power;
             PLC = plc;
+            PWM = pwm;
 
             if (!IsHardwareValid)
             {
@@ -137,7 +143,6 @@ namespace AnalogSignalAnalysisWpf
             {
                 RunningStatus = "就绪";
             }
-
         }
 
         #endregion
@@ -155,9 +160,14 @@ namespace AnalogSignalAnalysisWpf
         public IPower Power { get; set; }
 
         /// <summary>
-        /// Power接口
+        /// PLC接口
         /// </summary>
         public IPLC PLC { get; set; }
+
+        /// <summary>
+        /// PWM接口
+        /// </summary>
+        public IPWM PWM { get; set; }
 
         /// <summary>
         /// 硬件有效标志
@@ -166,7 +176,10 @@ namespace AnalogSignalAnalysisWpf
         {
             get
             {
-                if ((Scope?.IsConnect == true) && (Power?.IsConnect == true) && (PLC?.IsConnect == true))
+                if ((Scope?.IsConnect == true) &&
+                    (Power?.IsConnect == true) &&
+                    (PLC?.IsConnect == true) &&
+                    (PWM?.IsConnect == true))
                 {
                     return true;
                 }
@@ -195,6 +208,11 @@ namespace AnalogSignalAnalysisWpf
             if (PLC?.IsConnect != true)
             {
                 PLC?.Connect();
+            }
+
+            if (PWM?.IsConnect != true)
+            {
+                PWM?.Connect();
             }
 
             NotifyOfPropertyChange(() => IsHardwareValid);
@@ -888,9 +906,9 @@ namespace AnalogSignalAnalysisWpf
                 //设置采样时间
                 Scope.SampleTime = SampleTime;
 
-                //设置PLC
-                PLC.Frequency = 0;
-                PLC.DutyRatio = 50;
+                //设置PWM
+                PWM.Frequency = 0;
+                PWM.DutyRatio = 50;
 
                 //设置电源输出
                 double currentVoltage = MinVoltage;

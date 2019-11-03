@@ -179,7 +179,7 @@ namespace AnalogSignalAnalysisWpf
             IsAdmin = false;
         }
 
-        public FrequencyMeasurementViewModel(IScopeBase scope, IPower power, IPLC plc) : this()
+        public FrequencyMeasurementViewModel(IScopeBase scope, IPower power, IPLC plc, IPWM pwm) : this()
         {
             if (scope == null)
             {
@@ -196,9 +196,15 @@ namespace AnalogSignalAnalysisWpf
                 throw new ArgumentException("plc invalid");
             }
 
+            if (pwm == null)
+            {
+                throw new ArgumentException("pwm invalid");
+            }
+
             Scope = scope;
             Power = power;
             PLC = plc;
+            PWM = pwm;
 
             if (!IsHardwareValid)
             {
@@ -225,9 +231,14 @@ namespace AnalogSignalAnalysisWpf
         public IPower Power { get; set; }
 
         /// <summary>
-        /// Power接口
+        /// PLC接口
         /// </summary>
         public IPLC PLC { get; set; }
+
+        /// <summary>
+        /// PWM接口
+        /// </summary>
+        public IPWM PWM { get; set; }
 
         /// <summary>
         /// 硬件有效标志
@@ -236,7 +247,10 @@ namespace AnalogSignalAnalysisWpf
         {
             get
             {
-                if ((Scope?.IsConnect == true) && (Power?.IsConnect == true) && (PLC?.IsConnect == true))
+                if ((Scope?.IsConnect == true) &&
+                    (Power?.IsConnect == true) &&
+                    (PLC?.IsConnect == true) &&
+                    (PWM?.IsConnect == true))
                 {
                     return true;
                 }
@@ -267,90 +281,13 @@ namespace AnalogSignalAnalysisWpf
                 PLC?.Connect();
             }
 
+            if (PWM?.IsConnect != true)
+            {
+                PWM?.Connect();
+            }
+
             NotifyOfPropertyChange(() => IsHardwareValid);
         }
-
-#if false
-        
-        /// <summary>
-        /// 放大倍数
-        /// </summary>
-        public ObservableCollection<string> ScopeScale { get; set; }
-
-        /// <summary>
-        /// 电压档位
-        /// </summary>
-        public ObservableCollection<string> ScopeVoltageDIVCollection { get; set; }
-
-        /// <summary>
-        /// 采样率
-        /// </summary>
-        public ObservableCollection<string> ScopeSampleRateCollection { get; set; }
-
-        private EScale CHAScale = EScale.x10;
-
-        /// <summary>
-        /// CHA探头衰变
-        /// </summary>
-        public string ScopeCHAScale
-        {
-            get
-            {
-                return EnumHelper.GetDescription(CHAScale);
-            }
-            set
-            {
-                CHAScale = EnumHelper.GetEnum<EScale>(value);
-                NotifyOfPropertyChange(() => ScopeCHAScale);
-
-                SystemParamManager.SystemParam.FrequencyMeasureParams.CHAScale = CHAScale;
-                SystemParamManager.SaveParams();
-            }
-        }
-
-        private EVoltageDIV CHAVoltageDIV = EVoltageDIV.DIV_2V5;
-
-        /// <summary>
-        /// CHA电压档位
-        /// </summary>
-        public string ScopeCHAVoltageDIV
-        {
-            get
-            {
-                return EnumHelper.GetDescription(CHAVoltageDIV);
-            }
-            set
-            {
-                CHAVoltageDIV = EnumHelper.GetEnum<EVoltageDIV>(value);
-                NotifyOfPropertyChange(() => ScopeCHAVoltageDIV);
-
-                SystemParamManager.SystemParam.FrequencyMeasureParams.CHAVoltageDIV = CHAVoltageDIV;
-                SystemParamManager.SaveParams();
-            }
-        }
-
-        private ESampleRate SampleRate = ESampleRate.Sps_49K;
-
-        /// <summary>
-        /// 采样率
-        /// </summary>
-        public string ScopeSampleRate
-        {
-            get
-            {
-                return EnumHelper.GetDescription(SampleRate);
-            }
-            set
-            {
-                SampleRate = EnumHelper.GetEnum<ESampleRate>(value);
-                NotifyOfPropertyChange(() => ScopeSampleRate);
-
-                SystemParamManager.SystemParam.FrequencyMeasureParams.SampleRate = SampleRate;
-                SystemParamManager.SaveParams();
-            }
-        }
-#endif
-
 
         #endregion
 
@@ -681,7 +618,7 @@ namespace AnalogSignalAnalysisWpf
         {
             Power.IsEnableOutput = false;
 
-            PLC.Frequency = 0;
+            PWM.Frequency = 0;
             if (e.IsSuccess == true)
             {
                 RunningStatus = "成功";
@@ -892,8 +829,8 @@ namespace AnalogSignalAnalysisWpf
                 int lastFrequency = -1;
 
                 //设置频率
-                PLC.Frequency = 0;
-                PLC.DutyRatio = DutyRatio;
+                PWM.Frequency = 0;
+                PWM.DutyRatio = DutyRatio;
 
                 //使能Power输出
                 Power.Voltage = OutputVoltage;
@@ -901,9 +838,9 @@ namespace AnalogSignalAnalysisWpf
 
                 foreach (var item in TestDatas)
                 {
-                    //设置Power频率
-                    PLC.Frequency = item.Frequency;
-                    OnMessageRaised(MessageLevel.Message, $"F: [Frequency- {PLC.Frequency}]");
+                    //设置PWM频率
+                    PWM.Frequency = item.Frequency;
+                    OnMessageRaised(MessageLevel.Message, $"F: [Frequency- {PWM.Frequency}]");
                     Thread.Sleep(SystemParamManager.SystemParam.GlobalParam.PowerCommonDelay);
 
                     //设置Scope采集时长
