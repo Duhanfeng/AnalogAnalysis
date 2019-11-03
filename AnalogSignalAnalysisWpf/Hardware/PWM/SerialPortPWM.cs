@@ -3,9 +3,9 @@ using System.IO.Ports;
 using System.Linq;
 using System.Threading;
 
-namespace AnalogSignalAnalysisWpf.Hardware.PWM
+namespace AnalogSignalAnalysisWpf.Hardware
 {
-    public class SerialPortPWM : IPLC
+    public class SerialPortPWM : IPWM
     {
         /// <summary>
         /// 创建SerialPortPWM新实例

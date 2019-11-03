@@ -149,7 +149,11 @@ namespace AnalogSignalAnalysisWpf
             if (SerialPorts.Contains(SystemParamManager.SystemParam.PLCParams.PrimarySerialPortName))
             {
                 //配置通信参数
-                PLC.PrimarySerialPortName = SystemParamManager.SystemParam.PLCParams.PrimarySerialPortName;
+                PLC.PrimarySerialPortName = SystemParamManager.SystemParam.PowerParams.PrimarySerialPortName;
+                PLC.SerialPortBaudRate = SystemParamManager.SystemParam.PowerParams.SerialPortBaudRate;
+                PLC.SlaveAddress = SystemParamManager.SystemParam.PowerParams.SlaveAddress;
+                PLC.ReadTimeout = SystemParamManager.SystemParam.PowerParams.ReadTimeout;
+                PLC.WriteTimeout = SystemParamManager.SystemParam.PowerParams.WriteTimeout;
 
                 //连接设备
                 if (PLC.Connect())
@@ -166,6 +170,30 @@ namespace AnalogSignalAnalysisWpf
             else
             {
                 AddRunningMessage($"无有效端口[{SystemParamManager.SystemParam.PLCParams.PrimarySerialPortName ?? "Null"}],连接PLC失败");
+            }
+
+
+            PWM = new SerialPortPWM();
+            if (SerialPorts.Contains(SystemParamManager.SystemParam.PWMParams.PrimarySerialPortName))
+            {
+                //配置通信参数
+                PWM.PrimarySerialPortName = SystemParamManager.SystemParam.PWMParams.PrimarySerialPortName;
+
+                //连接设备
+                if (PWM.Connect())
+                {
+                    AddRunningMessage("连接PWM成功");
+                    PWM.Frequency = SystemParamManager.SystemParam.PWMParams.Frequency;
+                    PWM.DutyRatio = SystemParamManager.SystemParam.PWMParams.DutyRatio;
+                }
+                else
+                {
+                    AddRunningMessage("连接PWM失败");
+                }
+            }
+            else
+            {
+                AddRunningMessage($"无有效端口[{SystemParamManager.SystemParam.PWMParams.PrimarySerialPortName ?? "Null"}],连接PWM失败");
             }
 
             //创建示波器控件实例
@@ -1518,7 +1546,68 @@ namespace AnalogSignalAnalysisWpf
         }
 
         /// <summary>
-        /// 连接到Power
+        /// 串口波特率
+        /// </summary>
+        public int PLCSerialPortBaudRate
+        {
+            get
+            {
+                return PLC?.SerialPortBaudRate ?? 115200;
+            }
+            set
+            {
+                if (PLC != null)
+                {
+                    PLC.SerialPortBaudRate = value;
+                }
+
+                NotifyOfPropertyChange(() => PLCSerialPortBaudRate);
+            }
+        }
+
+        /// <summary>
+        /// 从站地址
+        /// </summary>
+        public byte PLCSlaveAddress
+        {
+            get
+            {
+                return PLC?.SlaveAddress ?? 0xFF;
+            }
+            set
+            {
+                if (PLC != null)
+                {
+                    PLC.SlaveAddress = value;
+                }
+
+                NotifyOfPropertyChange(() => PLCSlaveAddress);
+            }
+        }
+
+        /// <summary>
+        /// 超时
+        /// </summary>
+        public int PLCTimeout
+        {
+            get
+            {
+                return PLC?.ReadTimeout ?? -1;
+            }
+            set
+            {
+                if (PLC != null)
+                {
+                    PLC.ReadTimeout = value;
+                    PLC.WriteTimeout = value;
+                }
+
+                NotifyOfPropertyChange(() => PLCTimeout);
+            }
+        }
+
+        /// <summary>
+        /// 连接到PLC
         /// </summary>
         public void ConnectPLC()
         {
@@ -1529,6 +1618,10 @@ namespace AnalogSignalAnalysisWpf
             {
                 //将当前通信配置保存到系统参数中
                 SystemParamManager.SystemParam.PLCParams.PrimarySerialPortName = PLCSerialPort;
+                SystemParamManager.SystemParam.PLCParams.SerialPortBaudRate = PLCSerialPortBaudRate;
+                SystemParamManager.SystemParam.PLCParams.SlaveAddress = PLCSlaveAddress;
+                SystemParamManager.SystemParam.PLCParams.ReadTimeout = PLCTimeout;
+                SystemParamManager.SystemParam.PLCParams.WriteTimeout = PLCTimeout;
                 SystemParamManager.SaveParams();
 
                 AddRunningMessage("连接PLC成功");
@@ -1537,6 +1630,7 @@ namespace AnalogSignalAnalysisWpf
             {
                 AddRunningMessage("连接PLC失败");
             }
+
         }
 
         /// <summary>
@@ -1554,7 +1648,7 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public void ConnectOrDisconnectPLC()
         {
-            if (IsPLCValid)
+            if (IsPowerValid)
             {
                 DisconnectPLC();
             }
@@ -1564,6 +1658,8 @@ namespace AnalogSignalAnalysisWpf
             }
 
         }
+
+        #endregion
 
         /// <summary>
         /// 更新Power状态
@@ -1577,8 +1673,6 @@ namespace AnalogSignalAnalysisWpf
 
             NotifyOfPropertyChange(() => IsHardwareValid);
         }
-
-        #endregion
 
         #region 输出参数控制
 
@@ -1658,15 +1752,182 @@ namespace AnalogSignalAnalysisWpf
                     SystemParamManager.SaveParams();
                 }
 
-                //NotifyOfPropertyChange(() => PowerIsEnableOutput);
-                UpdatePowerStatus();
+                NotifyOfPropertyChange(() => PLCOutput);
+                //UpdatePowerStatus();
             }
+        }
+
+        public void EnablePLCOutput()
+        {
+            PLCOutput = !PLCOutput;
         }
 
         #endregion
 
         #endregion
 
+        #region PWM
+
+        /// <summary>
+        /// PWM
+        /// </summary>
+        IPWM PWM { get; set; }
+
+        /// <summary>
+        /// PWM有效标志
+        /// </summary>
+        public bool IsPWMValid
+        {
+            get
+            {
+                return PWM?.IsConnect ?? false;
+            }
+        }
+
+        #region COM配置
+
+        /// <summary>
+        /// 串口号
+        /// </summary>
+        public string PWMSerialPort
+        {
+            get
+            {
+                return PWM?.PrimarySerialPortName ?? "Nana";
+            }
+            set
+            {
+                if (PWM != null)
+                {
+                    PWM.PrimarySerialPortName = value;
+                }
+
+                NotifyOfPropertyChange(() => PWMSerialPort);
+            }
+        }
+
+        /// <summary>
+        /// 连接到Power
+        /// </summary>
+        public void ConnectPWM()
+        {
+            PWM?.Connect();
+            UpdatePWMStatus();
+
+            if (IsPWMValid)
+            {
+                //将当前通信配置保存到系统参数中
+                SystemParamManager.SystemParam.PWMParams.PrimarySerialPortName = PWMSerialPort;
+                SystemParamManager.SaveParams();
+
+                AddRunningMessage("连接PWM成功");
+            }
+            else
+            {
+                AddRunningMessage("连接PWM失败");
+            }
+        }
+
+        /// <summary>
+        /// 断开连接
+        /// </summary>
+        public void DisconnectPWM()
+        {
+            PWM?.Disconnect();
+            UpdatePWMStatus();
+            AddRunningMessage("断开PWM连接");
+        }
+
+        /// <summary>
+        /// 连接/断开连接
+        /// </summary>
+        public void ConnectOrDisconnectPWM()
+        {
+            if (IsPWMValid)
+            {
+                DisconnectPWM();
+            }
+            else
+            {
+                ConnectPWM();
+            }
+
+        }
+
+        /// <summary>
+        /// 更新Power状态
+        /// </summary>
+        public void UpdatePWMStatus()
+        {
+            NotifyOfPropertyChange(() => IsPWMValid);
+            NotifyOfPropertyChange(() => PWMSerialPort);
+            NotifyOfPropertyChange(() => PWMFrequency);
+            NotifyOfPropertyChange(() => PWMDutyRatio);
+
+            NotifyOfPropertyChange(() => IsHardwareValid);
+        }
+
+        #endregion
+
+        #region 输出参数控制
+
+        /// <summary>
+        /// PWM频率
+        /// </summary>
+        public int PWMFrequency
+        {
+            get
+            {
+                if (IsPWMValid)
+                {
+                    return PWM.Frequency;
+                }
+                return -1;
+            }
+            set
+            {
+                if (IsPWMValid)
+                {
+                    PWM.Frequency = value;
+                    SystemParamManager.SystemParam.PWMParams.Frequency = value;
+                    SystemParamManager.SaveParams();
+                }
+
+                //NotifyOfPropertyChange(() => PWMFrequency);
+                UpdatePWMStatus();
+            }
+        }
+
+        /// <summary>
+        /// PWM占空比
+        /// </summary>
+        public int PWMDutyRatio
+        {
+            get
+            {
+                if (IsPWMValid)
+                {
+                    return PWM.DutyRatio;
+                }
+                return -1;
+            }
+            set
+            {
+                if (IsPWMValid)
+                {
+                    PWM.DutyRatio = value;
+                    SystemParamManager.SystemParam.PWMParams.DutyRatio = value;
+                    SystemParamManager.SaveParams();
+                }
+
+                //NotifyOfPropertyChange(() => PWMDutyRatio);
+                UpdatePWMStatus();
+            }
+        }
+
+        #endregion
+
+        #endregion
 
         /// <summary>
         /// 硬件有效标志
@@ -1675,7 +1936,7 @@ namespace AnalogSignalAnalysisWpf
         {
             get
             {
-                if ((Scope?.IsConnect == true) && (Power?.IsConnect == true) && (PLC?.IsConnect == true))
+                if ((Scope?.IsConnect == true) && (Power?.IsConnect == true) && (PLC?.IsConnect == true) && (PWM?.IsConnect == true))
                 {
                     return true;
                 }
@@ -1704,6 +1965,11 @@ namespace AnalogSignalAnalysisWpf
             if (PLC?.IsConnect != true)
             {
                 PLC?.Connect();
+            }
+
+            if (PWM?.IsConnect != true)
+            {
+                PWM?.Connect();
             }
 
             NotifyOfPropertyChange(() => IsHardwareValid);
@@ -1931,7 +2197,7 @@ namespace AnalogSignalAnalysisWpf
                     Thread.Sleep(20);
                 }
 
-                ThroughputMeasurementViewModel.Start();
+                FlowMeasureViewModel.Start();
                 Thread.Sleep(1000);
 
                 //等待测试完成

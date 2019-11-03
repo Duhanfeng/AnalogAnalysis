@@ -23,7 +23,7 @@ namespace AnalogSignalAnalysisWpf.Hardware
         /// </summary>
         /// <param name="portName">端口名</param>
         /// <param name="baudRate">波特率</param>
-        public ModbusPLC(string portName, int baudRate = 115200)
+        public ModbusPLC(string portName, int baudRate = 9600)
         {
             PrimarySerialPortName = portName;
             SerialPortBaudRate = baudRate;
@@ -33,7 +33,77 @@ namespace AnalogSignalAnalysisWpf.Hardware
 
         #region Modbus接口
 
-        private object powerLock = new object();
+        private object plcLock = new object();
+
+        /// <summary>
+        /// 写单个寄存器
+        /// </summary>
+        /// <param name="slaveAddress">从站地址</param>
+        /// <param name="registerAddress">寄存器地址</param>
+        /// <param name="value">数据</param>
+        private void ModbusSerialRtuMasterWriteCoil(byte slaveAddress, ushort registerAddress, bool value)
+        {
+            using (SerialPort port = new SerialPort(PrimarySerialPortName))
+            {
+                //配置串口
+                port.BaudRate = SerialPortBaudRate;
+                port.DataBits = 8;
+                port.Parity = Parity.Even;
+                port.StopBits = StopBits.One;
+                port.Open();
+
+                //创建Modbus主机
+                var adapter = new SerialPortAdapter(port);
+                adapter.ReadTimeout = ReadTimeout;
+                adapter.WriteTimeout = WriteTimeout;
+                var factory = new ModbusFactory();
+                IModbusMaster master = factory.CreateRtuMaster(adapter);
+
+                lock (plcLock)
+                {
+                    //写到寄存器
+                    master.WriteSingleCoil(slaveAddress, registerAddress, value);
+                }
+
+            }
+        }
+
+        /// <summary>
+        /// 读单个寄存器
+        /// </summary>
+        /// <param name="slaveAddress">从站地址</param>
+        /// <param name="registerAddress">寄存器地址</param>
+        /// <param name="value">数据</param>
+        private void ModbusSerialRtuMasterReadCoil(byte slaveAddress, ushort registerAddress, out bool value)
+        {
+            value = false;
+            using (SerialPort port = new SerialPort(PrimarySerialPortName))
+            {
+                //配置串口
+                port.BaudRate = SerialPortBaudRate;
+                port.DataBits = 8;
+                port.Parity = Parity.Even;
+                port.StopBits = StopBits.One;
+                port.Open();
+
+                //创建Modbus主机
+                var adapter = new SerialPortAdapter(port);
+                adapter.ReadTimeout = ReadTimeout;
+                adapter.WriteTimeout = WriteTimeout;
+                var factory = new ModbusFactory();
+                IModbusMaster master = factory.CreateRtuMaster(adapter);
+
+                lock (plcLock)
+                {
+                    //读寄存器
+                    var values = master.ReadCoils(slaveAddress, registerAddress, 1);
+                    if (values?.Length >= 1)
+                    {
+                        value = values[0];
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// 写单个寄存器
@@ -48,7 +118,7 @@ namespace AnalogSignalAnalysisWpf.Hardware
                 //配置串口
                 port.BaudRate = SerialPortBaudRate;
                 port.DataBits = 8;
-                port.Parity = Parity.None;
+                port.Parity = Parity.Even;
                 port.StopBits = StopBits.One;
                 port.Open();
 
@@ -59,7 +129,7 @@ namespace AnalogSignalAnalysisWpf.Hardware
                 var factory = new ModbusFactory();
                 IModbusMaster master = factory.CreateRtuMaster(adapter);
 
-                lock (powerLock)
+                lock (plcLock)
                 {
                     //写到寄存器
                     master.WriteSingleRegister(slaveAddress, registerAddress, value);
@@ -81,7 +151,7 @@ namespace AnalogSignalAnalysisWpf.Hardware
                 //配置串口
                 port.BaudRate = SerialPortBaudRate;
                 port.DataBits = 8;
-                port.Parity = Parity.None;
+                port.Parity = Parity.Even;
                 port.StopBits = StopBits.One;
                 port.Open();
 
@@ -92,7 +162,7 @@ namespace AnalogSignalAnalysisWpf.Hardware
                 var factory = new ModbusFactory();
                 IModbusMaster master = factory.CreateRtuMaster(adapter);
 
-                lock (powerLock)
+                lock (plcLock)
                 {
                     //写到寄存器
                     master.WriteMultipleRegisters(slaveAddress, registerAddress, data);
@@ -114,7 +184,7 @@ namespace AnalogSignalAnalysisWpf.Hardware
                 //配置串口
                 port.BaudRate = SerialPortBaudRate;
                 port.DataBits = 8;
-                port.Parity = Parity.None;
+                port.Parity = Parity.Even;
                 port.StopBits = StopBits.One;
                 port.Open();
 
@@ -125,7 +195,7 @@ namespace AnalogSignalAnalysisWpf.Hardware
                 var factory = new ModbusFactory();
                 IModbusMaster master = factory.CreateRtuMaster(adapter);
 
-                lock (powerLock)
+                lock (plcLock)
                 {
                     //读寄存器
                     var values = master.ReadHoldingRegisters(slaveAddress, registerAddress, 1);
@@ -151,7 +221,7 @@ namespace AnalogSignalAnalysisWpf.Hardware
                 //配置串口
                 port.BaudRate = SerialPortBaudRate;
                 port.DataBits = 8;
-                port.Parity = Parity.None;
+                port.Parity = Parity.Even;
                 port.StopBits = StopBits.One;
                 port.Open();
 
@@ -162,7 +232,7 @@ namespace AnalogSignalAnalysisWpf.Hardware
                 var factory = new ModbusFactory();
                 IModbusMaster master = factory.CreateRtuMaster(adapter);
 
-                lock (powerLock)
+                lock (plcLock)
                 {
                     //读寄存器
                     data = master.ReadHoldingRegisters(slaveAddress, registerAddress, numberOfPoints);
@@ -183,7 +253,7 @@ namespace AnalogSignalAnalysisWpf.Hardware
         /// <summary>
         /// 串口波特率
         /// </summary>
-        public int SerialPortBaudRate { get; set; } = 115200;
+        public int SerialPortBaudRate { get; set; } = 9600;
 
         /// <summary>
         /// 从站地址
@@ -227,8 +297,8 @@ namespace AnalogSignalAnalysisWpf.Hardware
                 return false;
             }
 
-            ushort[] data;
-            if (Read(IsEnablePulseAddress, 1, out data))
+            bool data;
+            if (ReadCoil(IsEnablePulseAddress, out data))
             {
                 IsConnect = true;
                 return true;
@@ -261,8 +331,9 @@ namespace AnalogSignalAnalysisWpf.Hardware
             {
                 ModbusSerialRtuMasterWriteRegister(SlaveAddress, register, value);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex);
                 return false;
             }
             return true;
@@ -332,6 +403,47 @@ namespace AnalogSignalAnalysisWpf.Hardware
 
         }
 
+        /// <summary>
+        /// 写参数
+        /// </summary>
+        /// <param name="register">寄存器位置</param>
+        /// <param name="value">数值</param>
+        /// <returns>执行结果</returns>
+        public bool WriteCoil(ushort register, bool value)
+        {
+            try
+            {
+                ModbusSerialRtuMasterWriteCoil(SlaveAddress, register, value);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 读参数
+        /// </summary>
+        /// <param name="register">寄存器位置</param>
+        /// <param name="value">数值</param>
+        /// <returns>执行结果</returns>
+        public bool ReadCoil(ushort register, out bool value)
+        {
+            value = false;
+
+            try
+            {
+                ModbusSerialRtuMasterReadCoil(SlaveAddress, register, out value);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return false;
+            }
+            return true;
+        }
+
         #endregion
 
         #region 控制接口
@@ -346,12 +458,12 @@ namespace AnalogSignalAnalysisWpf.Hardware
         /// <summary>
         /// 频率地址
         /// </summary>
-        private readonly ushort FrequencyAddress = 0x0001;
+        private readonly ushort FrequencyAddress = 0x0000;
 
         /// <summary>
         /// 占空比
         /// </summary>
-        private readonly ushort DutyRatioAddress = 0x0002;
+        private readonly ushort DutyRatioAddress = 0x0001;
 
         /// <summary>
         /// 开关状态地址
@@ -369,11 +481,9 @@ namespace AnalogSignalAnalysisWpf.Hardware
             {
                 if (IsConnect)
                 {
-                    ushort[] data;
-                    if (Read(IsEnablePulseAddress, 1, out data))
-                    {
-                        return data[0] != 0;
-                    }
+                    bool data;
+                    ReadCoil(IsEnablePulseAddress, out data);
+                    return data;
                 }
                 return false;
             }
@@ -381,8 +491,7 @@ namespace AnalogSignalAnalysisWpf.Hardware
             {
                 if (IsConnect)
                 {
-                    ushort data = value ? (ushort)1 : (ushort)0;
-                    Write(IsEnablePulseAddress, data);
+                    WriteCoil(IsEnablePulseAddress, value);
                 }
             }
         }
@@ -408,6 +517,15 @@ namespace AnalogSignalAnalysisWpf.Hardware
             {
                 if (IsConnect)
                 {
+                    if (value > 0)
+                    {
+                        IsEnablePulse = true;
+                    }
+                    else
+                    {
+                        IsEnablePulse = false;
+                    }
+
                     ushort data = (ushort)value;
                     Write(FrequencyAddress, data);
                 }
@@ -450,8 +568,7 @@ namespace AnalogSignalAnalysisWpf.Hardware
         {
             if (IsConnect)
             {
-                ushort data = (ushort)(isEnable ? 0xFF00 : 0x0000);
-                Write(SwitchStatusAddress, data);
+                WriteCoil(SwitchStatusAddress, isEnable);
             }
         }
 
@@ -464,11 +581,9 @@ namespace AnalogSignalAnalysisWpf.Hardware
         {
             if (IsConnect)
             {
-                ushort[] data;
-                if (Read(SwitchStatusAddress, 1, out data))
-                {
-                    return data[0] != 0;
-                }
+                bool data;
+                ReadCoil(SwitchStatusAddress, out data);
+                return data;
             }
             return false;
         }

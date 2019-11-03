@@ -385,10 +385,36 @@ namespace AnalogSignalAnalysisWpf
 
     public class PLCParams
     {
+        #region Modbus配置参数
+
         /// <summary>
-        /// 串口
+        /// 串口号
         /// </summary>
         public string PrimarySerialPortName { get; set; }
+
+        /// <summary>
+        /// 串口波特率
+        /// </summary>
+        public int SerialPortBaudRate { get; set; }
+
+        /// <summary>
+        /// 从站地址
+        /// </summary>
+        public byte SlaveAddress { get; set; }
+
+        /// <summary>
+        /// 写超时
+        /// </summary>
+        public int WriteTimeout { get; set; }
+
+        /// <summary>
+        /// 读超时
+        /// </summary>
+        public int ReadTimeout { get; set; }
+
+        #endregion
+
+        #region 控制接口
 
         /// <summary>
         /// 频率(Hz)
@@ -404,10 +430,13 @@ namespace AnalogSignalAnalysisWpf
         /// 使能输出
         /// </summary>
         public bool Output { get; set; }
+
+        #endregion
+
     }
 
     /// <summary>
-    /// PLC参数
+    /// 电源模块参数
     /// </summary>
     public class PowerParams
     {
@@ -459,6 +488,24 @@ namespace AnalogSignalAnalysisWpf
 
         #endregion
 
+    }
+
+    public class PWMParams
+    {
+        /// <summary>
+        /// 串口
+        /// </summary>
+        public string PrimarySerialPortName { get; set; }
+
+        /// <summary>
+        /// 频率(Hz)
+        /// </summary>
+        public int Frequency { get; set; }
+
+        /// <summary>
+        /// 占空比(1-100)
+        /// </summary>
+        public int DutyRatio { get; set; }
     }
 
     #endregion
@@ -518,6 +565,11 @@ namespace AnalogSignalAnalysisWpf
         /// Power参数
         /// </summary>
         public PowerParams PowerParams { get; set; } = new PowerParams();
+
+        /// <summary>
+        /// PWM参数
+        /// </summary>
+        public PWMParams PWMParams { get; set; } = new PWMParams();
 
         #endregion
 

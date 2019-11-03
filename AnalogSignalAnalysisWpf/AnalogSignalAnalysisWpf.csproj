@@ -246,6 +246,8 @@
     <Compile Include="Hardware\IPLCCommunication.cs" />
     <Compile Include="Hardware\Power\ModbusPower.cs" />
     <Compile Include="Hardware\PLC\IPLC.cs" />
+    <Compile Include="Hardware\PWM\IPWM.cs" />
+    <Compile Include="Hardware\PWM\SerialPortPWM.cs" />
     <Compile Include="Hardware\Scope\IScopeBase.cs" />
     <Compile Include="Hardware\Scope\LOTOA02.cs" />
     <Compile Include="Hardware\Scope\MyDLLimport.cs" />
@@ -254,6 +256,9 @@
       <DependentUpon>LiveDataView.xaml</DependentUpon>
     </Compile>
     <Compile Include="LiveData\LiveDataViewModel.cs" />
+    <Compile Include="PWMControlView.xaml.cs">
+      <DependentUpon>PWMControlView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="PowerControlView.xaml.cs">
       <DependentUpon>PowerControlView.xaml</DependentUpon>
     </Compile>
@@ -317,6 +322,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="PWMControlView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="PowerControlView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -378,5 +387,6 @@
     <Content Include="Hardware\Scope\LOTOA02LIB\USBInterFace.dll" />
     <Content Include="Hardware\Scope\LOTOA02LIB\USBinterface.h" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

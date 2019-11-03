@@ -18,16 +18,30 @@
     </UserControl.Resources>
     <Grid>
         <StackPanel Margin="10">
-            <TextBlock Margin="0,10,0,0" FontSize="14">COM通信配置</TextBlock>
-            <DockPanel Margin="0,10,0,0">
-                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">串口号</TextBlock>
-                <ComboBox ItemsSource="{Binding SerialPorts}" SelectedItem="{Binding PLCSerialPort}" />
-            </DockPanel>
-            <DockPanel Margin="0,10,0,0" Visibility="Visible">
-                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">连接</TextBlock>
-                <Button cal:Message.Attach="ConnectOrDisconnectPLC"
+            <StackPanel>
+                <TextBlock Margin="0,10,0,0" FontSize="14">COM通信配置</TextBlock>
+                <DockPanel Margin="0,10,0,0">
+                    <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">串口号</TextBlock>
+                    <ComboBox ItemsSource="{Binding SerialPorts}" SelectedItem="{Binding PLCSerialPort}" />
+                </DockPanel>
+                <DockPanel Margin="0,10,0,0">
+                    <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">波特率</TextBlock>
+                    <TextBox Text="{Binding PLCSerialPortBaudRate, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+                </DockPanel>
+                <DockPanel Margin="0,10,0,0">
+                    <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">从站地址</TextBlock>
+                    <TextBox Text="{Binding PLCSlaveAddress, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+                </DockPanel>
+                <DockPanel Margin="0,10,0,0">
+                    <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">超时(MS)</TextBlock>
+                    <TextBox Text="{Binding PLCTimeout, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+                </DockPanel>
+                <DockPanel Margin="0,10,0,0" Visibility="Visible">
+                    <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">连接</TextBlock>
+                    <Button cal:Message.Attach="ConnectOrDisconnectPLC"
                             Content="{Binding IsPLCValid, Converter={StaticResource BoolToStringConverter}}"/>
-            </DockPanel>
+                </DockPanel>
+            </StackPanel>
             <StackPanel IsEnabled="{Binding IsPLCValid}">
                 <TextBlock Margin="0,20,0,0" FontSize="14">PLC输出控制</TextBlock>
                 <DockPanel Margin="0,10,0,0">
@@ -40,8 +54,8 @@
                 </DockPanel>
                 <DockPanel Margin="0,10,0,0">
                     <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">输出</TextBlock>
-                    <Ellipse Width="20" Height="20" Fill="{Binding PowerEnableOutput, Converter={StaticResource BoolToColorConverter}}"/>
-                    <Button cal:Message.Attach="EnablePowerOutput" Margin="10,0,0,0" Content="使能输出" />
+                    <Ellipse Width="20" Height="20" Fill="{Binding PLCOutput, Converter={StaticResource BoolToColorConverter}}"/>
+                    <Button cal:Message.Attach="EnablePLCOutput" Margin="10,0,0,0" Content="使能输出" />
                 </DockPanel>
                 <DockPanel Margin="0,10,0,0">
                     <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="80">刷新</TextBlock>

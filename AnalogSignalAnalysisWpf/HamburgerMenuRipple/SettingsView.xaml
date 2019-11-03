@@ -118,6 +118,12 @@
                     <local:PLCControlView DataContext="{Binding}"/>
                 </StackPanel>
             </TabItem>
+            <TabItem Header="PWM调试">
+                <StackPanel Margin="10,5" Orientation="Horizontal">
+                    <!--<Label Foreground="DarkGreen" FontSize="16">PLC</Label>-->
+                    <local:PWMControlView DataContext="{Binding}"/>
+                </StackPanel>
+            </TabItem>
         </TabControl>
         
         <!--<Grid.ColumnDefinitions>
