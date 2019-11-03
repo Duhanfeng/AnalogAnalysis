@@ -1,5 +1,4 @@
 ﻿using AnalogSignalAnalysisWpf.Hardware;
-using AnalogSignalAnalysisWpf.Hardware;
 using AnalogSignalAnalysisWpf.Hardware.Scope;
 using AnalogSignalAnalysisWpf.LiveData;
 using Caliburn.Micro;
@@ -9,9 +8,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace AnalogSignalAnalysisWpf
 {
@@ -473,7 +470,7 @@ namespace AnalogSignalAnalysisWpf
 
             if (Power?.IsConnect == true)
             {
-                Power.EnableOutput = false;
+                Power.IsEnableOutput = false;
             }
 
             lock (lockObject)
@@ -619,7 +616,7 @@ namespace AnalogSignalAnalysisWpf
 
                 double currentVoltage = MinVoltage;
                 Power.Voltage = currentVoltage;
-                Power.EnableOutput = true;
+                Power.IsEnableOutput = true;
 
                 int count = 0;
                 while (currentVoltage <= MaxVoltage)

@@ -1,11 +1,8 @@
 ﻿using NModbus;
 using NModbus.Serial;
 using System;
-using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AnalogSignalAnalysisWpf.Hardware
 {
@@ -67,7 +64,7 @@ namespace AnalogSignalAnalysisWpf.Hardware
                     //写到寄存器
                     master.WriteSingleRegister(slaveAddress, registerAddress, value);
                 }
-                
+
             }
         }
 
@@ -170,7 +167,7 @@ namespace AnalogSignalAnalysisWpf.Hardware
                     //读寄存器
                     data = master.ReadHoldingRegisters(slaveAddress, registerAddress, numberOfPoints);
                 }
-                
+
             }
         }
 
@@ -344,23 +341,22 @@ namespace AnalogSignalAnalysisWpf.Hardware
         /// <summary>
         /// 使能脉冲地址
         /// </summary>
-        private readonly ushort IsEnablePulseAddress = 0x00;
+        private readonly ushort IsEnablePulseAddress = 0x0002;
 
         /// <summary>
-        /// 电流地址
+        /// 频率地址
         /// </summary>
-        private readonly ushort CurrentAddress = 0x01;
+        private readonly ushort FrequencyAddress = 0x0001;
 
         /// <summary>
-        /// 开关地址
+        /// 占空比
         /// </summary>
-        private readonly ushort SwitchAddress = 0x02;
+        private readonly ushort DutyRatioAddress = 0x0002;
 
         /// <summary>
         /// 开关状态地址
         /// </summary>
-        private readonly ushort SwitchStatusAddress = 0x1000;
-
+        private readonly ushort SwitchStatusAddress = 0x0003;
 
         #endregion
 
@@ -394,12 +390,56 @@ namespace AnalogSignalAnalysisWpf.Hardware
         /// <summary>
         /// 频率(Hz)
         /// </summary>
-        public int Frequency { get; set; }
+        public int Frequency
+        {
+            get
+            {
+                if (IsConnect)
+                {
+                    ushort[] data;
+                    if (Read(FrequencyAddress, 1, out data))
+                    {
+                        return data[0];
+                    }
+                }
+                return -1;
+            }
+            set
+            {
+                if (IsConnect)
+                {
+                    ushort data = (ushort)value;
+                    Write(FrequencyAddress, data);
+                }
+            }
+        }
 
         /// <summary>
         /// 占空比(1-100)
         /// </summary>
-        public int DutyRatio { get; set; }
+        public int DutyRatio
+        {
+            get
+            {
+                if (IsConnect)
+                {
+                    ushort[] data;
+                    if (Read(DutyRatioAddress, 1, out data))
+                    {
+                        return data[0];
+                    }
+                }
+                return -1;
+            }
+            set
+            {
+                if (IsConnect)
+                {
+                    ushort data = (ushort)value;
+                    Write(DutyRatioAddress, data);
+                }
+            }
+        }
 
         /// <summary>
         /// 设置输出状态
@@ -408,7 +448,11 @@ namespace AnalogSignalAnalysisWpf.Hardware
         /// <param name="isEnable">输出状态</param>
         public void SetOutput(int number, bool isEnable)
         {
-
+            if (IsConnect)
+            {
+                ushort data = (ushort)(isEnable ? 0xFF00 : 0x0000);
+                Write(SwitchStatusAddress, data);
+            }
         }
 
         /// <summary>
@@ -418,6 +462,14 @@ namespace AnalogSignalAnalysisWpf.Hardware
         /// <returns>输出状态</returns>
         public bool GetOutput(int number)
         {
+            if (IsConnect)
+            {
+                ushort[] data;
+                if (Read(SwitchStatusAddress, 1, out data))
+                {
+                    return data[0] != 0;
+                }
+            }
             return false;
         }
 

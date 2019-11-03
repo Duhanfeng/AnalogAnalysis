@@ -1,17 +1,12 @@
 ﻿using AnalogSignalAnalysisWpf.Hardware;
-using AnalogSignalAnalysisWpf.Hardware;
 using AnalogSignalAnalysisWpf.Hardware.Scope;
 using AnalogSignalAnalysisWpf.LiveData;
 using Caliburn.Micro;
 using DataAnalysis;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace AnalogSignalAnalysisWpf
 {
@@ -178,12 +173,12 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public int MeasureType
         {
-            get 
+            get
             {
-                return measureType; 
+                return measureType;
             }
-            set 
-            { 
+            set
+            {
                 measureType = value;
                 if (value == 0)
                 {
@@ -225,11 +220,11 @@ namespace AnalogSignalAnalysisWpf
         public bool IsEnableMeasureType1
         {
             get
-            { 
+            {
                 return isEnableMeasureType1;
             }
             set
-            { 
+            {
                 isEnableMeasureType1 = value;
                 NotifyOfPropertyChange(() => IsEnableMeasureType1);
             }
@@ -245,8 +240,8 @@ namespace AnalogSignalAnalysisWpf
         public double PressureK
         {
             get
-            { 
-                return pressureK; 
+            {
+                return pressureK;
             }
             set
             {
@@ -553,7 +548,7 @@ namespace AnalogSignalAnalysisWpf
                 NotifyOfPropertyChange(() => RunningStatus);
             }
         }
-        
+
         private double currentVoltage;
 
         /// <summary>
@@ -579,11 +574,11 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public double Time
         {
-            get 
+            get
             {
                 return time;
             }
-            set 
+            set
             {
                 time = value;
                 NotifyOfPropertyChange(() => Time);
@@ -685,7 +680,7 @@ namespace AnalogSignalAnalysisWpf
                 NotifyOfPropertyChange(() => DerivativeEdgeCollection);
             }
         }
-        
+
         /// <summary>
         /// 显示微分数据
         /// </summary>
@@ -735,7 +730,7 @@ namespace AnalogSignalAnalysisWpf
 
             if (Power?.IsConnect == true)
             {
-                Power.EnableOutput = false;
+                Power.IsEnableOutput = false;
             }
 
             lock (lockObject)
@@ -817,7 +812,7 @@ namespace AnalogSignalAnalysisWpf
 
             measureThread = new Thread(() =>
             {
-                
+
                 lock (lockObject)
                 {
                     IsMeasuring = true;
@@ -829,7 +824,7 @@ namespace AnalogSignalAnalysisWpf
                 Scope.SampleTime = SampleTime;
 
                 //设置电压
-                Power.EnableOutput = false;
+                Power.IsEnableOutput = false;
                 Power.Voltage = OutputVoltage;
 
                 //启动线程
@@ -838,7 +833,7 @@ namespace AnalogSignalAnalysisWpf
                     Thread.Sleep(OutputDelay);
 
                     //设置电压
-                    Power.EnableOutput = true;
+                    Power.IsEnableOutput = true;
                 }).Start();
 
                 try
@@ -922,7 +917,7 @@ namespace AnalogSignalAnalysisWpf
                         {
                             Time = ((end - start) * 1000.0) / DerivativeK;
 
-                            
+
                             OnMeasurementCompleted(new ThroughputMeasurementCompletedEventArgs(true, Time));
 
                         }

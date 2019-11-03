@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AnalogSignalAnalysisWpf.Hardware
+﻿namespace AnalogSignalAnalysisWpf.Hardware
 {
     public interface IPower : IModbusCommunication
     {
@@ -23,7 +17,7 @@ namespace AnalogSignalAnalysisWpf.Hardware
         /// <summary>
         /// 使能输出
         /// </summary>
-        bool EnableOutput { get; set; }
+        bool IsEnableOutput { get; set; }
 
         /// <summary>
         /// 开关频率

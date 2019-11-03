@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AnalogSignalAnalysisWpf.Hardware
 {
-    public interface IModbusCommunication: IDisposable
+    public interface IModbusCommunication : IDisposable
     {
         #region Modbus配置参数
 

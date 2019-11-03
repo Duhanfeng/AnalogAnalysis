@@ -1,5 +1,4 @@
 ﻿using AnalogSignalAnalysisWpf.Hardware;
-using AnalogSignalAnalysisWpf.Hardware;
 using AnalogSignalAnalysisWpf.Hardware.Scope;
 using AnalogSignalAnalysisWpf.LiveData;
 using Caliburn.Micro;
@@ -9,9 +8,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace AnalogSignalAnalysisWpf
 {
@@ -301,12 +298,12 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public int Frequency
         {
-            get 
-            { 
-                return frequency; 
+            get
+            {
+                return frequency;
             }
-            set 
-            { 
+            set
+            {
                 frequency = value;
                 NotifyOfPropertyChange(() => Frequency);
                 SystemParamManager.SystemParam.BurnInTestParams.Frequency = value;
@@ -321,11 +318,11 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public int PLCCount
         {
-            get 
-            { 
-                return plcCount; 
+            get
+            {
+                return plcCount;
             }
-            set 
+            set
             {
                 plcCount = value;
                 NotifyOfPropertyChange(() => PLCCount);
@@ -362,7 +359,7 @@ namespace AnalogSignalAnalysisWpf
         /// <param name="e"></param>
         protected void OnMeasurementCompleted(BurnInTestCompletedEventArgs e)
         {
-            Power.EnableOutput = false;
+            Power.IsEnableOutput = false;
 
             PLC.Frequency = 0;
             if (e.IsSuccess == true)
@@ -515,7 +512,7 @@ namespace AnalogSignalAnalysisWpf
                     SynchronizationContext.SetSynchronizationContext(new System.Windows.Threading.DispatcherSynchronizationContext(System.Windows.Application.Current.Dispatcher));
                     SynchronizationContext.Current.Send(pl =>
                     {
-                        MeasurementInfos.Insert(0, new  BurnInTestInfo(currentInputFrequency, currentSampleTime, pulseFrequencies));
+                        MeasurementInfos.Insert(0, new BurnInTestInfo(currentInputFrequency, currentSampleTime, pulseFrequencies));
                     }, null);
                 });
             }).Start();
@@ -569,7 +566,7 @@ namespace AnalogSignalAnalysisWpf
 
                 //使能Power输出
                 Power.Voltage = SystemParamManager.SystemParam.FrequencyMeasureParams.OutputVoltage;
-                Power.EnableOutput = true;
+                Power.IsEnableOutput = true;
 
                 //设置实际输出频率
                 PLC.Frequency = Frequency;
@@ -604,8 +601,8 @@ namespace AnalogSignalAnalysisWpf
                     //阈值查找边沿
                     List<int> edgeIndexs;
                     DigitEdgeType digitEdgeType;
-                    Analysis.FindEdgeByThreshold(pressureData, SystemParamManager.SystemParam.FrequencyMeasureParams.MinPressure, 
-                        SystemParamManager.SystemParam.FrequencyMeasureParams.MaxPressure, 
+                    Analysis.FindEdgeByThreshold(pressureData, SystemParamManager.SystemParam.FrequencyMeasureParams.MinPressure,
+                        SystemParamManager.SystemParam.FrequencyMeasureParams.MaxPressure,
                         out edgeIndexs, out digitEdgeType);
 
                     ////显示波形
@@ -624,7 +621,7 @@ namespace AnalogSignalAnalysisWpf
                         //检测脉冲是否异常
                         double minFrequency = Frequency * (1 - SystemParamManager.SystemParam.FrequencyMeasureParams.FrequencyErrLimit);
                         double maxFrequency = Frequency * (1 + SystemParamManager.SystemParam.FrequencyMeasureParams.FrequencyErrLimit);
-                        
+
                         //若波形不符,则退出测试
                         if (!Analysis.CheckFrequency(pulseFrequencies, minFrequency, maxFrequency, 1))
                         {

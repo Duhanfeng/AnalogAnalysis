@@ -1,6 +1,5 @@
 ﻿using AnalogSignalAnalysisWpf.Core;
 using AnalogSignalAnalysisWpf.Hardware;
-using AnalogSignalAnalysisWpf.Hardware;
 using AnalogSignalAnalysisWpf.Hardware.Scope;
 using AnalogSignalAnalysisWpf.LiveData;
 using Caliburn.Micro;
@@ -134,7 +133,7 @@ namespace AnalogSignalAnalysisWpf
                     AddRunningMessage("连接Power成功");
                     Power.Voltage = SystemParamManager.SystemParam.PowerParams.Voltage;
                     Power.Current = SystemParamManager.SystemParam.PowerParams.Current;
-                    Power.EnableOutput = SystemParamManager.SystemParam.PowerParams.EnableOutput;
+                    Power.IsEnableOutput = SystemParamManager.SystemParam.PowerParams.IsEnableOutput;
                 }
                 else
                 {
@@ -216,7 +215,7 @@ namespace AnalogSignalAnalysisWpf
 
             //获取用户名
             SystemParamManager.LoadUser();
-            
+
 
         }
 
@@ -270,7 +269,7 @@ namespace AnalogSignalAnalysisWpf
             {
                 IsMeasuring = false;
             }
-            
+
             if (e.IsSuccess)
             {
                 PNMeasureStatus = "测试完成";
@@ -313,7 +312,7 @@ namespace AnalogSignalAnalysisWpf
                     }, null);
                 });
             }).Start();
-            
+
         }
 
         private void ThroughputMeasurementViewModel_MeasurementCompleted(object sender, ThroughputMeasurementCompletedEventArgs e)
@@ -604,7 +603,7 @@ namespace AnalogSignalAnalysisWpf
         public void ConnectScope()
         {
             Scope?.Connect();
-            
+
             if (IsScopeValid)
             {
                 //还原配置
@@ -1340,13 +1339,13 @@ namespace AnalogSignalAnalysisWpf
         /// <summary>
         /// Power使能输出
         /// </summary>
-        public bool PowerEnableOutput
+        public bool PowerIsEnableOutput
         {
             get
             {
                 if (IsPowerValid)
                 {
-                    return Power.EnableOutput;
+                    return Power.IsEnableOutput;
                 }
                 return false;
             }
@@ -1354,12 +1353,12 @@ namespace AnalogSignalAnalysisWpf
             {
                 if (IsPowerValid == true)
                 {
-                    Power.EnableOutput = value;
-                    SystemParamManager.SystemParam.PowerParams.EnableOutput = value;
+                    Power.IsEnableOutput = value;
+                    SystemParamManager.SystemParam.PowerParams.IsEnableOutput = value;
                     SystemParamManager.SaveParams();
                 }
 
-                //NotifyOfPropertyChange(() => PowerEnableOutput);
+                //NotifyOfPropertyChange(() => PowerIsEnableOutput);
                 UpdatePowerStatus();
             }
         }
@@ -1417,7 +1416,7 @@ namespace AnalogSignalAnalysisWpf
             NotifyOfPropertyChange(() => IsPowerValid);
             NotifyOfPropertyChange(() => PowerVoltage);
             NotifyOfPropertyChange(() => PowerCurrent);
-            NotifyOfPropertyChange(() => PowerEnableOutput);
+            NotifyOfPropertyChange(() => PowerIsEnableOutput);
             NotifyOfPropertyChange(() => PowerRealityVoltage);
             NotifyOfPropertyChange(() => PowerRealityCurrent);
             NotifyOfPropertyChange(() => PowerRealityTemperature);
@@ -1445,7 +1444,7 @@ namespace AnalogSignalAnalysisWpf
             //        NotifyOfPropertyChange(() => IsPowerValid);
             //        NotifyOfPropertyChange(() => PowerVoltage);
             //        NotifyOfPropertyChange(() => PowerCurrent);
-            //        NotifyOfPropertyChange(() => PowerEnableOutput);
+            //        NotifyOfPropertyChange(() => PowerIsEnableOutput);
             //        NotifyOfPropertyChange(() => PowerRealityVoltage);
             //        NotifyOfPropertyChange(() => PowerRealityCurrent);
             //        NotifyOfPropertyChange(() => PowerRealityTemperature);
@@ -1466,7 +1465,7 @@ namespace AnalogSignalAnalysisWpf
         {
             if (IsPowerValid)
             {
-                PowerEnableOutput = !PowerEnableOutput;
+                PowerIsEnableOutput = !PowerIsEnableOutput;
             }
         }
 
@@ -1630,6 +1629,33 @@ namespace AnalogSignalAnalysisWpf
 
                 //NotifyOfPropertyChange(() => PLCDutyRatio);
                 UpdatePLCStatus();
+            }
+        }
+
+        /// <summary>
+        /// Power使能输出
+        /// </summary>
+        public bool PLCOutput
+        {
+            get
+            {
+                if (IsPLCValid)
+                {
+                    return PLC.GetOutput(0);
+                }
+                return false;
+            }
+            set
+            {
+                if (IsPLCValid == true)
+                {
+                    PLC.SetOutput(0, value);
+                    SystemParamManager.SystemParam.PLCParams.Output = value;
+                    SystemParamManager.SaveParams();
+                }
+
+                //NotifyOfPropertyChange(() => PowerIsEnableOutput);
+                UpdatePowerStatus();
             }
         }
 
@@ -1829,7 +1855,7 @@ namespace AnalogSignalAnalysisWpf
                     }
                 }
 
-                return true; 
+                return true;
             }
         }
 
@@ -1927,12 +1953,12 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public string FrequencyMeasureStatus
         {
-            get 
-            { 
-                return frequencyMeasureStatus; 
+            get
+            {
+                return frequencyMeasureStatus;
             }
-            set 
-            { 
+            set
+            {
                 frequencyMeasureStatus = value;
                 NotifyOfPropertyChange(() => FrequencyMeasureStatus);
             }
@@ -1945,12 +1971,12 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public int MaxLimitFrequency
         {
-            get 
-            { 
-                return maxLimitFrequency; 
+            get
+            {
+                return maxLimitFrequency;
             }
-            set 
-            { 
+            set
+            {
                 maxLimitFrequency = value;
                 NotifyOfPropertyChange(() => MaxLimitFrequency);
             }
@@ -1963,13 +1989,13 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public string PNMeasureStatus
         {
-            get 
-            { 
-                return pnMeasureStatus; 
+            get
+            {
+                return pnMeasureStatus;
             }
-            set 
-            { 
-                pnMeasureStatus = value; 
+            set
+            {
+                pnMeasureStatus = value;
                 NotifyOfPropertyChange(() => PNMeasureStatus);
             }
         }
@@ -1981,11 +2007,11 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public double PositiveVoltage
         {
-            get 
-            { 
+            get
+            {
                 return positiveVoltage;
             }
-            set 
+            set
             {
                 positiveVoltage = value;
             }
@@ -1999,12 +2025,12 @@ namespace AnalogSignalAnalysisWpf
         public double NegativeVoltage
         {
             get
-            { 
+            {
                 return negativeVoltage;
             }
-            set 
-            { 
-                negativeVoltage = value; 
+            set
+            {
+                negativeVoltage = value;
             }
         }
 
@@ -2033,11 +2059,11 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public ObservableCollection<InputOutputMeasurementInfo> InputOutputInfos
         {
-            get 
-            { 
-                return inputOutputInfos; 
+            get
+            {
+                return inputOutputInfos;
             }
-            set 
+            set
             {
                 inputOutputInfos = value;
                 NotifyOfPropertyChange(() => InputOutputInfos);
@@ -2069,12 +2095,12 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public double Flow
         {
-            get 
+            get
             {
-                return flow; 
+                return flow;
             }
-            set 
-            { 
+            set
+            {
                 flow = value;
                 NotifyOfPropertyChange(() => Flow);
             }
@@ -2093,12 +2119,12 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public string OperaMsg
         {
-            get 
+            get
             {
                 return operaMsg;
             }
             set
-            { 
+            {
                 operaMsg = value;
                 NotifyOfPropertyChange(() => OperaMsg);
             }
@@ -2111,11 +2137,11 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public bool IsAdmin
         {
-            get 
+            get
             {
-                return isAdmin; 
+                return isAdmin;
             }
-            set 
+            set
             {
                 if (value)
                 {
@@ -2139,7 +2165,7 @@ namespace AnalogSignalAnalysisWpf
             settings.InitialUsername = "Admin";
             settings.NegativeButtonVisibility = Visibility.Visible;
             settings.EnablePasswordPreview = true;
-            
+
             var result = ((MetroWindow)Application.Current.MainWindow).ShowModalLoginExternal("登录管理员账户", "", settings);
             if ((result?.Username?.Equals(SystemParamManager.User?.UserName) == true) &&
                 (result?.Password?.Equals(SystemParamManager.User?.Password) == true))
@@ -2190,7 +2216,7 @@ namespace AnalogSignalAnalysisWpf
                 SystemParamManager.User.Password = result;
                 SystemParamManager.SaveUser();
             }
-            
+
         }
 
         #endregion
@@ -2235,7 +2261,7 @@ namespace AnalogSignalAnalysisWpf
         /// <summary>
         /// 全局气压比例系数(P/V)
         /// </summary>
-        public double GlobalPressureK 
+        public double GlobalPressureK
         {
             get
             {

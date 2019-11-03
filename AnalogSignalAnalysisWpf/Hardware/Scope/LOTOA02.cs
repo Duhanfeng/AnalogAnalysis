@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace AnalogSignalAnalysisWpf.Hardware.Scope
 {
@@ -173,7 +167,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
                     }
                 }
             }
-            
+
         }
 
         public void SetSampleRate(ESampleRate sampleRate)
@@ -216,7 +210,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
                         break;
                 }
             }
-            
+
         }
 
         public void SetTriggerModel(ETriggerModel triggerModel)
@@ -240,7 +234,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
                         break;
                 }
             }
-            
+
         }
 
         public void SetTriggerEdge(ETriggerEdge triggerEdge)
@@ -259,7 +253,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
                         break;
                 }
             }
-            
+
         }
 
         public void SetTriggerLevel(byte level)
@@ -269,7 +263,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
                 //设置触发数据
                 MyDLLimport.USBCtrlTrans(0x16, level, 1);
             }
-            
+
         }
 
         public void SetVoltageDIV(EChannel channel, EVoltageDIV voltageDIV)
@@ -375,7 +369,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
                     MyDLLimport.USBCtrlTrans(0x24, g_CtrlByte1, 1);
                 }
             }
-            
+
         }
 
         ///// <summary>
@@ -439,7 +433,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
             {
                 sampleTime = value;
                 sampleCount = (uint)((uint)SampleRate * (sampleTime + 25) / 1000);
-                invalidDataCount = (uint)((uint)SampleRate *  25 / 1000);
+                invalidDataCount = (uint)((uint)SampleRate * 25 / 1000);
 
                 lock (lockObject)
                 {
@@ -508,7 +502,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
                 }
 
             }
-            
+
             return IsConnect;
         }
 
@@ -522,7 +516,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
                 MyDLLimport.DeviceClose();
                 IsConnect = false;
             }
-            
+
         }
 
         /// <summary>
@@ -770,12 +764,12 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         /// </summary>
         public ECoupling CHACoupling
         {
-            get 
-            { 
+            get
+            {
                 return chaCoupling;
             }
             set
-            { 
+            {
                 chaCoupling = value;
                 SetCoupling(EChannel.CHA, value);
             }
@@ -807,11 +801,11 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         public ESampleRate SampleRate
         {
             get
-            { 
-                return sampleRate; 
+            {
+                return sampleRate;
             }
             set
-            { 
+            {
                 sampleRate = value;
                 SetSampleRate(value);
 
@@ -834,12 +828,12 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         /// </summary>
         public ETriggerModel TriggerModel
         {
-            get 
-            { 
+            get
+            {
                 return triggerModel;
             }
             set
-            { 
+            {
                 triggerModel = value;
                 SetTriggerModel(value);
             }
@@ -852,12 +846,12 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         /// </summary>
         public ETriggerEdge TriggerEdge
         {
-            get 
-            { 
+            get
+            {
                 return triggerEdge;
             }
-            set 
-            { 
+            set
+            {
                 triggerEdge = value;
                 SetTriggerEdge(value);
             }
@@ -870,12 +864,12 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         /// </summary>
         public EVoltageDIV CHAVoltageDIV
         {
-            get 
-            { 
+            get
+            {
                 return chaVoltageDIV;
             }
             set
-            { 
+            {
                 chaVoltageDIV = value;
                 SetVoltageDIV(EChannel.CHA, value);
 
@@ -978,7 +972,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
                 return isCHBEnable;
             }
             set
-            { 
+            {
                 isCHBEnable = value;
                 EnableCHB(value);
             }

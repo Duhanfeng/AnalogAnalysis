@@ -1,5 +1,4 @@
 ﻿using AnalogSignalAnalysisWpf.Hardware;
-using AnalogSignalAnalysisWpf.Hardware;
 using AnalogSignalAnalysisWpf.Hardware.Scope;
 using AnalogSignalAnalysisWpf.LiveData;
 using Caliburn.Micro;
@@ -8,9 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace AnalogSignalAnalysisWpf
 {
@@ -682,7 +679,7 @@ namespace AnalogSignalAnalysisWpf
         /// <param name="e"></param>
         protected void OnMeasurementCompleted(FrequencyMeasurementCompletedEventArgs e)
         {
-            Power.EnableOutput = false;
+            Power.IsEnableOutput = false;
 
             PLC.Frequency = 0;
             if (e.IsSuccess == true)
@@ -900,7 +897,7 @@ namespace AnalogSignalAnalysisWpf
 
                 //使能Power输出
                 Power.Voltage = OutputVoltage;
-                Power.EnableOutput = true;
+                Power.IsEnableOutput = true;
 
                 foreach (var item in TestDatas)
                 {

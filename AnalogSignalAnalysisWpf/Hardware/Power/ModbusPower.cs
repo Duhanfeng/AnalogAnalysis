@@ -1,11 +1,8 @@
 ﻿using NModbus;
 using NModbus.Serial;
 using System;
-using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AnalogSignalAnalysisWpf.Hardware
 {
@@ -67,7 +64,7 @@ namespace AnalogSignalAnalysisWpf.Hardware
                     //写到寄存器
                     master.WriteSingleRegister(slaveAddress, registerAddress, value);
                 }
-                
+
             }
         }
 
@@ -170,7 +167,7 @@ namespace AnalogSignalAnalysisWpf.Hardware
                     //读寄存器
                     data = master.ReadHoldingRegisters(slaveAddress, registerAddress, numberOfPoints);
                 }
-                
+
             }
         }
 
@@ -456,7 +453,7 @@ namespace AnalogSignalAnalysisWpf.Hardware
         /// <summary>
         /// 使能
         /// </summary>
-        public bool EnableOutput
+        public bool IsEnableOutput
         {
             get
             {

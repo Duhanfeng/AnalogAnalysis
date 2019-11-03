@@ -1,5 +1,4 @@
 ﻿using AnalogSignalAnalysisWpf.Hardware;
-using AnalogSignalAnalysisWpf.Hardware;
 using AnalogSignalAnalysisWpf.Hardware.Scope;
 using AnalogSignalAnalysisWpf.LiveData;
 using Caliburn.Micro;
@@ -9,9 +8,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace AnalogSignalAnalysisWpf
 {
@@ -235,12 +232,12 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public double VoltageInterval
         {
-            get 
-            { 
-                return voltageInterval; 
+            get
+            {
+                return voltageInterval;
             }
-            set 
-            { 
+            set
+            {
                 voltageInterval = value;
                 NotifyOfPropertyChange(() => VoltageInterval);
 
@@ -369,7 +366,7 @@ namespace AnalogSignalAnalysisWpf
                 NotifyOfPropertyChange(() => RunningStatus);
             }
         }
-        
+
         private double currentVoltage;
 
         /// <summary>
@@ -397,10 +394,10 @@ namespace AnalogSignalAnalysisWpf
         {
             get
             {
-                return currentPressure; 
+                return currentPressure;
             }
             set
-            { 
+            {
                 currentPressure = value;
                 NotifyOfPropertyChange(() => CurrentPressure);
             }
@@ -603,7 +600,7 @@ namespace AnalogSignalAnalysisWpf
 
             if (Power?.IsConnect == true)
             {
-                Power.EnableOutput = false;
+                Power.IsEnableOutput = false;
             }
 
             lock (lockObject)
@@ -683,7 +680,7 @@ namespace AnalogSignalAnalysisWpf
                             Value1 = currentVoltage,
                             Value = time
                         });
-                        
+
                         if (isSuccess)
                         {
                             PVoltageEdgeCollection.Add(new Data
@@ -887,7 +884,7 @@ namespace AnalogSignalAnalysisWpf
                 bool isSuccess = false;
                 double positiveVoltage = 0;
                 double negativeVoltage = 0;
-                
+
                 //设置采样时间
                 Scope.SampleTime = SampleTime;
 
@@ -898,7 +895,7 @@ namespace AnalogSignalAnalysisWpf
                 //设置电源输出
                 double currentVoltage = MinVoltage;
                 Power.Voltage = currentVoltage;
-                Power.EnableOutput = true;
+                Power.IsEnableOutput = true;
 
                 int measureStep = 0;
 

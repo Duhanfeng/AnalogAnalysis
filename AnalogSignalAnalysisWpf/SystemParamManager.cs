@@ -1,12 +1,7 @@
 ﻿using AnalogSignalAnalysisWpf.Hardware.Scope;
 using Framework.Infrastructure.Serialization;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AnalogSignalAnalysisWpf
 {
@@ -392,6 +387,11 @@ namespace AnalogSignalAnalysisWpf
         /// 占空比(1-100)
         /// </summary>
         public int DutyRatio { get; set; }
+
+        /// <summary>
+        /// 使能输出
+        /// </summary>
+        public bool Output { get; set; }
     }
 
     /// <summary>
@@ -443,7 +443,7 @@ namespace AnalogSignalAnalysisWpf
         /// <summary>
         /// 使能输出
         /// </summary>
-        public bool EnableOutput { get; set; }
+        public bool IsEnableOutput { get; set; }
 
         #endregion
 
