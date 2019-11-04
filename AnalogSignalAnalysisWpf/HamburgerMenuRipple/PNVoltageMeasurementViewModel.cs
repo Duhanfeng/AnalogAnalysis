@@ -421,7 +421,6 @@ namespace AnalogSignalAnalysisWpf
             }
         }
 
-
         private double pVoltage;
 
         /// <summary>
@@ -621,6 +620,9 @@ namespace AnalogSignalAnalysisWpf
                 Power.IsEnableOutput = false;
             }
 
+            PVoltage = e.PositiveVoltage;
+            NVoltage = e.NegativeVoltage;
+
             lock (lockObject)
             {
                 IsMeasuring = false;
@@ -658,23 +660,12 @@ namespace AnalogSignalAnalysisWpf
         /// <summary>
         /// 电压转气压
         /// </summary>
-        /// <param name="pressure"></param>
-        /// <returns></returns>
-        private double PressureToVoltage(double pressure)
-        {
-
-            return pressure / SystemParamManager.SystemParam.GlobalParam.PressureK;
-        }
-
-        /// <summary>
-        /// 气压转电压
-        /// </summary>
         /// <param name="voltage"></param>
         /// <returns></returns>
         private double VoltageToPressure(double voltage)
         {
 
-            return voltage * SystemParamManager.SystemParam.GlobalParam.PressureK;
+            return (voltage - SystemParamManager.SystemParam.GlobalParam.PressureZeroVoltage) * SystemParamManager.SystemParam.GlobalParam.PressureK;
         }
 
         /// <summary>
@@ -903,11 +894,18 @@ namespace AnalogSignalAnalysisWpf
                 }
 
                 bool isSuccess = false;
+
+
+
                 double positiveVoltage = 0;
                 double negativeVoltage = 0;
 
                 //设置采样时间
                 Scope.SampleTime = SampleTime;
+                if (SampleTime <= 50)
+                {
+                    Scope.SampleRate = ESampleRate.Sps_781K;
+                }
 
                 //设置PWM
                 PWM.Frequency = 0;
@@ -918,6 +916,10 @@ namespace AnalogSignalAnalysisWpf
                 Power.Voltage = currentVoltage;
                 Power.IsEnableOutput = true;
 
+                double roughPositiveVoltage = 0;
+                double roughNegativeVoltage = 0;
+                var roughVoltageInterval = VoltageInterval < 1 ? 1 : VoltageInterval;
+
                 int measureStep = 0;
 
                 while (true)
@@ -925,8 +927,124 @@ namespace AnalogSignalAnalysisWpf
                     switch (measureStep)
                     {
                         case 0:
+                            RunningStatus = "查找吸合电压(粗)";
 
-                            RunningStatus = "查找吸合电压";
+                            //测量释放电压
+                            while (currentVoltage <= MaxVoltage)
+                            {
+                                //设置当前电压
+                                Power.Voltage = currentVoltage;
+                                Thread.Sleep(SystemParamManager.SystemParam.GlobalParam.PowerCommonDelay);
+                                CurrentVoltage = currentVoltage;
+
+                                //读取Scope数据
+                                double[] originalData;
+                                Scope.ReadDataBlock(0, out originalData);
+
+                                //数据滤波
+                                double[] filterData;
+                                Analysis.MeanFilter(originalData, 7, out filterData);
+
+                                //电压转气压
+                                double[] pressureData = filterData.ToList().ConvertAll(x => VoltageToPressure(x)).ToArray();
+
+                                //获取平均值
+                                CurrentPressure = Analysis.Mean(pressureData);
+
+                                stopwatch.Stop();
+
+                                //假如当前气压值大于等于临界值,则认为测试有效
+                                if (CurrentPressure >= CriticalPressure)
+                                {
+                                    ShowPData(stopwatch.Elapsed.TotalMilliseconds, CurrentVoltage, CurrentPressure, true);
+
+                                    roughPositiveVoltage = currentVoltage;
+                                    isSuccess = true;
+                                    break;
+                                }
+                                else
+                                {
+                                    ShowPData(stopwatch.Elapsed.TotalMilliseconds, CurrentVoltage, CurrentPressure, false);
+                                }
+
+                                stopwatch.Start();
+
+                                currentVoltage += roughVoltageInterval;
+                            }
+
+                            if (isSuccess)
+                            {
+                                measureStep++;
+                            }
+                            else
+                            {
+                                measureStep = -1;
+                            }
+
+                            break;
+
+                        case 1:
+                            RunningStatus = "查找释放电压(粗)";
+                            
+                            //测量释放电压
+                            while (currentVoltage >= 0)
+                            {
+                                //设置当前电压
+                                Power.Voltage = currentVoltage;
+                                Thread.Sleep(SystemParamManager.SystemParam.GlobalParam.PowerCommonDelay);
+                                CurrentVoltage = currentVoltage;
+
+                                //读取Scope数据
+                                double[] originalData;
+                                Scope.ReadDataBlock(0, out originalData);
+
+                                //数据滤波
+                                double[] filterData;
+                                Analysis.MeanFilter(originalData, 7, out filterData);
+
+                                //电压转气压
+                                double[] pressureData = filterData.ToList().ConvertAll(x => VoltageToPressure(x)).ToArray();
+
+                                //获取平均值
+                                CurrentPressure = Analysis.Mean(pressureData);
+
+                                stopwatch.Stop();
+
+                                //假如当前气压值小于等于临界值,则认为测试有效
+                                if (CurrentPressure <= CriticalPressure)
+                                {
+                                    ShowNData(stopwatch.Elapsed.TotalMilliseconds, CurrentVoltage, CurrentPressure, true);
+
+                                    roughNegativeVoltage = currentVoltage;
+                                    isSuccess = true;
+                                    break;
+                                }
+                                else
+                                {
+                                    ShowNData(stopwatch.Elapsed.TotalMilliseconds, CurrentVoltage, CurrentPressure, false);
+                                }
+
+                                stopwatch.Start();
+
+                                currentVoltage -= roughVoltageInterval;
+                            }
+
+                            if (isSuccess)
+                            {
+                                measureStep++;
+                            }
+                            else
+                            {
+                                measureStep = -1;
+                            }
+
+                            break;
+
+                        case 2:
+                            RunningStatus = "查找吸合电压(精细)";
+                            var temp = roughPositiveVoltage - roughVoltageInterval * 2;
+                            currentVoltage = temp < 0 ? 0 : temp;
+                            //currentVoltage = MinVoltage;
 
                             //测量吸合电压
                             while (currentVoltage <= MaxVoltage)
@@ -983,12 +1101,13 @@ namespace AnalogSignalAnalysisWpf
 
                             break;
 
-                        case 1:
-
-                            RunningStatus = "查找释放电压";
+                        case 3:
+                            RunningStatus = "查找释放电压(精细)";
+                            currentVoltage = (roughNegativeVoltage <= 0 ? 0 : roughNegativeVoltage) + roughVoltageInterval * 2;
+                            //currentVoltage = positiveVoltage + 1;
 
                             //测量释放电压
-                            while (currentVoltage >= MinVoltage)
+                            while (currentVoltage >= 0)
                             {
                                 //设置当前电压
                                 Power.Voltage = currentVoltage;
@@ -1027,7 +1146,7 @@ namespace AnalogSignalAnalysisWpf
 
                                 stopwatch.Start();
 
-                                currentVoltage += VoltageInterval;
+                                currentVoltage -= VoltageInterval;
                             }
 
                             if (isSuccess)
@@ -1041,7 +1160,7 @@ namespace AnalogSignalAnalysisWpf
 
                             break;
 
-                        case 2:
+                        case 4:
                             //测试成功
                             OnMeasurementCompleted(new PNVoltageMeasurementCompletedEventArgs(true, positiveVoltage, negativeVoltage));
                             return;

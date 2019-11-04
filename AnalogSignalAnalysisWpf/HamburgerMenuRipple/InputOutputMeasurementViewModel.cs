@@ -563,23 +563,12 @@ namespace AnalogSignalAnalysisWpf
         /// <summary>
         /// 电压转气压
         /// </summary>
-        /// <param name="pressure"></param>
-        /// <returns></returns>
-        private double PressureToVoltage(double pressure)
-        {
-
-            return pressure / SystemParamManager.SystemParam.GlobalParam.PressureK;
-        }
-
-        /// <summary>
-        /// 气压转电压
-        /// </summary>
         /// <param name="voltage"></param>
         /// <returns></returns>
         private double VoltageToPressure(double voltage)
         {
 
-            return voltage * SystemParamManager.SystemParam.GlobalParam.PressureK;
+            return (voltage - SystemParamManager.SystemParam.GlobalParam.PressureZeroVoltage) * SystemParamManager.SystemParam.GlobalParam.PressureK;
         }
 
         /// <summary>
@@ -635,6 +624,11 @@ namespace AnalogSignalAnalysisWpf
 
                 var infos = new List<InputOutputMeasurementInfo>();
                 MeasurementInfos = new ObservableCollection<InputOutputMeasurementInfo>();
+
+                if (SampleTime <= 50)
+                {
+                    Scope.SampleRate = ESampleRate.Sps_781K;
+                }
 
                 double currentVoltage = MinVoltage;
                 Power.Voltage = currentVoltage;

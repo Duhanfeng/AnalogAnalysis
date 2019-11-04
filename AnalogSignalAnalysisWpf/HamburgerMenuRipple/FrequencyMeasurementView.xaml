@@ -59,7 +59,7 @@
                         <chart:LinearXAxis CrossLineStyle="{StaticResource crossLineStyle}" MinorLineStyle="{StaticResource minorcrossLineStyle}" MajorLineStyle="{StaticResource crossLineStyle}" AxisLineStyle="{StaticResource axisLineStyle}" MinorTicksCount="3" ShowCrossLines="True" Header="Time(ms)" StringFormat="0.0"/>
                     </chart:SparrowChart.XAxis>
                     <chart:SparrowChart.YAxis>
-                        <chart:LinearYAxis CrossLineStyle="{StaticResource crossLineStyle}"  MinorLineStyle="{StaticResource minorcrossLineStyle}" MajorLineStyle="{StaticResource crossLineStyle}" MinValue="0" AxisLineStyle="{StaticResource axisLineStyle}" MinorTicksCount="3" ShowCrossLines="True" StringFormat="0.0" Header="气压(MPa)"/>
+                        <chart:LinearYAxis CrossLineStyle="{StaticResource crossLineStyle}"  MinorLineStyle="{StaticResource minorcrossLineStyle}" MajorLineStyle="{StaticResource crossLineStyle}" MinValue="0" MaxValue="1.0" AxisLineStyle="{StaticResource axisLineStyle}" MinorTicksCount="3" ShowCrossLines="True" StringFormat="0.00" Header="气压(MPa)"/>
                     </chart:SparrowChart.YAxis>
                     <chart:LineSeries Label="输入电压" PointsSource="{Binding ScopeCHACollection}" Stroke="Yellow" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
                     <chart:ScatterSeries Label="边沿点" PointsSource="{Binding ScopeCHAEdgeCollection}" Stroke="Red" XPath="Value" YPath="Value1" ScatterSize="10"  StrokeThickness="2" UseSinglePart="True"/>
@@ -91,21 +91,21 @@
                     <Grid Grid.Column="3" Name="Grid3"/>
                     <Grid Grid.Column="4" Name="Grid4"/>
                 </Grid>
-                <ScrollViewer MaxHeight="300" Margin="0,10,0,0">
-                    <ListView ItemsSource="{Binding MeasurementInfos}"
+                <ListView ItemsSource="{Binding MeasurementInfos}"
                               x:Name="ScopeListView"
                               MinHeight="100" 
+                              MaxHeight="300" 
+                              Margin="0,10,0,0"
                               cal:Message.Attach="[Event SelectionChanged] = [Action ShowScopeListView(ScopeListView.SelectedIndex)]">
-                        <ListView.View>
-                            <GridView>
-                                <GridViewColumn DisplayMemberBinding="{Binding DateTime}" Width="{Binding ElementName=Grid1, Path=ActualWidth}" Header="时间"/>
-                                <GridViewColumn DisplayMemberBinding="{Binding InputFrequency}" Width="{Binding ElementName=Grid2, Path=ActualWidth}" Header="输入频率(Hz)"/>
-                                <GridViewColumn DisplayMemberBinding="{Binding SampleTime}" Width="{Binding ElementName=Grid3, Path=ActualWidth}" Header="采样时间(MS)"/>
-                                <GridViewColumn DisplayMemberBinding="{Binding CurrentFrequency}" Width="{Binding ElementName=Grid4, Path=ActualWidth}" Header="测量结果"/>
-                            </GridView>
-                        </ListView.View>
-                    </ListView>
-                </ScrollViewer>
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn DisplayMemberBinding="{Binding DateTime}" Width="{Binding ElementName=Grid1, Path=ActualWidth}" Header="时间"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding InputFrequency}" Width="{Binding ElementName=Grid2, Path=ActualWidth}" Header="输入频率(Hz)"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding SampleTime}" Width="{Binding ElementName=Grid3, Path=ActualWidth}" Header="采样时间(MS)"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding CurrentFrequency}" Width="{Binding ElementName=Grid4, Path=ActualWidth}" Header="测量结果"/>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
             </StackPanel>
         </StackPanel>
 

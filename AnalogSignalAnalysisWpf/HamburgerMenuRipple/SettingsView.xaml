@@ -36,6 +36,10 @@
                     <StackPanel>
                         <TextBlock Text="传感器配置" Foreground="Green" Margin="0,20,0,0"/>
                         <DockPanel Margin="0,10,0,0">
+                            <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">零点电压(V)</TextBlock>
+                            <TextBox Text="{Binding GlobalPressureZeroVoltage, UpdateSourceTrigger=Explicit}" KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus" MinWidth="120"/>
+                        </DockPanel>
+                        <DockPanel Margin="0,10,0,0">
                             <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">气压系数(P/V)</TextBlock>
                             <TextBox Text="{Binding GlobalPressureK, UpdateSourceTrigger=Explicit}" KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus" MinWidth="120"/>
                         </DockPanel>

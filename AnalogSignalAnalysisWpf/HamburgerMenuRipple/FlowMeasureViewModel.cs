@@ -466,6 +466,7 @@ namespace AnalogSignalAnalysisWpf
                 //使能Power输出
                 Power.Voltage = SystemParamManager.SystemParam.FrequencyMeasureParams.OutputVoltage;
                 Power.IsEnableOutput = true;
+                Thread.Sleep(SystemParamManager.SystemParam.GlobalParam.PowerCommonDelay);
 
                 //设置Scope采集时长
                 Scope.SampleTime = SampleTime;

@@ -506,6 +506,11 @@ namespace AnalogSignalAnalysisWpf
     public class GlobalParam
     {
         /// <summary>
+        /// 零点电压(V)
+        /// </summary>
+        public double PressureZeroVoltage { get; set; } = 0;
+
+        /// <summary>
         /// 气压系数(P/V)
         /// </summary>
         public double PressureK { get; set; } = 1.0;

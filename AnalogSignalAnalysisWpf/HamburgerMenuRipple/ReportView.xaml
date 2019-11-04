@@ -34,21 +34,24 @@
                 </DockPanel>
                 <DockPanel Margin="0,10,0,0">
                     <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">吸合电压(V)</TextBlock>
-                    <TextBox Text="{Binding PositiveVoltage}" IsReadOnly="True"/>
+                    <TextBox Text="{Binding PositiveVoltage, StringFormat={}{0:F3}}" IsReadOnly="True"/>
                 </DockPanel>
                 <DockPanel Margin="0,10,0,0">
                     <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">释放电压(V)</TextBlock>
-                    <TextBox Text="{Binding NegativeVoltage}" IsReadOnly="True"/>
+                    <TextBox Text="{Binding NegativeVoltage, StringFormat={}{0:F3}}" IsReadOnly="True"/>
                 </DockPanel>
             </StackPanel>
 
-            <StackPanel MinWidth="200" Margin="20,10,0,0">
+            <StackPanel MinWidth="200" Margin="20,10,0,0" Visibility="Collapsed">
                 <TextBlock Text="输入输出关系曲线测试" Foreground="Green"/>
                 <DockPanel Margin="0,10,0,0">
                     <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">测试状态</TextBlock>
                     <TextBox Text="{Binding IOMeasureStatus}" IsReadOnly="True"/>
                 </DockPanel>
-                <ListView ItemsSource="{Binding InputOutputInfos}" MinHeight="100" Margin="0,10,0,0">
+                <ListView ItemsSource="{Binding InputOutputInfos}" 
+                          MinHeight="100" 
+                          MaxHeight="500"
+                          Margin="0,10,0,0">
                     <ListView.View>
                         <GridView>
                             <!--<GridViewColumn DisplayMemberBinding="{Binding DateTime}" Header="时间"/>-->
@@ -66,8 +69,8 @@
                     <TextBox Text="{Binding FlowMeasureStatus}" IsReadOnly="True"/>
                 </DockPanel>
                 <DockPanel Margin="0,10,0,0">
-                    <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">流量(?)</TextBlock>
-                    <TextBox Text="{Binding Flow}" IsReadOnly="True"/>
+                    <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">流量(L/S)</TextBlock>
+                    <TextBox Text="{Binding Flow, StringFormat={}{0:F3}}" IsReadOnly="True"/>
                 </DockPanel>
             </StackPanel>
 

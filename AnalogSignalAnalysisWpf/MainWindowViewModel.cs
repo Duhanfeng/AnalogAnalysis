@@ -149,11 +149,11 @@ namespace AnalogSignalAnalysisWpf
             if (SerialPorts.Contains(SystemParamManager.SystemParam.PLCParams.PrimarySerialPortName))
             {
                 //配置通信参数
-                PLC.PrimarySerialPortName = SystemParamManager.SystemParam.PowerParams.PrimarySerialPortName;
-                PLC.SerialPortBaudRate = SystemParamManager.SystemParam.PowerParams.SerialPortBaudRate;
-                PLC.SlaveAddress = SystemParamManager.SystemParam.PowerParams.SlaveAddress;
-                PLC.ReadTimeout = SystemParamManager.SystemParam.PowerParams.ReadTimeout;
-                PLC.WriteTimeout = SystemParamManager.SystemParam.PowerParams.WriteTimeout;
+                PLC.PrimarySerialPortName = SystemParamManager.SystemParam.PLCParams.PrimarySerialPortName;
+                PLC.SerialPortBaudRate = SystemParamManager.SystemParam.PLCParams.SerialPortBaudRate;
+                PLC.SlaveAddress = SystemParamManager.SystemParam.PLCParams.SlaveAddress;
+                PLC.ReadTimeout = SystemParamManager.SystemParam.PLCParams.ReadTimeout;
+                PLC.WriteTimeout = SystemParamManager.SystemParam.PLCParams.WriteTimeout;
 
                 //连接设备
                 if (PLC.Connect())
@@ -253,24 +253,31 @@ namespace AnalogSignalAnalysisWpf
             lock (measureLock)
             {
                 IsMeasuring = true;
-
-                if (sender is FrequencyMeasurementViewModel)
-                {
-                    FrequencyMeasureStatus = "测试中";
-                }
-                else if (sender is PNVoltageMeasurementViewModel)
-                {
-                    PNMeasureStatus = "测试中";
-                }
-                else if (sender is InputOutputMeasurementViewModel)
-                {
-                    IOMeasureStatus = "测试中";
-                }
-                else if (sender is ThroughputMeasurementViewModel)
-                {
-                    FlowMeasureStatus = "测试中";
-                }
             }
+
+            if (sender is FrequencyMeasurementViewModel)
+            {
+                FrequencyMeasureStatus = "测试中";
+            }
+            else if (sender is PNVoltageMeasurementViewModel)
+            {
+                PNMeasureStatus = "测试中";
+            }
+            else if (sender is InputOutputMeasurementViewModel)
+            {
+                IOMeasureStatus = "测试中";
+            }
+            else if (sender is ThroughputMeasurementViewModel)
+            {
+                FlowMeasureStatus = "测试中";
+            }
+            else if (sender is FlowMeasureViewModel)
+            {
+                FlowMeasureStatus = "测试中";
+            }
+
+            NotifyOfPropertyChange(() => IsEnableTest);
+
         }
 
         private void FrequencyMeasurementViewModel_MeasurementCompleted(object sender, FrequencyMeasurementCompletedEventArgs e)
@@ -290,6 +297,8 @@ namespace AnalogSignalAnalysisWpf
                 FrequencyMeasureStatus = "测试失败";
                 MaxLimitFrequency = -1;
             }
+
+            NotifyOfPropertyChange(() => IsEnableTest);
         }
 
         private void PNVoltageMeasurementViewModel_MeasurementCompleted(object sender, PNVoltageMeasurementCompletedEventArgs e)
@@ -311,7 +320,7 @@ namespace AnalogSignalAnalysisWpf
                 PositiveVoltage = -1;
                 NegativeVoltage = -1;
             }
-
+            NotifyOfPropertyChange(() => IsEnableTest);
         }
 
         private void InputOutputMeasurementViewModel_MeasurementCompleted(object sender, InputOutputMeasurementCompletedEventArgs e)
@@ -341,7 +350,7 @@ namespace AnalogSignalAnalysisWpf
                     }, null);
                 });
             }).Start();
-
+            NotifyOfPropertyChange(() => IsEnableTest);
         }
 
         private void ThroughputMeasurementViewModel_MeasurementCompleted(object sender, ThroughputMeasurementCompletedEventArgs e)
@@ -361,6 +370,7 @@ namespace AnalogSignalAnalysisWpf
                 FlowMeasureStatus = "测试失败";
                 Flow = -1;
             }
+            NotifyOfPropertyChange(() => IsEnableTest);
         }
 
         private void FrequencyMeasurementViewModel_MessageRaised(object sender, MessageRaisedEventArgs e)
@@ -2090,6 +2100,7 @@ namespace AnalogSignalAnalysisWpf
                     return;
                 }
             }
+            NotifyOfPropertyChange(() => IsEnableTest);
 
             new Thread(() =>
             {
@@ -2108,26 +2119,9 @@ namespace AnalogSignalAnalysisWpf
                     }
                     Thread.Sleep(20);
                 }
-
-                InputOutputMeasurementViewModel.Start();
-                Thread.Sleep(1000);
-
-                //等待测试完成
-                while (true)
-                {
-                    lock (measureLock)
-                    {
-                        if (!IsMeasuring)
-                        {
-                            break;
-                        }
-                    }
-                    Thread.Sleep(20);
-                }
-
                 PNVoltageMeasurementViewModel.Start();
                 Thread.Sleep(1000);
-
+                
                 //等待测试完成
                 while (true)
                 {
@@ -2140,6 +2134,22 @@ namespace AnalogSignalAnalysisWpf
                     }
                     Thread.Sleep(20);
                 }
+
+                //InputOutputMeasurementViewModel.Start();
+                //Thread.Sleep(1000);
+
+                ////等待测试完成
+                //while (true)
+                //{
+                //    lock (measureLock)
+                //    {
+                //        if (!IsMeasuring)
+                //        {
+                //            break;
+                //        }
+                //    }
+                //    Thread.Sleep(20);
+                //}
 
                 FlowMeasureViewModel.Start();
                 Thread.Sleep(1000);
@@ -2476,6 +2486,21 @@ namespace AnalogSignalAnalysisWpf
         }
 
         #region 默认全局参数
+
+        public double GlobalPressureZeroVoltage
+        {
+            get
+            {
+                return SystemParamManager.SystemParam.GlobalParam.PressureZeroVoltage;
+            }
+            set
+            {
+                SystemParamManager.SystemParam.GlobalParam.PressureZeroVoltage = value;
+                NotifyOfPropertyChange(() => GlobalPressureZeroVoltage);
+                SystemParamManager.SaveParams();
+            }
+        }
+
 
         /// <summary>
         /// 全局气压比例系数(P/V)

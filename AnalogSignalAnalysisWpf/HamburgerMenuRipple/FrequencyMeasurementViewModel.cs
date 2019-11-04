@@ -735,23 +735,12 @@ namespace AnalogSignalAnalysisWpf
         /// <summary>
         /// 电压转气压
         /// </summary>
-        /// <param name="pressure"></param>
-        /// <returns></returns>
-        private double PressureToVoltage(double pressure)
-        {
-
-            return pressure / SystemParamManager.SystemParam.GlobalParam.PressureK;
-        }
-
-        /// <summary>
-        /// 气压转电压
-        /// </summary>
         /// <param name="voltage"></param>
         /// <returns></returns>
         private double VoltageToPressure(double voltage)
         {
 
-            return voltage * SystemParamManager.SystemParam.GlobalParam.PressureK;
+            return (voltage - SystemParamManager.SystemParam.GlobalParam.PressureZeroVoltage) * SystemParamManager.SystemParam.GlobalParam.PressureK;
         }
 
         /// <summary>
@@ -893,7 +882,7 @@ namespace AnalogSignalAnalysisWpf
                         //检测脉冲是否异常
                         double minFrequency = item.Frequency * (1 - FrequencyErrLimit);
                         double maxFrequency = item.Frequency * (1 + FrequencyErrLimit);
-                        if (!Analysis.CheckFrequency(pulseFrequencies, minFrequency, maxFrequency, 1))
+                        if (!Analysis.CheckFrequency(pulseFrequencies, minFrequency, maxFrequency, 0))
                         {
                             if (lastFrequency != -1)
                             {
