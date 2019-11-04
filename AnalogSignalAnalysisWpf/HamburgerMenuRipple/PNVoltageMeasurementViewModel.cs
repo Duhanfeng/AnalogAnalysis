@@ -868,7 +868,7 @@ namespace AnalogSignalAnalysisWpf
             Scope.CHAVoltageDIV = SystemParamManager.SystemParam.GlobalParam.VoltageDIV;
 
             //设置电源模块直通
-            PLC.Switch = false;
+            PLC.PWMSwitch = false;
 
             PVoltage = -1;
             NVoltage = -1;

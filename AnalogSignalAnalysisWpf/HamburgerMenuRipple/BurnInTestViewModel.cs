@@ -379,7 +379,7 @@ namespace AnalogSignalAnalysisWpf
         protected void OnMeasurementCompleted(BurnInTestCompletedEventArgs e)
         {
             Power.IsEnableOutput = false;
-            PLC.Switch = false;
+            PLC.PWMSwitch = false;
             PWM.Frequency = 0;
             if (e.IsSuccess == true)
             {
@@ -555,7 +555,7 @@ namespace AnalogSignalAnalysisWpf
             Scope.CHAVoltageDIV = SystemParamManager.SystemParam.GlobalParam.VoltageDIV;
 
             //设置PLC开关模式
-            PLC.Switch = true;
+            PLC.PWMSwitch = true;
             Thread.Sleep(SystemParamManager.SystemParam.GlobalParam.PowerCommonDelay);
             MeasurementInfos = new ObservableCollection<BurnInTestInfo>();
 

@@ -272,7 +272,7 @@ namespace AnalogSignalAnalysisWpf
         protected void OnMeasurementCompleted(ThroughputMeasurementCompletedEventArgs e)
         {
             Power.IsEnableOutput = false;
-
+            PLC.FlowSwitch = false;
             PWM.Frequency = 0;
             if (e.IsSuccess == true)
             {
@@ -448,7 +448,8 @@ namespace AnalogSignalAnalysisWpf
             Scope.CHAVoltageDIV = SystemParamManager.SystemParam.GlobalParam.VoltageDIV;
 
             //设置电源模块直通
-            PLC.Switch = false;
+            PLC.PWMSwitch = false;
+            PLC.FlowSwitch = true;
 
             OnMeasurementStarted();
 

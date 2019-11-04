@@ -617,7 +617,7 @@ namespace AnalogSignalAnalysisWpf
         protected void OnMeasurementCompleted(FrequencyMeasurementCompletedEventArgs e)
         {
             Power.IsEnableOutput = false;
-            PLC.Switch = false;
+            PLC.PWMSwitch = false;
             PWM.Frequency = 0;
             if (e.IsSuccess == true)
             {
@@ -803,7 +803,7 @@ namespace AnalogSignalAnalysisWpf
             Scope.SampleRate = SystemParamManager.SystemParam.GlobalParam.SampleRate;
             Scope.CHAVoltageDIV = SystemParamManager.SystemParam.GlobalParam.VoltageDIV;
 
-            PLC.Switch = true;
+            PLC.PWMSwitch = true;
             Thread.Sleep(SystemParamManager.SystemParam.GlobalParam.PowerCommonDelay);
             MeasurementInfos = new ObservableCollection<FrequencyMeasurementInfo>();
 

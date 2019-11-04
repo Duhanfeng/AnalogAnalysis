@@ -7,7 +7,12 @@
         /// <summary>
         /// 开关
         /// </summary>
-        bool Switch { get; set; }
+        bool PWMSwitch { get; set; }
+
+        /// <summary>
+        /// 流量开关
+        /// </summary>
+        bool FlowSwitch { get; set; }
 
         #endregion
 

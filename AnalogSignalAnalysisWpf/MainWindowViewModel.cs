@@ -1690,7 +1690,7 @@ namespace AnalogSignalAnalysisWpf
             {
                 if (IsPLCValid)
                 {
-                    return PLC.Switch;
+                    return PLC.PWMSwitch;
                 }
                 return false; 
             }
@@ -1698,7 +1698,7 @@ namespace AnalogSignalAnalysisWpf
             {
                 if (IsPLCValid)
                 {
-                    PLC.Switch = value;
+                    PLC.PWMSwitch = value;
                     SystemParamManager.SystemParam.PLCParams.Switch = value;
                     SystemParamManager.SaveParams();
                 }

@@ -455,12 +455,17 @@ namespace AnalogSignalAnalysisWpf.Hardware
         /// </summary>
         private readonly ushort PWMSwitchAddress = 0x0002;
 
+        /// <summary>
+        /// 流量开关地址
+        /// </summary>
+        private readonly ushort FlowSwitchAddress = 0x0003;
+
         #endregion
 
         /// <summary>
-        /// 开关
+        /// PWM开关
         /// </summary>
-        public bool Switch
+        public bool PWMSwitch
         {
             get
             {
@@ -477,6 +482,30 @@ namespace AnalogSignalAnalysisWpf.Hardware
                 if (IsConnect)
                 {
                     WriteCoil(PWMSwitchAddress, value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 流量开关
+        /// </summary>
+        public bool FlowSwitch
+        {
+            get
+            {
+                if (IsConnect)
+                {
+                    bool data;
+                    ReadCoil(FlowSwitchAddress, out data);
+                    return data;
+                }
+                return false;
+            }
+            set
+            {
+                if (IsConnect)
+                {
+                    WriteCoil(FlowSwitchAddress, value);
                 }
             }
         }

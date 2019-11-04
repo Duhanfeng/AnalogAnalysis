@@ -600,7 +600,7 @@ namespace AnalogSignalAnalysisWpf
             Scope.CHAVoltageDIV = SystemParamManager.SystemParam.GlobalParam.VoltageDIV;
 
             //设置电源模块直通
-            PLC.Switch = false;
+            PLC.PWMSwitch = false;
 
             ScopeCHACollection = new ObservableCollection<Data>();
             ScopeCHBCollection = new ObservableCollection<Data>();
