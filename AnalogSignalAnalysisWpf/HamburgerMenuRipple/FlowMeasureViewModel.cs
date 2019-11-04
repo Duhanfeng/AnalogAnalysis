@@ -447,6 +447,9 @@ namespace AnalogSignalAnalysisWpf
             Scope.SampleRate = SystemParamManager.SystemParam.GlobalParam.SampleRate;
             Scope.CHAVoltageDIV = SystemParamManager.SystemParam.GlobalParam.VoltageDIV;
 
+            //设置电源模块直通
+            PLC.Switch = false;
+
             OnMeasurementStarted();
 
             measureThread = new Thread(() =>
@@ -458,7 +461,7 @@ namespace AnalogSignalAnalysisWpf
 
                 //设置频率
                 PWM.Frequency = 0;
-                PWM.DutyRatio = SystemParamManager.SystemParam.FrequencyMeasureParams.DutyRatio; ;
+                PWM.DutyRatio = SystemParamManager.SystemParam.FrequencyMeasureParams.DutyRatio;
 
                 //使能Power输出
                 Power.Voltage = SystemParamManager.SystemParam.FrequencyMeasureParams.OutputVoltage;

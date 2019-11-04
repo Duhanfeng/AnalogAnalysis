@@ -417,19 +417,9 @@ namespace AnalogSignalAnalysisWpf
         #region 控制接口
 
         /// <summary>
-        /// 频率(Hz)
+        /// 开关
         /// </summary>
-        public int Frequency { get; set; }
-
-        /// <summary>
-        /// 占空比(1-100)
-        /// </summary>
-        public int DutyRatio { get; set; }
-
-        /// <summary>
-        /// 使能输出
-        /// </summary>
-        public bool Output { get; set; }
+        public bool Switch { get; set; }
 
         #endregion
 

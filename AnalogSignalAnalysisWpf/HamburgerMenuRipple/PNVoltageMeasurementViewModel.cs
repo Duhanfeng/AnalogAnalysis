@@ -876,6 +876,9 @@ namespace AnalogSignalAnalysisWpf
             Scope.SampleRate = SystemParamManager.SystemParam.GlobalParam.SampleRate;
             Scope.CHAVoltageDIV = SystemParamManager.SystemParam.GlobalParam.VoltageDIV;
 
+            //设置电源模块直通
+            PLC.Switch = false;
+
             PVoltage = -1;
             NVoltage = -1;
 

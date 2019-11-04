@@ -298,7 +298,7 @@ namespace AnalogSignalAnalysisWpf.Hardware
             }
 
             bool data;
-            if (ReadCoil(IsEnablePulseAddress, out data))
+            if (ReadCoil(PWMSwitchAddress, out data))
             {
                 IsConnect = true;
                 return true;
@@ -453,36 +453,21 @@ namespace AnalogSignalAnalysisWpf.Hardware
         /// <summary>
         /// 使能脉冲地址
         /// </summary>
-        private readonly ushort IsEnablePulseAddress = 0x0002;
-
-        /// <summary>
-        /// 频率地址
-        /// </summary>
-        private readonly ushort FrequencyAddress = 0x0000;
-
-        /// <summary>
-        /// 占空比
-        /// </summary>
-        private readonly ushort DutyRatioAddress = 0x0001;
-
-        /// <summary>
-        /// 开关状态地址
-        /// </summary>
-        private readonly ushort SwitchStatusAddress = 0x0003;
+        private readonly ushort PWMSwitchAddress = 0x0002;
 
         #endregion
 
         /// <summary>
-        /// 使能输出脉冲
+        /// 开关
         /// </summary>
-        public bool IsEnablePulse
+        public bool Switch
         {
             get
             {
                 if (IsConnect)
                 {
                     bool data;
-                    ReadCoil(IsEnablePulseAddress, out data);
+                    ReadCoil(PWMSwitchAddress, out data);
                     return data;
                 }
                 return false;
@@ -491,101 +476,9 @@ namespace AnalogSignalAnalysisWpf.Hardware
             {
                 if (IsConnect)
                 {
-                    WriteCoil(IsEnablePulseAddress, value);
+                    WriteCoil(PWMSwitchAddress, value);
                 }
             }
-        }
-
-        /// <summary>
-        /// 频率(Hz)
-        /// </summary>
-        public int Frequency
-        {
-            get
-            {
-                if (IsConnect)
-                {
-                    ushort[] data;
-                    if (Read(FrequencyAddress, 1, out data))
-                    {
-                        return data[0];
-                    }
-                }
-                return -1;
-            }
-            set
-            {
-                if (IsConnect)
-                {
-                    if (value > 0)
-                    {
-                        IsEnablePulse = true;
-                    }
-                    else
-                    {
-                        IsEnablePulse = false;
-                    }
-
-                    ushort data = (ushort)value;
-                    Write(FrequencyAddress, data);
-                }
-            }
-        }
-
-        /// <summary>
-        /// 占空比(1-100)
-        /// </summary>
-        public int DutyRatio
-        {
-            get
-            {
-                if (IsConnect)
-                {
-                    ushort[] data;
-                    if (Read(DutyRatioAddress, 1, out data))
-                    {
-                        return data[0];
-                    }
-                }
-                return -1;
-            }
-            set
-            {
-                if (IsConnect)
-                {
-                    ushort data = (ushort)value;
-                    Write(DutyRatioAddress, data);
-                }
-            }
-        }
-
-        /// <summary>
-        /// 设置输出状态
-        /// </summary>
-        /// <param name="number">输出引脚编号</param>
-        /// <param name="isEnable">输出状态</param>
-        public void SetOutput(int number, bool isEnable)
-        {
-            if (IsConnect)
-            {
-                WriteCoil(SwitchStatusAddress, isEnable);
-            }
-        }
-
-        /// <summary>
-        /// 获取输出状态
-        /// </summary>
-        /// <param name="number">输出引脚编号</param>
-        /// <returns>输出状态</returns>
-        public bool GetOutput(int number)
-        {
-            if (IsConnect)
-            {
-                bool data;
-                ReadCoil(SwitchStatusAddress, out data);
-                return data;
-            }
-            return false;
         }
 
         #endregion

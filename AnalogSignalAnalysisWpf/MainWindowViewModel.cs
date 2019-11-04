@@ -159,8 +159,6 @@ namespace AnalogSignalAnalysisWpf
                 if (PLC.Connect())
                 {
                     AddRunningMessage("连接PLC成功");
-                    PLC.Frequency = SystemParamManager.SystemParam.PLCParams.Frequency;
-                    PLC.DutyRatio = SystemParamManager.SystemParam.PLCParams.DutyRatio;
                 }
                 else
                 {
@@ -1666,9 +1664,7 @@ namespace AnalogSignalAnalysisWpf
         public void UpdatePLCStatus()
         {
             NotifyOfPropertyChange(() => IsPLCValid);
-            NotifyOfPropertyChange(() => PLCSerialPort);
-            NotifyOfPropertyChange(() => PLCFrequency);
-            NotifyOfPropertyChange(() => PLCDutyRatio);
+            NotifyOfPropertyChange(() => PLCSwitch);
 
             NotifyOfPropertyChange(() => IsHardwareValid);
         }
@@ -1676,89 +1672,38 @@ namespace AnalogSignalAnalysisWpf
         #region 输出参数控制
 
         /// <summary>
-        /// PLC频率
+        /// PLC开关
         /// </summary>
-        public int PLCFrequency
+        public bool PLCSwitch
         {
-            get
+            get 
             {
                 if (IsPLCValid)
                 {
-                    return PLC.Frequency;
+                    return PLC.Switch;
                 }
-                return -1;
+                return false; 
             }
-            set
+            set 
             {
                 if (IsPLCValid)
                 {
-                    PLC.Frequency = value;
-                    SystemParamManager.SystemParam.PLCParams.Frequency = value;
+                    PLC.Switch = value;
+                    SystemParamManager.SystemParam.PLCParams.Switch = value;
                     SystemParamManager.SaveParams();
                 }
 
-                //NotifyOfPropertyChange(() => PLCFrequency);
                 UpdatePLCStatus();
+
             }
         }
 
         /// <summary>
-        /// PLC占空比
+        /// 使能PLC开关
         /// </summary>
-        public int PLCDutyRatio
+        public void EnablePLCSwitch()
         {
-            get
-            {
-                if (IsPLCValid)
-                {
-                    return PLC.DutyRatio;
-                }
-                return -1;
-            }
-            set
-            {
-                if (IsPLCValid)
-                {
-                    PLC.DutyRatio = value;
-                    SystemParamManager.SystemParam.PLCParams.DutyRatio = value;
-                    SystemParamManager.SaveParams();
-                }
-
-                //NotifyOfPropertyChange(() => PLCDutyRatio);
-                UpdatePLCStatus();
-            }
-        }
-
-        /// <summary>
-        /// Power使能输出
-        /// </summary>
-        public bool PLCOutput
-        {
-            get
-            {
-                if (IsPLCValid)
-                {
-                    return PLC.GetOutput(0);
-                }
-                return false;
-            }
-            set
-            {
-                if (IsPLCValid == true)
-                {
-                    PLC.SetOutput(0, value);
-                    SystemParamManager.SystemParam.PLCParams.Output = value;
-                    SystemParamManager.SaveParams();
-                }
-
-                NotifyOfPropertyChange(() => PLCOutput);
-                //UpdatePowerStatus();
-            }
-        }
-
-        public void EnablePLCOutput()
-        {
-            PLCOutput = !PLCOutput;
+            PLCSwitch = !PLCSwitch;
         }
 
         #endregion
