@@ -6,6 +6,7 @@ using DataAnalysis;
 using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 
 namespace AnalogSignalAnalysisWpf
@@ -601,11 +602,28 @@ namespace AnalogSignalAnalysisWpf
             {
                 time = value;
                 NotifyOfPropertyChange(() => Time);
-
             }
         }
 
+        private double flow;
 
+        /// <summary>
+        /// 测量时间
+        /// </summary>
+        public double Flow
+        {
+            get
+            {
+                return flow;
+            }
+            set
+            {
+                flow = value;
+                NotifyOfPropertyChange(() => Flow);
+            }
+        }
+
+        
         #endregion
 
         #region 折线图
@@ -787,6 +805,17 @@ namespace AnalogSignalAnalysisWpf
         private Thread measureThread;
 
         /// <summary>
+        /// 电压转气压
+        /// </summary>
+        /// <param name="voltage"></param>
+        /// <returns></returns>
+        private double VoltageToPressure(double voltage)
+        {
+
+            return (voltage - SystemParamManager.SystemParam.GlobalParam.PressureZeroVoltage) * SystemParamManager.SystemParam.GlobalParam.PressureK;
+        }
+
+        /// <summary>
         /// 启动
         /// </summary>
         public void Start()
@@ -868,9 +897,12 @@ namespace AnalogSignalAnalysisWpf
                     double[] filterData;
                     Analysis.MeanFilter(originalData, VoltageFilterCount, out filterData);
 
+                    //电压转气压
+                    double[] pressureData = filterData.ToList().ConvertAll(x => VoltageToPressure(x)).ToArray();
+
                     //微分求导
                     double[] derivativeData;
-                    Analysis.Derivative(filterData, (int)Scope.SampleRate / DerivativeK, out derivativeData);
+                    Analysis.Derivative(pressureData, (int)Scope.SampleRate / DerivativeK, out derivativeData);
 
                     //数据滤波
                     double[] filterData2;
@@ -883,31 +915,34 @@ namespace AnalogSignalAnalysisWpf
                         filterData2 = derivativeData;
                     }
 
+                    //显示当前曲线
+                    ShowData(pressureData);
+                    ShowDerivativeData(filterData2);
+
                     if (MeasureType == 0)
                     {
-                        for (int i = 0; i < filterData.Length; i++)
+                        for (int i = 0; i < pressureData.Length; i++)
                         {
-                            if ((filterData[i] > MinVoltageThreshold) && (start == -1))
+                            if ((pressureData[i] > MinVoltageThreshold) && (start == -1))
                             {
                                 start = i;
                             }
-                            else if ((filterData[i] > MaxVoltageThreshold) && (start != -1) && (end == -1))
+                            else if ((pressureData[i] > MaxVoltageThreshold) && (start != -1) && (end == -1))
                             {
                                 end = i;
                                 break;
                             }
                         }
 
-
                         if ((start != -1) && (end != -1))
                         {
                             Time = ((end - start) * 1000.0) / (int)Scope.SampleRate;
-
+                            Flow = SystemParamManager.SystemParam.GlobalParam.FlowK / Time * 1000 * 60;
                             var edge = new ObservableCollection<Data>();
                             edge.Add(new Data() { Value1 = VoltageCollection[start].Value1, Value = VoltageCollection[start].Value });
                             edge.Add(new Data() { Value1 = VoltageCollection[end].Value1, Value = VoltageCollection[end].Value });
                             EdgeCollection = edge;
-                            OnMeasurementCompleted(new ThroughputMeasurementCompletedEventArgs(true, Time));
+                            OnMeasurementCompleted(new ThroughputMeasurementCompletedEventArgs(true, Flow));
 
                         }
                         else
@@ -947,10 +982,6 @@ namespace AnalogSignalAnalysisWpf
                         }
 
                     }
-
-                    //显示当前曲线
-                    ShowData(filterData);
-                    ShowDerivativeData(filterData2);
 
 
                 }

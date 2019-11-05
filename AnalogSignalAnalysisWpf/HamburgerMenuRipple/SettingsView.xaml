@@ -44,7 +44,7 @@
                             <TextBox Text="{Binding GlobalPressureK, UpdateSourceTrigger=Explicit}" KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus" MinWidth="120"/>
                         </DockPanel>
                         <DockPanel Margin="0,10,0,0">
-                            <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">流量系数(流量/V)</TextBlock>
+                            <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">气罐容量(L)</TextBlock>
                             <TextBox Text="{Binding GlobalFlowK, UpdateSourceTrigger=Explicit}" KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus" MinWidth="120"/>
                         </DockPanel>
                         <TextBlock Text="电源模块配置" Foreground="Green" Margin="0,20,0,0"/>

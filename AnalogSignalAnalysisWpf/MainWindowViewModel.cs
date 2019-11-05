@@ -1674,8 +1674,9 @@ namespace AnalogSignalAnalysisWpf
         public void UpdatePLCStatus()
         {
             NotifyOfPropertyChange(() => IsPLCValid);
-            NotifyOfPropertyChange(() => PLCSwitch);
-
+            NotifyOfPropertyChange(() => PLCPWMSwitch);
+            NotifyOfPropertyChange(() => PLCFlowSwitch);
+            
             NotifyOfPropertyChange(() => IsHardwareValid);
         }
 
@@ -1684,7 +1685,7 @@ namespace AnalogSignalAnalysisWpf
         /// <summary>
         /// PLC开关
         /// </summary>
-        public bool PLCSwitch
+        public bool PLCPWMSwitch
         {
             get 
             {
@@ -1709,11 +1710,45 @@ namespace AnalogSignalAnalysisWpf
         }
 
         /// <summary>
+        /// PLC开关
+        /// </summary>
+        public bool PLCFlowSwitch
+        {
+            get
+            {
+                if (IsPLCValid)
+                {
+                    return PLC.FlowSwitch;
+                }
+                return false;
+            }
+            set
+            {
+                if (IsPLCValid)
+                {
+                    PLC.FlowSwitch = value;
+                }
+
+                UpdatePLCStatus();
+
+            }
+        }
+
+        /// <summary>
         /// 使能PLC开关
         /// </summary>
-        public void EnablePLCSwitch()
+        public void EnablePLCPWMSwitch()
         {
-            PLCSwitch = !PLCSwitch;
+            PLCPWMSwitch = !PLCPWMSwitch;
+        }
+
+
+        /// <summary>
+        /// 使能PLC开关
+        /// </summary>
+        public void EnablePLCFlowSwitch()
+        {
+            PLCFlowSwitch = !PLCFlowSwitch;
         }
 
         #endregion
@@ -2243,6 +2278,7 @@ namespace AnalogSignalAnalysisWpf
             set
             {
                 positiveVoltage = value;
+                NotifyOfPropertyChange(() => PositiveVoltage);
             }
         }
 
@@ -2260,6 +2296,7 @@ namespace AnalogSignalAnalysisWpf
             set
             {
                 negativeVoltage = value;
+                NotifyOfPropertyChange(() => NegativeVoltage);
             }
         }
 
