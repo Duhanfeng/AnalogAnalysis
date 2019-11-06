@@ -131,9 +131,10 @@ namespace AnalogSignalAnalysisWpf
                 if (Power.Connect())
                 {
                     AddRunningMessage("连接Power成功");
+                    Power.IsEnableOutput = false;
                     Power.Voltage = SystemParamManager.SystemParam.PowerParams.Voltage;
                     Power.Current = SystemParamManager.SystemParam.PowerParams.Current;
-                    Power.IsEnableOutput = SystemParamManager.SystemParam.PowerParams.IsEnableOutput;
+                    //Power.IsEnableOutput = SystemParamManager.SystemParam.PowerParams.IsEnableOutput;
                 }
                 else
                 {
@@ -158,6 +159,8 @@ namespace AnalogSignalAnalysisWpf
                 //连接设备
                 if (PLC.Connect())
                 {
+                    PLC.PWMSwitch = false;
+                    PLC.FlowSwitch = false;
                     AddRunningMessage("连接PLC成功");
                 }
                 else

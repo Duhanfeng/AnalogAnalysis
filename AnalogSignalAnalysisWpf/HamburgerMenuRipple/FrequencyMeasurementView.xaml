@@ -10,8 +10,7 @@
              xmlns:converters="clr-namespace:AnalogSignalAnalysisWpf.Converters"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance local:FrequencyMeasurementViewModel}"
-             d:DesignHeight="800" d:DesignWidth="800"
-             MinWidth="600">
+             d:DesignHeight="800" d:DesignWidth="800">
 
     <UserControl.Resources>
         <ResourceDictionary>
@@ -39,7 +38,7 @@
     <Grid Margin="10">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="auto" MinWidth="200"/>
+            <ColumnDefinition Width="auto"/>
         </Grid.ColumnDefinitions>
 
         <StackPanel >
@@ -68,13 +67,16 @@
 
             <StackPanel Margin="10">
                 <StackPanel Orientation="Horizontal">
+                    <Button cal:Message.Attach="Start" IsEnabled="{Binding IsHardwareValid}" Margin="0,0,20,0" MinWidth="80">运行</Button>
                     <TextBlock Text="当前状态:" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <Ellipse Width="20" Height="20" Fill="{Binding IsMeasuring, Converter={StaticResource BoolToColorConverter}}" Margin="0,0,10,0"/>
                     <TextBox Text="{Binding RunningStatus}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
-                    <TextBlock Text="采样时长(MS):" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <TextBox Text="{Binding CurrentSampleTime}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
-                    <TextBlock Text="输入频率(Hz):" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <TextBox Text="{Binding CurrentInputFrequency}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
+                    <StackPanel Visibility="Collapsed">
+                        <TextBlock Text="采样时长(MS):" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBox Text="{Binding CurrentSampleTime}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
+                        <TextBlock Text="输入频率(Hz):" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBox Text="{Binding CurrentInputFrequency}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
+                    </StackPanel>
                     <TextBlock Text="极限频率(Hz):" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <TextBox Text="{Binding MaxFrequency}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
                 </StackPanel>
@@ -109,8 +111,8 @@
             </StackPanel>
         </StackPanel>
 
-        <StackPanel Grid.Column="1" Grid.RowSpan="3" Margin="10" MinWidth="200" IsEnabled="{Binding IsMeasuring, Converter={StaticResource BoolToInvertConverter}}">
-            <Expander Header="基本设置" IsExpanded="True">
+        <Expander Grid.Column="1" Grid.RowSpan="3" ExpandDirection="Left">
+            <StackPanel IsEnabled="{Binding IsMeasuring, Converter={StaticResource BoolToInvertConverter}}">
                 <StackPanel>
                     <TextBlock Text="配置参数" Foreground="Green" Margin="0,10,0,0"/>
                     <DockPanel Margin="0,10,0,0">
@@ -121,7 +123,7 @@
                         <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">最大气压(MPa)</TextBlock>
                         <TextBox Text="{Binding MaxPressure, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
                     </DockPanel>
-                    
+
                     <TextBlock Text="测试项" Foreground="Green" Margin="0,10,0,0"/>
                     <DataGrid ItemsSource="{Binding TestDatas}"
                               SelectedIndex="{Binding TestDatasIndex}"
@@ -144,48 +146,47 @@
                         </DataGrid.Columns>
                     </DataGrid>
                 </StackPanel>
-            </Expander>
-            <Expander Header="高级设置" Margin="0,10,0,0">
-                <StackPanel IsEnabled="{Binding IsAdmin}">
-                    <DockPanel Margin="0,10,0,0">
-                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">频率误差(0.1-0.5)</TextBlock>
-                        <TextBox Text="{Binding FrequencyErrLimit, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
-                    </DockPanel>
-                    <TextBlock Text="滤波参数" Foreground="Green" Margin="0,10,0,0"/>
-                    <DockPanel Margin="0,10,0,0">
-                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">电压滤波系数</TextBlock>
-                        <TextBox Text="{Binding VoltageFilterCount, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
-                    </DockPanel>
-                    <StackPanel Visibility="Collapsed">
-                        <TextBlock Text="示波器配置" Foreground="Green" Margin="0,10,0,0"/>
+                <Expander Header="高级设置" Margin="0,10,0,0">
+                    <StackPanel IsEnabled="{Binding IsAdmin}">
                         <DockPanel Margin="0,10,0,0">
-                            <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">探头衰减</TextBlock>
-                            <ComboBox ItemsSource="{Binding ScopeScale}" SelectedItem="{Binding ScopeCHAScale}"/>
+                            <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">频率误差(0.1-0.5)</TextBlock>
+                            <TextBox Text="{Binding FrequencyErrLimit, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
                         </DockPanel>
+                        <TextBlock Text="滤波参数" Foreground="Green" Margin="0,10,0,0"/>
                         <DockPanel Margin="0,10,0,0">
-                            <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">探头电压档位</TextBlock>
-                            <ComboBox ItemsSource="{Binding ScopeVoltageDIVCollection}" SelectedItem="{Binding ScopeCHAVoltageDIV}"/>
+                            <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">电压滤波系数</TextBlock>
+                            <TextBox Text="{Binding VoltageFilterCount, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
                         </DockPanel>
+                        <StackPanel Visibility="Collapsed">
+                            <TextBlock Text="示波器配置" Foreground="Green" Margin="0,10,0,0"/>
+                            <DockPanel Margin="0,10,0,0">
+                                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">探头衰减</TextBlock>
+                                <ComboBox ItemsSource="{Binding ScopeScale}" SelectedItem="{Binding ScopeCHAScale}"/>
+                            </DockPanel>
+                            <DockPanel Margin="0,10,0,0">
+                                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">探头电压档位</TextBlock>
+                                <ComboBox ItemsSource="{Binding ScopeVoltageDIVCollection}" SelectedItem="{Binding ScopeCHAVoltageDIV}"/>
+                            </DockPanel>
+                            <DockPanel Margin="0,10,0,0">
+                                <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">采样率</TextBlock>
+                                <ComboBox ItemsSource="{Binding ScopeSampleRateCollection}" SelectedItem="{Binding ScopeSampleRate}"/>
+                            </DockPanel>
+                        </StackPanel>
+                        <TextBlock Text="Power配置" Foreground="Green" Margin="0,10,0,0"/>
                         <DockPanel Margin="0,10,0,0">
-                            <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">采样率</TextBlock>
-                            <ComboBox ItemsSource="{Binding ScopeSampleRateCollection}" SelectedItem="{Binding ScopeSampleRate}"/>
+                            <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">输出(吸合)电压(V)</TextBlock>
+                            <TextBox Text="{Binding OutputVoltage, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+                        </DockPanel>
+                        <TextBlock Text="PLC配置" Foreground="Green" Margin="0,10,0,0"/>
+                        <DockPanel Margin="0,10,0,0">
+                            <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">占空比(1-100)</TextBlock>
+                            <TextBox Text="{Binding DutyRatio, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
                         </DockPanel>
                     </StackPanel>
-                    <TextBlock Text="Power配置" Foreground="Green" Margin="0,10,0,0"/>
-                    <DockPanel Margin="0,10,0,0">
-                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">输出(吸合)电压(V)</TextBlock>
-                        <TextBox Text="{Binding OutputVoltage, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
-                    </DockPanel>
-                    <TextBlock Text="PLC配置" Foreground="Green" Margin="0,10,0,0"/>
-                    <DockPanel Margin="0,10,0,0">
-                        <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" MinWidth="100">占空比(1-100)</TextBlock>
-                        <TextBox Text="{Binding DutyRatio, UpdateSourceTrigger=Explicit}"  KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
-                    </DockPanel>
-                </StackPanel>
-            </Expander>
-            <Button cal:Message.Attach="UpdateHardware" Margin="0,10,0,0">刷新硬件</Button>
-            <Button cal:Message.Attach="Start" IsEnabled="{Binding IsHardwareValid}" Margin="0,10,0,0">运行</Button>
-        </StackPanel>
-    
+                </Expander>
+                <Button cal:Message.Attach="UpdateHardware" Margin="0,10,0,0">刷新硬件</Button>
+            </StackPanel>
+        </Expander>
+
     </Grid>
 </UserControl>
