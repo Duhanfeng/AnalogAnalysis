@@ -2100,6 +2100,50 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public FlowMeasureViewModel FlowMeasureViewModel { get; set; }
 
+        private int hamburgerMenuIndex;
+
+        /// <summary>
+        /// 窗口索引
+        /// </summary>
+        public int HamburgerMenuIndex
+        {
+            get 
+            { 
+                return hamburgerMenuIndex;
+            }
+            set 
+            { 
+                hamburgerMenuIndex = value;
+                NotifyOfPropertyChange(() => HamburgerMenuIndex);
+            }
+        }
+
+        private int hamburgerOptionsIndex;
+
+        /// <summary>
+        /// 操作索引
+        /// </summary>
+        public int HamburgerOptionsIndex
+        {
+            get 
+            { 
+                return hamburgerOptionsIndex; 
+            }
+            set 
+            { 
+                hamburgerOptionsIndex = value;
+                NotifyOfPropertyChange(() => HamburgerOptionsIndex);
+            }
+        }
+
+        /// <summary>
+        /// 加载界面
+        /// </summary>
+        public void Loaded()
+        {
+            HamburgerMenuIndex = 0;
+        }
+
         /// <summary>
         /// 使能测试
         /// </summary>
@@ -2148,7 +2192,8 @@ namespace AnalogSignalAnalysisWpf
 
             new Thread(() =>
             {
-                FrequencyMeasurementViewModel.Start();
+                HamburgerMenuIndex = 0;
+                PNVoltageMeasurementViewModel.Start();
                 Thread.Sleep(1000);
 
                 //等待测试完成
@@ -2163,9 +2208,11 @@ namespace AnalogSignalAnalysisWpf
                     }
                     Thread.Sleep(20);
                 }
-                PNVoltageMeasurementViewModel.Start();
+
+                HamburgerMenuIndex = 1;
+                FrequencyMeasurementViewModel.Start();
                 Thread.Sleep(1000);
-                
+
                 //等待测试完成
                 while (true)
                 {
@@ -2195,7 +2242,8 @@ namespace AnalogSignalAnalysisWpf
                 //    Thread.Sleep(20);
                 //}
 
-                FlowMeasureViewModel.Start();
+                HamburgerMenuIndex = 2;
+                ThroughputMeasurementViewModel.Start();
                 Thread.Sleep(1000);
 
                 //等待测试完成
@@ -2210,6 +2258,9 @@ namespace AnalogSignalAnalysisWpf
                     }
                     Thread.Sleep(20);
                 }
+
+                Thread.Sleep(1000);
+                HamburgerOptionsIndex = 0;
 
                 NotifyOfPropertyChange(() => IsEnableTest);
 

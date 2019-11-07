@@ -287,6 +287,7 @@ namespace AnalogSignalAnalysisWpf
             }
 
             NotifyOfPropertyChange(() => IsHardwareValid);
+            NotifyOfPropertyChange(() => CanMeasure);
         }
 
         #endregion
@@ -350,7 +351,6 @@ namespace AnalogSignalAnalysisWpf
             }
         }
 
-
         private bool isMeasuring;
 
         /// <summary>
@@ -366,6 +366,29 @@ namespace AnalogSignalAnalysisWpf
             {
                 isMeasuring = value;
                 NotifyOfPropertyChange(() => IsMeasuring);
+            }
+        }
+
+        private bool canMeasure = true;
+
+        /// <summary>
+        /// 允许测量
+        /// </summary>
+        public bool CanMeasure
+        {
+            get
+            {
+                if (IsHardwareValid)
+                {
+                    return canMeasure;
+                }
+
+                return false;
+            }
+            set
+            {
+                canMeasure = value;
+                NotifyOfPropertyChange(() => CanMeasure);
             }
         }
 
@@ -602,6 +625,7 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         protected void OnMeasurementStarted()
         {
+            CanMeasure = false;
             MeasurementStarted?.Invoke(this, new EventArgs());
         }
 
@@ -616,6 +640,8 @@ namespace AnalogSignalAnalysisWpf
         /// <param name="e"></param>
         protected void OnMeasurementCompleted(FrequencyMeasurementCompletedEventArgs e)
         {
+            CanMeasure = true;
+
             Power.IsEnableOutput = false;
             PLC.PWMSwitch = false;
             PWM.Frequency = 0;
@@ -804,6 +830,7 @@ namespace AnalogSignalAnalysisWpf
             Scope.CHAVoltageDIV = SystemParamManager.SystemParam.GlobalParam.VoltageDIV;
 
             PLC.PWMSwitch = true;
+            PLC.FlowSwitch = false;
             Thread.Sleep(SystemParamManager.SystemParam.GlobalParam.PowerCommonDelay);
             MeasurementInfos = new ObservableCollection<FrequencyMeasurementInfo>();
 
@@ -831,12 +858,10 @@ namespace AnalogSignalAnalysisWpf
                 {
                     //设置PWM频率
                     PWM.Frequency = item.Frequency;
-                    OnMessageRaised(MessageLevel.Message, $"F: [Frequency- {PWM.Frequency}]");
                     Thread.Sleep(SystemParamManager.SystemParam.GlobalParam.PowerCommonDelay);
 
                     //设置Scope采集时长
                     Scope.SampleTime = item.SampleTime;
-                    OnMessageRaised(MessageLevel.Message, $"F: [SampleTime- {Scope.SampleTime}]");
 
                     //读取Scope数据
                     double[] originalData;

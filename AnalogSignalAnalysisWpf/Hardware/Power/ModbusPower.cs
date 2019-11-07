@@ -8,6 +8,11 @@ namespace AnalogSignalAnalysisWpf.Hardware
 {
     class ModbusPower : IPower
     {
+        /// <summary>
+        /// 设备线程锁
+        /// </summary>
+        private static object deviceLock = new object();
+
         #region 构造函数
 
         /// <summary>
@@ -257,15 +262,18 @@ namespace AnalogSignalAnalysisWpf.Hardware
         /// <returns>执行结果</returns>
         public bool Write(ushort register, ushort value)
         {
-            try
+            lock (deviceLock)
             {
-                ModbusSerialRtuMasterWriteRegister(SlaveAddress, register, value);
+                try
+                {
+                    ModbusSerialRtuMasterWriteRegister(SlaveAddress, register, value);
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+                return true;
             }
-            catch (Exception)
-            {
-                return false;
-            }
-            return true;
         }
 
         /// <summary>
@@ -276,15 +284,18 @@ namespace AnalogSignalAnalysisWpf.Hardware
         /// <returns>执行结果</returns>
         public bool Write(ushort register, ushort[] values)
         {
-            try
+            lock (deviceLock)
             {
-                ModbusSerialRtuMasterWriteRegister(SlaveAddress, register, values);
+                try
+                {
+                    ModbusSerialRtuMasterWriteRegister(SlaveAddress, register, values);
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+                return true;
             }
-            catch (Exception)
-            {
-                return false;
-            }
-            return true;
 
         }
 
@@ -296,18 +307,21 @@ namespace AnalogSignalAnalysisWpf.Hardware
         /// <returns>执行结果</returns>
         public bool Read(ushort register, out ushort value)
         {
-            value = 0xFFFF;
+            lock (deviceLock)
+            {
+                value = 0xFFFF;
 
-            try
-            {
-                ModbusSerialRtuMasterReadRegister(SlaveAddress, register, out value);
+                try
+                {
+                    ModbusSerialRtuMasterReadRegister(SlaveAddress, register, out value);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                    return false;
+                }
+                return true;
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                return false;
-            }
-            return true;
         }
 
         /// <summary>
@@ -318,18 +332,20 @@ namespace AnalogSignalAnalysisWpf.Hardware
         /// <returns>执行结果</returns>
         public bool Read(ushort register, ushort count, out ushort[] values)
         {
-            values = new ushort[0];
-
-            try
+            lock (deviceLock)
             {
-                ModbusSerialRtuMasterReadRegister(SlaveAddress, register, count, out values);
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-            return true;
+                values = new ushort[0];
 
+                try
+                {
+                    ModbusSerialRtuMasterReadRegister(SlaveAddress, register, count, out values);
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+                return true;
+            }
         }
 
         #endregion

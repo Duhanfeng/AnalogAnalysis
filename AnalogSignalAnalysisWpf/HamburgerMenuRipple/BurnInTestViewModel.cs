@@ -210,6 +210,7 @@ namespace AnalogSignalAnalysisWpf
             }
 
             NotifyOfPropertyChange(() => IsHardwareValid);
+            NotifyOfPropertyChange(() => CanMeasure);
         }
 
         #endregion
@@ -251,6 +252,30 @@ namespace AnalogSignalAnalysisWpf
                 NotifyOfPropertyChange(() => IsMeasuring);
             }
         }
+
+        private bool canMeasure = true;
+
+        /// <summary>
+        /// 允许测量
+        /// </summary>
+        public bool CanMeasure
+        {
+            get
+            {
+                if (IsHardwareValid)
+                {
+                    return canMeasure;
+                }
+
+                return false;
+            }
+            set
+            {
+                canMeasure = value;
+                NotifyOfPropertyChange(() => CanMeasure);
+            }
+        }
+
 
         private string runningStatus = "就绪";
 
@@ -364,6 +389,7 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         protected void OnMeasurementStarted()
         {
+            CanMeasure = false;
             MeasurementStarted?.Invoke(this, new EventArgs());
         }
 
@@ -378,6 +404,8 @@ namespace AnalogSignalAnalysisWpf
         /// <param name="e"></param>
         protected void OnMeasurementCompleted(BurnInTestCompletedEventArgs e)
         {
+            CanMeasure = true;
+
             Power.IsEnableOutput = false;
             PLC.PWMSwitch = false;
             PWM.Frequency = 0;

@@ -180,6 +180,7 @@ namespace AnalogSignalAnalysisWpf
             }
 
             NotifyOfPropertyChange(() => IsHardwareValid);
+            NotifyOfPropertyChange(() => CanMeasure);
         }
 
         #endregion
@@ -551,6 +552,29 @@ namespace AnalogSignalAnalysisWpf
             }
         }
 
+        private bool canMeasure = true;
+
+        /// <summary>
+        /// 允许测量
+        /// </summary>
+        public bool CanMeasure
+        {
+            get
+            {
+                if (IsHardwareValid)
+                {
+                    return canMeasure;
+                }
+
+                return false;
+            }
+            set
+            {
+                canMeasure = value;
+                NotifyOfPropertyChange(() => CanMeasure);
+            }
+        }
+
         private string runningStatus = "就绪";
 
         /// <summary>
@@ -749,6 +773,7 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         protected void OnMeasurementStarted()
         {
+            CanMeasure = false;
             MeasurementStarted?.Invoke(this, new EventArgs());
         }
 
@@ -763,12 +788,18 @@ namespace AnalogSignalAnalysisWpf
         /// <param name="e"></param>
         protected void OnMeasurementCompleted(ThroughputMeasurementCompletedEventArgs e)
         {
-            RunningStatus = e.IsSuccess ? "成功" : "失败";
+            CanMeasure = true;
 
+            RunningStatus = e.IsSuccess ? "成功" : "失败";
+            
             if (Power?.IsConnect == true)
             {
                 Power.IsEnableOutput = false;
             }
+
+            Thread.Sleep(100);
+            PLC.PWMSwitch = false;
+            PLC.FlowSwitch = false;
 
             lock (lockObject)
             {
@@ -871,6 +902,8 @@ namespace AnalogSignalAnalysisWpf
                 //设置采样时间
                 Scope.SampleTime = SampleTime;
 
+                PLC.PWMSwitch = false;
+                
                 //设置电压
                 Power.IsEnableOutput = false;
                 Power.Voltage = OutputVoltage;
@@ -878,10 +911,12 @@ namespace AnalogSignalAnalysisWpf
                 //启动线程
                 new Thread(() =>
                 {
-                    Thread.Sleep(OutputDelay);
-
                     //设置电压
+                    Thread.Sleep(OutputDelay);
+                    PLC.FlowSwitch = true;
+                    Thread.Sleep(OutputDelay);
                     Power.IsEnableOutput = true;
+
                 }).Start();
 
                 try
@@ -921,7 +956,7 @@ namespace AnalogSignalAnalysisWpf
 
                     if (MeasureType == 0)
                     {
-                        for (int i = 0; i < pressureData.Length; i++)
+                        for (int i = (int)Scope.SampleRate * 50 / 1000; i < pressureData.Length; i++)
                         {
                             if ((pressureData[i] > MinVoltageThreshold) && (start == -1))
                             {

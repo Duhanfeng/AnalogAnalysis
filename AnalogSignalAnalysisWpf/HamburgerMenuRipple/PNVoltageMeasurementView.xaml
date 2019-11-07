@@ -92,7 +92,7 @@
 
             <StackPanel Margin="10">
                 <StackPanel Orientation="Horizontal">
-                    <Button cal:Message.Attach="Start" IsEnabled="{Binding IsHardwareValid}" Margin="0,0,20,0" MinWidth="80">运行</Button>
+                    <Button cal:Message.Attach="Start" IsEnabled="{Binding CanMeasure}" Margin="0,0,20,0" MinWidth="80">运行</Button>
                     <TextBlock Text="当前状态:" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <Ellipse Width="20" Height="20" Fill="{Binding IsMeasuring, Converter={StaticResource BoolToColorConverter}}" Margin="0,0,10,0"/>
                     <TextBox Text="{Binding RunningStatus}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>

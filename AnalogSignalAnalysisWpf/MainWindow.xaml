@@ -19,7 +19,8 @@
                       xmlns:cal="http://www.caliburnproject.org"
                       xmlns:converters="clr-namespace:AnalogSignalAnalysisWpf.Converters"
                       WindowState="Normal"
-                      Closing="MetroWindow_Closing">
+                      Closing="MetroWindow_Closing"
+                      cal:Message.Attach="[Event Loaded] = [Action Loaded]">
 
     <Window.Resources>
         <ResourceDictionary>
