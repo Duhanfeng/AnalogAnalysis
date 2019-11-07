@@ -2140,6 +2140,12 @@ namespace AnalogSignalAnalysisWpf
             }
             NotifyOfPropertyChange(() => IsEnableTest);
 
+            var result = ((MetroWindow)Application.Current.MainWindow).ShowModalMessageExternal("测试确认", "是否开始测试?", MessageDialogStyle.AffirmativeAndNegative);
+            if (result != MessageDialogResult.Affirmative)
+            {
+                return;
+            }
+
             new Thread(() =>
             {
                 FrequencyMeasurementViewModel.Start();

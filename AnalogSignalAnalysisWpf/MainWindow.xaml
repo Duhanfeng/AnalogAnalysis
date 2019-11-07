@@ -145,6 +145,7 @@
                     <MenuItem Header="注销" cal:Message.Attach="Logout" IsEnabled="{Binding IsAdmin}"/>
                 </MenuItem>
                 <MenuItem Header="一键测试" cal:Message.Attach="TestAll" IsEnabled="{Binding IsEnableTest}"/>
+                <!--<MenuItem Header="一键测试" cal:Message.Attach="TestAll"/>-->
             </Menu>
             <StackPanel MinWidth="15"/>
             <Label VerticalAlignment="Center" FontSize="13">当前账户:</Label>
