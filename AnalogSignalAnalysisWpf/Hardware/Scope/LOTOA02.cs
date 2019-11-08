@@ -432,8 +432,8 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
             set
             {
                 sampleTime = value;
-                sampleCount = (uint)((uint)SampleRate * (sampleTime + 25) / 1000);
-                invalidDataCount = (uint)((uint)SampleRate * 25 / 1000);
+                sampleCount = (uint)((uint)SampleRate * (sampleTime + 50) / 1000);
+                invalidDataCount = (uint)((uint)SampleRate * 50 / 1000);
 
                 lock (lockObject)
                 {
@@ -809,8 +809,8 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
                 sampleRate = value;
                 SetSampleRate(value);
 
-                sampleCount = (uint)((uint)SampleRate * (SampleTime + 25) / 1000);
-                invalidDataCount = (uint)((uint)SampleRate * 25 / 1000);
+                sampleCount = (uint)((uint)SampleRate * (SampleTime + 50) / 1000);
+                invalidDataCount = (uint)((uint)SampleRate * 50 / 1000);
 
                 lock (lockObject)
                 {

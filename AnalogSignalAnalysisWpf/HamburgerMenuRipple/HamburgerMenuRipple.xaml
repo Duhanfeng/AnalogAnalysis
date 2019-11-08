@@ -172,8 +172,9 @@
 
             <Controls:HamburgerMenu x:Name="HamburgerMenuControl"
                                     HamburgerWidth="48"
-                                    IsPaneOpen="False"
+                                    IsPaneOpen="True"
                                     DataContext="{Binding}"
+                                    OpenPaneLength="170"
                                     ItemInvoked="HamburgerMenuControl_OnItemInvoked"
                                     ItemTemplate="{StaticResource MenuItemTemplate}"
                                     OptionsItemTemplate="{StaticResource MenuItemTemplate}"
@@ -184,32 +185,32 @@
                 <!--  Items  -->
                 <Controls:HamburgerMenu.ItemsSource>
                     <Controls:HamburgerMenuItemCollection>
-                        <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="吸合电压与释放电压测量">
+                        <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="吸合/释放电压">
                             <Controls:HamburgerMenuIconItem.Tag>
                                 <local:PNVoltageMeasurementView />
                             </Controls:HamburgerMenuIconItem.Tag>
                         </Controls:HamburgerMenuIconItem>
-                        <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="极限频率测试">
-                            <Controls:HamburgerMenuIconItem.Tag>
-                                <local:FrequencyMeasurementView/>
-                            </Controls:HamburgerMenuIconItem.Tag>
-                        </Controls:HamburgerMenuIconItem>
-                        <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="流量测试(气压传感器)">
+                        <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="流量测试">
                             <Controls:HamburgerMenuIconItem.Tag>
                                 <local:ThroughputMeasurementView />
                             </Controls:HamburgerMenuIconItem.Tag>
                         </Controls:HamburgerMenuIconItem>
-                        <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="流量测试(流量传感器)">
+                        <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="极限频率">
+                            <Controls:HamburgerMenuIconItem.Tag>
+                                <local:FrequencyMeasurementView/>
+                            </Controls:HamburgerMenuIconItem.Tag>
+                        </Controls:HamburgerMenuIconItem>
+                        <!--<Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="流量测试(流量传感器)">
                             <Controls:HamburgerMenuIconItem.Tag>
                                 <local:FlowMeasureView />
                             </Controls:HamburgerMenuIconItem.Tag>
-                        </Controls:HamburgerMenuIconItem>
+                        </Controls:HamburgerMenuIconItem>-->
                         <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="老化测试">
                             <Controls:HamburgerMenuIconItem.Tag>
                                 <local:BurnInTestView />
                             </Controls:HamburgerMenuIconItem.Tag>
                         </Controls:HamburgerMenuIconItem>
-                        <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="输入输出关系曲线测试">
+                        <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="输入输出曲线">
                             <Controls:HamburgerMenuIconItem.Tag>
                                 <local:InputOutputMeasurementView />
                             </Controls:HamburgerMenuIconItem.Tag>

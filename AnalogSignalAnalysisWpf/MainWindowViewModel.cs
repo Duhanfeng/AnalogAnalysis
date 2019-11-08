@@ -2210,6 +2210,23 @@ namespace AnalogSignalAnalysisWpf
                 }
 
                 HamburgerMenuIndex = 1;
+                ThroughputMeasurementViewModel.Start();
+                Thread.Sleep(1000);
+
+                //等待测试完成
+                while (true)
+                {
+                    lock (measureLock)
+                    {
+                        if (!IsMeasuring)
+                        {
+                            break;
+                        }
+                    }
+                    Thread.Sleep(20);
+                }
+
+                HamburgerMenuIndex = 2;
                 FrequencyMeasurementViewModel.Start();
                 Thread.Sleep(1000);
 
@@ -2242,22 +2259,6 @@ namespace AnalogSignalAnalysisWpf
                 //    Thread.Sleep(20);
                 //}
 
-                HamburgerMenuIndex = 2;
-                ThroughputMeasurementViewModel.Start();
-                Thread.Sleep(1000);
-
-                //等待测试完成
-                while (true)
-                {
-                    lock (measureLock)
-                    {
-                        if (!IsMeasuring)
-                        {
-                            break;
-                        }
-                    }
-                    Thread.Sleep(20);
-                }
 
                 Thread.Sleep(1000);
                 HamburgerOptionsIndex = 0;

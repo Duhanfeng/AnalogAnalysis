@@ -514,6 +514,9 @@ namespace AnalogSignalAnalysisWpf
 
             RunningStatus = e.IsSuccess ? "成功" : "失败";
 
+            PLC.PWMSwitch = false;
+            PLC.FlowSwitch = false;
+
             if (Power?.IsConnect == true)
             {
                 Power.IsEnableOutput = false;
@@ -628,6 +631,7 @@ namespace AnalogSignalAnalysisWpf
 
             //设置电源模块直通
             PLC.PWMSwitch = false;
+            PLC.FlowSwitch = true;
 
             ScopeCHACollection = new ObservableCollection<Data>();
             ScopeCHBCollection = new ObservableCollection<Data>();
