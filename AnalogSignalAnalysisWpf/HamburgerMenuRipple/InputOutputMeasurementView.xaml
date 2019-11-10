@@ -147,7 +147,7 @@
             <Button cal:Message.Attach="Start" Margin="0,10,0,0">运行</Button>
         </StackPanel>
 
-        <Expander Grid.Column="1" Grid.RowSpan="3" ExpandDirection="Left" IsExpanded="True">
+        <Expander Grid.Column="1" Grid.RowSpan="3" ExpandDirection="Left">
             <StackPanel IsEnabled="{Binding IsMeasuring, Converter={StaticResource BoolToInvertConverter}}" MinWidth="180">
                 <StackPanel>
                     <TextBlock Text="配置参数" Foreground="Green" Margin="0,10,0,0"/>
