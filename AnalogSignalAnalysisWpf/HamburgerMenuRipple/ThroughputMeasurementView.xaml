@@ -118,8 +118,12 @@
                     <TextBlock Text="当前状态:" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <Ellipse Width="20" Height="20" Fill="{Binding IsMeasuring, Converter={StaticResource BoolToColorConverter}}" Margin="0,0,10,0"/>
                     <TextBox Text="{Binding RunningStatus}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
+                    <TextBlock Text="通气时间(MS):" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBox Text="{Binding Time, StringFormat={}{0:F3}}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
+                    <TextBlock Text="流量(L/分钟):" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBox Text="{Binding Flow, StringFormat={}{0:F3}}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                <StackPanel Orientation="Horizontal" Margin="0,10,0,0" Visibility="Collapsed">
                     <TextBlock Text="通气时间(MS):" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <TextBox Text="{Binding Time, StringFormat={}{0:F3}}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
                     <TextBlock Text="流量(L/分钟):" VerticalAlignment="Center" Margin="0,0,10,0"/>
@@ -129,7 +133,7 @@
         </StackPanel>
 
         <Expander Grid.Column="1" Grid.RowSpan="3" ExpandDirection="Left">
-            <StackPanel IsEnabled="{Binding IsMeasuring, Converter={StaticResource BoolToInvertConverter}}">
+            <StackPanel IsEnabled="{Binding IsMeasuring, Converter={StaticResource BoolToInvertConverter}}" MinWidth="180">
                 <StackPanel>
                     <TextBlock Text="配置参数" Foreground="Green" Margin="0,10,0,0"/>
                     <DockPanel Margin="0,10,0,0">

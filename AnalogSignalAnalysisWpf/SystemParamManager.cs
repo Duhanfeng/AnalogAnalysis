@@ -75,6 +75,16 @@ namespace AnalogSignalAnalysisWpf
     public class InputOutputMeasureParams
     {
         /// <summary>
+        /// 电压表
+        /// </summary>
+        public ObservableCollection<VoltageTable> VoltageTable { get; set; } = new ObservableCollection<VoltageTable>();
+
+        /// <summary>
+        /// 输出类型
+        /// </summary>
+        public int OutputType { get; set; } = 0;
+
+        /// <summary>
         /// 电压间隔(V)
         /// </summary>
         public double VoltageInterval { get; set; } = 0.25;

@@ -31,6 +31,11 @@ namespace AnalogSignalAnalysisWpf
         public double Output { get; set; }
 
         /// <summary>
+        /// 公斤力
+        /// </summary>
+        public double Output2 { get; set; }
+
+        /// <summary>
         /// 创建InputOutputMeasurementInfo新实例
         /// </summary>
         public InputOutputMeasurementInfo()
@@ -48,7 +53,19 @@ namespace AnalogSignalAnalysisWpf
             DateTime = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             Input = input;
             Output = output;
+            Output2 = Output * 10.197;
         }
+    }
+
+    /// <summary>
+    /// 电压表
+    /// </summary>
+    public class VoltageTable
+    {
+        /// <summary>
+        /// 电压值
+        /// </summary>
+        public double Voltage { get; set; }
     }
 
     public class InputOutputMeasurementViewModel : Screen
@@ -85,6 +102,9 @@ namespace AnalogSignalAnalysisWpf
         {
             //恢复配置参数
             SystemParamManager = SystemParamManager.GetInstance();
+
+            VoltageTable = new ObservableCollection<VoltageTable>(SystemParamManager.SystemParam.InputOutputMeasureParams.VoltageTable);
+            OutputType = SystemParamManager.SystemParam.InputOutputMeasureParams.OutputType;
             VoltageInterval = SystemParamManager.SystemParam.InputOutputMeasureParams.VoltageInterval;
             MinVoltage = SystemParamManager.SystemParam.InputOutputMeasureParams.MinVoltage;
             MaxVoltage = SystemParamManager.SystemParam.InputOutputMeasureParams.MaxVoltage;
@@ -214,6 +234,51 @@ namespace AnalogSignalAnalysisWpf
 
         #region 配置参数
 
+        private ObservableCollection<VoltageTable> voltageTable;
+
+        /// <summary>
+        /// 电压表
+        /// </summary>
+        public ObservableCollection<VoltageTable> VoltageTable
+        {
+            get 
+            { 
+                return voltageTable; 
+            }
+            set 
+            {
+                voltageTable = value;
+                NotifyOfPropertyChange(() => VoltageTable);
+
+                SystemParamManager.SystemParam.InputOutputMeasureParams.VoltageTable = new ObservableCollection<VoltageTable>(value);
+                SystemParamManager.SaveParams();
+            }
+        }
+
+        private int outputType;
+
+        /// <summary>
+        /// 输出类型
+        /// </summary>
+        public int OutputType
+        {
+            get 
+            { 
+                return outputType; 
+            }
+            set 
+            { 
+                outputType = value;
+                NotifyOfPropertyChange(() => OutputType);
+
+                SystemParamManager.SystemParam.InputOutputMeasureParams.OutputType = value;
+                SystemParamManager.SaveParams();
+
+                IsEnableLoopupTableOutput = value == 1;
+                IsEnableNormalOutput = !IsEnableLoopupTableOutput;
+            }
+        }
+
         private double voltageInterval = 0.25;
 
         /// <summary>
@@ -319,6 +384,43 @@ namespace AnalogSignalAnalysisWpf
                 NotifyOfPropertyChange(() => MeasurementInfos);
             }
         }
+
+        private bool isEnableLoopupTableOutput;
+
+        /// <summary>
+        /// 使能查表法
+        /// </summary>
+        public bool IsEnableLoopupTableOutput
+        {
+            get 
+            { 
+                return isEnableLoopupTableOutput; 
+            }
+            set 
+            {
+                isEnableLoopupTableOutput = value;
+                NotifyOfPropertyChange(() => IsEnableLoopupTableOutput);
+            }
+        }
+
+        private bool isEnableNormalOutput;
+
+        /// <summary>
+        /// 使能正常输出模式
+        /// </summary>
+        public bool IsEnableNormalOutput
+        {
+            get 
+            { 
+                return isEnableNormalOutput; 
+            }
+            set 
+            { 
+                isEnableNormalOutput = value;
+                NotifyOfPropertyChange(() => IsEnableNormalOutput);
+            }
+        }
+
 
         private bool isMeasuring;
 
@@ -455,31 +557,43 @@ namespace AnalogSignalAnalysisWpf
             }
         }
 
+        private ObservableCollection<Data> aVoltageEdgeCollection = new ObservableCollection<Data>();
+
         /// <summary>
-        /// 显示数据
+        /// 通道A数据
         /// </summary>
-        /// <param name="data">数据</param>
-        private void ShowEdgeData(double[] data, List<int> edgeIndexs, DigitEdgeType digitEdgeType)
+        public ObservableCollection<Data> AVoltageEdgeCollection
         {
-            int SampleInterval = 1;
-
-            var collection = new ObservableCollection<Data>();
-            for (int i = 0; i < data.Length / SampleInterval; i++)
+            get
             {
-                collection.Add(new Data() { Value1 = data[i * SampleInterval], Value = i * 1000.0 / ((int)Scope.SampleRate) * SampleInterval });
+                return aVoltageEdgeCollection;
             }
-            var collection2 = new ObservableCollection<Data>();
-            if ((digitEdgeType == DigitEdgeType.FirstFillingEdge) || (digitEdgeType == DigitEdgeType.FirstRisingEdge))
+            set
             {
-                foreach (var item in edgeIndexs)
-                {
-                    //collection.Add(new Data() { Value1 = ScopeCHACollection[item / SampleInterval].Value1, Value = item * 1000.0 / ((int)Scope.SampleRate) * SampleInterval });
-                    collection2.Add(new Data() { Value1 = collection[item / SampleInterval].Value1, Value = collection[item / SampleInterval].Value });
-                }
+                aVoltageEdgeCollection = value;
+                NotifyOfPropertyChange(() => AVoltageEdgeCollection);
             }
-
-            ScopeCHACollection = collection;
         }
+
+
+        private ObservableCollection<Data> bVoltageEdgeCollection = new ObservableCollection<Data>();
+
+        /// <summary>
+        /// 通道A数据
+        /// </summary>
+        public ObservableCollection<Data> BVoltageEdgeCollection
+        {
+            get
+            {
+                return bVoltageEdgeCollection;
+            }
+            set
+            {
+                bVoltageEdgeCollection = value;
+                NotifyOfPropertyChange(() => BVoltageEdgeCollection);
+            }
+        }
+
 
         #endregion
 
@@ -572,9 +686,21 @@ namespace AnalogSignalAnalysisWpf
                     SynchronizationContext.SetSynchronizationContext(new System.Windows.Threading.DispatcherSynchronizationContext(System.Windows.Application.Current.Dispatcher));
                     SynchronizationContext.Current.Send(pl =>
                     {
+                        AVoltageEdgeCollection.Add(new Data
+                        {
+                            Value1 = currentInput,
+                            Value = time
+                        });
+
                         ScopeCHACollection.Add(new Data
                         {
                             Value1 = currentInput,
+                            Value = time
+                        });
+
+                        BVoltageEdgeCollection.Add(new Data
+                        {
+                            Value1 = currentOutput,
                             Value = time
                         });
 
@@ -635,6 +761,8 @@ namespace AnalogSignalAnalysisWpf
 
             ScopeCHACollection = new ObservableCollection<Data>();
             ScopeCHBCollection = new ObservableCollection<Data>();
+            AVoltageEdgeCollection = new ObservableCollection<Data>();
+            BVoltageEdgeCollection = new ObservableCollection<Data>();
 
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -643,11 +771,6 @@ namespace AnalogSignalAnalysisWpf
 
             measureThread = new System.Threading.Thread(() =>
             {
-                if (MinVoltage > MaxVoltage)
-                {
-                    throw new ArgumentException("MinVoltage > MaxVoltage");
-                }
-
                 lock (lockObject)
                 {
                     IsMeasuring = true;
@@ -656,58 +779,212 @@ namespace AnalogSignalAnalysisWpf
                 var infos = new List<InputOutputMeasurementInfo>();
                 MeasurementInfos = new ObservableCollection<InputOutputMeasurementInfo>();
 
-                if (SampleTime <= 50)
+                Scope.SampleTime = 500;
+
+                //查表法
+                if (IsEnableLoopupTableOutput)
                 {
-                    Scope.SampleRate = ESampleRate.Sps_781K;
-                }
+                    if (VoltageTable?.Count >= 0)
+                    {
+                        double currentVoltage = 0;
+                        Power.Voltage = 0;
+                        Power.IsEnableOutput = true;
 
-                double currentVoltage = MinVoltage;
-                Power.Voltage = currentVoltage;
-                Power.IsEnableOutput = true;
+                        foreach (var item in VoltageTable)
+                        {
+                            currentVoltage = item.Voltage;
 
-                int count = 0;
-                while (currentVoltage <= MaxVoltage)
-                {
-                    //设置当前电压
-                    Power.Voltage = currentVoltage;
-                    Thread.Sleep(SystemParamManager.SystemParam.GlobalParam.PowerCommonDelay);
+                            //设置当前电压
+                            Power.Voltage = currentVoltage;
+                            Thread.Sleep(SampleTime);
 
-                    //读取Scope数据
-                    double[] originalData;
-                    Scope.ReadDataBlock(0, out originalData);
+                            //读取Scope数据
+                            double[] originalData;
+                            Scope.ReadDataBlock(0, out originalData);
 
-                    //数据滤波
-                    double[] filterData;
-                    Analysis.MeanFilter(originalData, 7, out filterData);
+                            //数据滤波
+                            double[] filterData;
+                            Analysis.MeanFilter(originalData, 7, out filterData);
 
-                    //电压转气压
-                    double[] pressureData = filterData.ToList().ConvertAll(x => VoltageToPressure(x)).ToArray();
+                            //电压转气压
+                            double[] pressureData = filterData.ToList().ConvertAll(x => VoltageToPressure(x)).ToArray();
 
-                    //获取中值
-                    var medianData = Analysis.Median(pressureData);
-                    if (double.IsNaN(medianData))
+                            //获取中值
+                            var medianData = Analysis.Median(pressureData);
+                            if (double.IsNaN(medianData))
+                            {
+                                OnMeasurementCompleted(new InputOutputMeasurementCompletedEventArgs());
+                            }
+
+                            CurrentInput = currentVoltage;
+                            CurrentOutput = medianData;
+
+                            if (infos.Count >= 2)
+                            {
+                                CurrentOutput = infos[infos.Count - 1].Output * 0.5 + infos[infos.Count - 2].Output * 0.2 + medianData * 0.3;
+                            }
+
+                            infos.Add(new InputOutputMeasurementInfo(CurrentInput, CurrentOutput));
+
+                            stopwatch.Stop();
+                            ShowIOData(stopwatch.Elapsed.TotalMilliseconds, currentVoltage, medianData);
+                            stopwatch.Start();
+                        }
+
+                    }
+                    else
                     {
                         OnMeasurementCompleted(new InputOutputMeasurementCompletedEventArgs());
                     }
 
-                    CurrentInput = currentVoltage;
-                    CurrentOutput = medianData;
-                    infos.Add(new InputOutputMeasurementInfo(currentVoltage, medianData));
-
-                    stopwatch.Stop();
-                    ShowIOData(stopwatch.Elapsed.TotalMilliseconds, currentVoltage, medianData);
-                    stopwatch.Start();
-
-                    currentVoltage += VoltageInterval;
-                    count++;
+                    //输出结果
+                    OnMeasurementCompleted(new InputOutputMeasurementCompletedEventArgs(true, infos));
                 }
+                else
+                {
+                    if (MinVoltage > MaxVoltage)
+                    {
+                        OnMeasurementCompleted(new InputOutputMeasurementCompletedEventArgs());
+                    }
+                    
+                    double currentVoltage = MinVoltage;
+                    Power.Voltage = currentVoltage;
+                    Power.IsEnableOutput = true;
 
-                //输出结果
-                OnMeasurementCompleted(new InputOutputMeasurementCompletedEventArgs(true, infos));
+                    int count = 0;
+                    while (currentVoltage <= MaxVoltage)
+                    {
+                        //设置当前电压
+                        Power.Voltage = currentVoltage;
+                        Thread.Sleep(SampleTime);
 
+                        //读取Scope数据
+                        double[] originalData;
+                        Scope.ReadDataBlock(0, out originalData);
+
+                        //数据滤波
+                        double[] filterData;
+                        Analysis.MeanFilter(originalData, 7, out filterData);
+
+                        //电压转气压
+                        double[] pressureData = filterData.ToList().ConvertAll(x => VoltageToPressure(x)).ToArray();
+
+                        //获取中值
+                        var medianData = Analysis.Median(pressureData);
+                        if (double.IsNaN(medianData))
+                        {
+                            OnMeasurementCompleted(new InputOutputMeasurementCompletedEventArgs());
+                        }
+
+                        CurrentInput = currentVoltage;
+                        CurrentOutput = medianData;
+
+                        if (infos.Count >= 2)
+                        {
+                            CurrentOutput = infos[infos.Count - 1].Output * 0.5 + infos[infos.Count - 2].Output * 0.2 + medianData * 0.3;
+                        }
+
+                        infos.Add(new InputOutputMeasurementInfo(CurrentInput, CurrentOutput));
+
+                        stopwatch.Stop();
+                        ShowIOData(stopwatch.Elapsed.TotalMilliseconds, currentVoltage, medianData);
+                        stopwatch.Start();
+
+                        currentVoltage += VoltageInterval;
+                        count++;
+                    }
+
+                    //输出结果
+                    OnMeasurementCompleted(new InputOutputMeasurementCompletedEventArgs(true, infos));
+                }
             });
 
             measureThread.Start();
+        }
+
+        private int talbleIndex;
+
+        /// <summary>
+        /// 列表索引
+        /// </summary>
+        public int TalbleIndex
+        {
+            get 
+            { 
+                return talbleIndex; 
+            }
+            set 
+            { 
+                talbleIndex = value;
+                NotifyOfPropertyChange(() => TalbleIndex);
+            }
+        }
+
+        /// <summary>
+        /// 插入测试数据
+        /// </summary>
+        public void InsertTableItem()
+        {
+            lock (lockObject)
+            {
+                if (IsMeasuring)
+                {
+                    return;
+                }
+            }
+
+            if (TalbleIndex < 0)
+            {
+                return;
+            }
+
+            VoltageTable.Insert(TalbleIndex, new AnalogSignalAnalysisWpf.VoltageTable());
+
+            SystemParamManager.SystemParam.InputOutputMeasureParams.VoltageTable = new ObservableCollection<VoltageTable>(VoltageTable);
+            SystemParamManager.SaveParams();
+        }
+
+        /// <summary>
+        /// 删除测试数据
+        /// </summary>
+        public void DeleteTableItem()
+        {
+            lock (lockObject)
+            {
+                if (IsMeasuring)
+                {
+                    return;
+                }
+            }
+
+            if (TalbleIndex < 0)
+            {
+                return;
+            }
+
+            VoltageTable.RemoveAt(TalbleIndex);
+
+            SystemParamManager.SystemParam.InputOutputMeasureParams.VoltageTable = new ObservableCollection<VoltageTable>(VoltageTable);
+            SystemParamManager.SaveParams();
+        }
+
+        /// <summary>
+        /// 清空测试数据
+        /// </summary>
+        public void ClearTable()
+        {
+            VoltageTable = new ObservableCollection<VoltageTable>();
+            SystemParamManager.SystemParam.InputOutputMeasureParams.VoltageTable = new ObservableCollection<VoltageTable>(VoltageTable);
+            SystemParamManager.SaveParams();
+        }
+
+        /// <summary>
+        /// 保存测试数据
+        /// </summary>
+        public void SaveTable()
+        {
+            SystemParamManager.SystemParam.InputOutputMeasureParams.VoltageTable = new ObservableCollection<VoltageTable>(VoltageTable);
+            SystemParamManager.SaveParams();
         }
 
         #endregion
