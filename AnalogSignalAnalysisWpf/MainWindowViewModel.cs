@@ -3,6 +3,7 @@ using AnalogSignalAnalysisWpf.Hardware;
 using AnalogSignalAnalysisWpf.Hardware.Scope;
 using AnalogSignalAnalysisWpf.LiveData;
 using Caliburn.Micro;
+using CsvHelper;
 using DataAnalysis;
 using Framework.Infrastructure.Serialization;
 using MahApps.Metro;
@@ -11,6 +12,7 @@ using MahApps.Metro.Controls.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.IO.Ports;
 using System.Linq;
 using System.Threading;
@@ -2431,6 +2433,43 @@ namespace AnalogSignalAnalysisWpf
                 flow = value;
                 NotifyOfPropertyChange(() => Flow);
             }
+        }
+
+        /// <summary>
+        /// 导出结果
+        /// </summary>
+        public void ExportReport()
+        {
+            try
+            {
+                var records = new List<object>
+                {
+                    new { Id = 1, Name = "极限频率", Value = $"{MaxLimitFrequency}" },
+                    new { Id = 2, Name = "吸合电压", Value = $"{PositiveVoltage}" },
+                    new { Id = 3, Name = "释放电压", Value = $"{NegativeVoltage}" },
+                    new { Id = 4, Name = "流量", Value = $"{Flow}" },
+                };
+
+                if (!Directory.Exists("Report"))
+                {
+                    Directory.CreateDirectory("Report");
+                }
+
+                using (var writer = new StreamWriter($"Report/{DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss")}.csv"))
+                using (var csv = new CsvWriter(writer))
+                {
+                    csv.WriteRecords(records);
+                }
+
+                OnMessageRaised(MessageLevel.Message, "导出报告成功");
+
+            }
+            catch (Exception)
+            {
+                OnMessageRaised(MessageLevel.Message, "导出报告失败");
+            }
+
+
         }
 
         #endregion

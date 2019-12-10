@@ -13,7 +13,11 @@
              d:DesignHeight="800" d:DesignWidth="800"
              MinWidth="600">
     <Grid>
-        <WrapPanel>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="200"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <WrapPanel Grid.RowSpan="2">
             <StackPanel MinWidth="200" Margin="20,10,0,0">
                 <TextBlock Text="极限频率测试" Foreground="Green"/>
                 <DockPanel Margin="0,10,0,0">
@@ -75,5 +79,14 @@
             </StackPanel>
 
         </WrapPanel>
+        <StackPanel Grid.Row="1">
+            <DockPanel Margin="0,10,0,0">
+                <Button cal:Message.Attach="ExportReport" MaxWidth="200" MinWidth="100" Margin="20,0">导出</Button>
+                <StackPanel/>
+            </DockPanel>
+            <StackPanel Orientation="Horizontal">
+
+            </StackPanel>
+        </StackPanel>
     </Grid>
 </UserControl>

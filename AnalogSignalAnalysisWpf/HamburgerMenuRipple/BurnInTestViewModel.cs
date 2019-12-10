@@ -644,7 +644,7 @@ namespace AnalogSignalAnalysisWpf
                         SystemParamManager.SystemParam.FrequencyMeasureParams.MaxPressure,
                         out edgeIndexs, out digitEdgeType);
 
-                    ////显示波形
+                    //显示波形
                     ShowEdgeData(pressureData, edgeIndexs, digitEdgeType);
 
                     //分析脉冲数据
@@ -664,6 +664,12 @@ namespace AnalogSignalAnalysisWpf
                         //若波形不符,则退出测试
                         if (!Analysis.CheckFrequency(pulseFrequencies, minFrequency, maxFrequency, 0))
                         {
+                            //保存错误信息
+                            errPressureData = new double[pressureData.Length];
+                            Array.Copy(pressureData, errPressureData, pressureData.Length);
+                            errEdgeIndexs = new List<int>(edgeIndexs);
+                            errDigitEdgeType = digitEdgeType;
+
                             //测试失败
                             OnMeasurementCompleted(new BurnInTestCompletedEventArgs());
                             return;
@@ -671,6 +677,12 @@ namespace AnalogSignalAnalysisWpf
                     }
                     else
                     {
+                        //保存错误信息
+                        errPressureData = new double[pressureData.Length];
+                        Array.Copy(pressureData, errPressureData, pressureData.Length);
+                        errEdgeIndexs = new List<int>(edgeIndexs);
+                        errDigitEdgeType = digitEdgeType;
+
                         //测试失败
                         OnMeasurementCompleted(new BurnInTestCompletedEventArgs());
                         return;
@@ -686,6 +698,30 @@ namespace AnalogSignalAnalysisWpf
             });
 
             measureThread.Start();
+        }
+
+        private double[] errPressureData;
+        private List<int> errEdgeIndexs = new List<int>();
+        private DigitEdgeType errDigitEdgeType;
+
+        /// <summary>
+        /// 显示上次异常的错误图形
+        /// </summary>
+        public void ShowErrorFigure()
+        {
+            if (!IsMeasuring)
+            {
+                if ((errPressureData?.Length > 0))
+                {
+                    //显示波形
+                    ShowEdgeData(errPressureData, errEdgeIndexs, errDigitEdgeType);
+                }
+                else
+                {
+                    OnMessageRaised(MessageLevel.Warning, "无异常");
+                }
+            }
+
         }
 
         #endregion

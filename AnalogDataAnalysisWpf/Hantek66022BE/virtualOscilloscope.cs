@@ -389,7 +389,7 @@ namespace AnalogDataAnalysisWpf.Hantek66022BE
                     }
 
                     //数据拷贝
-                    unsafe
+                     unsafe
                     {
                         short* ch1 = (short*)channel1Data.ToPointer();
                         short* ch2 = (short*)channel2Data.ToPointer();

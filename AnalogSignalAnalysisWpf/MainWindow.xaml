@@ -8,7 +8,7 @@
                       xmlns:avalon="http://schemas.xceed.com/wpf/xaml/avalondock"
                       mc:Ignorable="d"
                       xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
-                      Title="MainWindow" Height="600" Width="800"
+                      Title="MainWindow" Height="900" Width="1600"
                       d:DataContext="{d:DesignInstance local:MainWindowViewModel}"
                       NonActiveGlowBrush="#CDFF0000"
                       ShowIconOnTitleBar="True"

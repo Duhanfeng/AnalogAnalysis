@@ -76,6 +76,8 @@
                     <TextBox Text="{Binding CurrentSampleTime}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>
                     <TextBlock Text="输入频率(Hz):" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <TextBox Text="{Binding CurrentInputFrequency}" IsReadOnly="True" MinWidth="60" Margin="0,0,20,0"/>-->
+                    <TextBlock Text="显示上次异常结果:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <Button cal:Message.Attach="ShowErrorFigure" MinWidth="50" Content="显示"/>
                 </StackPanel>
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -107,7 +109,7 @@
             </StackPanel>
         </StackPanel>
 
-        <Expander Grid.Column="1" Grid.RowSpan="3" ExpandDirection="Left">
+        <Expander Grid.Column="1" Grid.RowSpan="3" ExpandDirection="Left" IsExpanded="True">
             <StackPanel Margin="10" IsEnabled="{Binding IsMeasuring, Converter={StaticResource BoolToInvertConverter}}">
                 <StackPanel>
                     <TextBlock Text="配置参数" Foreground="Green" Margin="0,10,0,0"/>
