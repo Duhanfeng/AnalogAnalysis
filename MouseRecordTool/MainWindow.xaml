@@ -4,15 +4,39 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MouseRecordTool"
+        xmlns:chart="http://sparrowtoolkit.codeplex.com/wpf"
         mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance local:MainWindowModel}"
         Loaded="Window_Loaded"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="600" Width="1200" SizeChanged="Window_SizeChanged">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <Style x:Key="containerStyle" TargetType="Border">
+                <Setter Property="BorderBrush" Value="#FFAAFFAA"/>
+                <Setter Property="BorderThickness" Value="1"/>
+            </Style>
+            <Style TargetType="{x:Type Line}" x:Key="crossLineStyle">
+                <Setter Property="Stroke" Value="#FFAAFFAA"/>
+                <Setter Property="StrokeThickness" Value="1"/>
+            </Style>
+            <Style TargetType="{x:Type Line}" x:Key="axisLineStyle">
+                <Setter Property="Stroke" Value="#FFAAFFAA"/>
+                <Setter Property="StrokeThickness" Value="0"/>
+            </Style>
+            <Style TargetType="{x:Type Line}" x:Key="minorcrossLineStyle">
+                <Setter Property="Stroke" Value="#FF225633"/>
+                <Setter Property="StrokeThickness" Value="0.25"/>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+
     <DockPanel >
-        <StackPanel MinWidth="150" Margin="10,20,10,0">
+        <StackPanel MinWidth="200" Margin="10,20,10,0">
             <StackPanel Margin="0,20,0,0"/>
             <DockPanel>
-                <TextBlock Margin="0,0,20,0">X轴</TextBlock>
-                <ComboBox Margin="0,0,0,0" SelectedIndex="0" SelectionChanged="ComboBox_SelectionChanged">
+                <TextBlock Margin="0,0,20,0" MinWidth="60">X轴</TextBlock>
+                <ComboBox Margin="0,0,0,0" SelectedIndex="-1" SelectionChanged="ComboBox_SelectionChanged">
                     <ComboBoxItem>2S</ComboBoxItem>
                     <ComboBoxItem>5S</ComboBoxItem>
                     <ComboBoxItem>10S</ComboBoxItem>
@@ -21,19 +45,78 @@
             </DockPanel>
             <StackPanel Margin="0,20,0,0"/>
             <DockPanel>
-                <TextBlock Margin="0,0,20,0">Y轴</TextBlock>
-                <ComboBox Margin="0,0,0,0" SelectedIndex="0" SelectionChanged="ComboBox_SelectionChanged_1">
+                <TextBlock Margin="0,0,20,0" MinWidth="60">Y轴</TextBlock>
+                <ComboBox Margin="0,0,0,0" SelectedIndex="-1" SelectionChanged="ComboBox_SelectionChanged_1">
                     <ComboBoxItem>5V</ComboBoxItem>
                     <ComboBoxItem>12V</ComboBoxItem>
                     <ComboBoxItem>24V</ComboBoxItem>
                 </ComboBox>
             </DockPanel>
-            <Button Margin="0,20,0,0">数据检测</Button>
-            <Button Margin="0,10,0,0">导出</Button>
+            <StackPanel Margin="0,20,0,0"/>
+            <DockPanel>
+                <TextBlock Margin="0,0,20,0" MinWidth="60">采用间隔</TextBlock>
+                <ComboBox Margin="0,0,0,0" SelectedIndex="1" SelectionChanged="ComboBox_SelectionChanged_2">
+                    <ComboBoxItem>10MS</ComboBoxItem>
+                    <ComboBoxItem>50ms</ComboBoxItem>
+                    <ComboBoxItem>100ms</ComboBoxItem>
+                </ComboBox>
+            </DockPanel>
+            <Button Margin="0,20,0,0" Click="CheckButton_Click">数据检测</Button>
+            <Button Margin="0,10,0,0" Click="ExportButton_Click">导出</Button>
         </StackPanel>
-        <Canvas x:Name="myCanvas"  Margin="0" Background="Gray" PreviewMouseLeftButtonDown="Grid_PreviewMouseLeftButtonDown" PreviewMouseMove="Grid_PreviewMouseMove" PreviewMouseRightButtonDown="myCanvas_PreviewMouseRightButtonDown" >
-            <TextBlock x:Name="coordLabel" Foreground="Red"></TextBlock>
-        </Canvas>
+        <Grid Margin="0,10,40,10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="250" />
+                <RowDefinition Height="250" />
+                <RowDefinition Height="1*" />
+            </Grid.RowDefinitions>
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top">描绘区</TextBlock>
+                <Canvas x:Name="Canvas"  Margin="0,10,10,10" Background="LightGoldenrodYellow" PreviewMouseLeftButtonDown="Canvas_PreviewMouseLeftButtonDown" PreviewMouseMove="Canvas_PreviewMouseMove" PreviewMouseRightButtonDown="Canvas_PreviewMouseRightButtonDown" >
+                    <TextBlock x:Name="coordLabel" Foreground="Red"></TextBlock>
+                    <chart:SparrowChart x:Name="BackgroudChart" Foreground="White" FontFamily="Arial" ContainerBorderStyle="{StaticResource containerStyle}" MinHeight="200" >
+                        <chart:SparrowChart.Background>
+                            <LinearGradientBrush EndPoint="0.504,1.5" StartPoint="0.504,0.03">
+                                <GradientStop Color="#FF00170B" Offset="0"/>
+                                <GradientStop Color="#FF005C2C" Offset="0.8"/>
+                            </LinearGradientBrush>
+                        </chart:SparrowChart.Background>
+                        <chart:SparrowChart.XAxis>
+                            <chart:LinearXAxis CrossLineStyle="{StaticResource crossLineStyle}" MinorLineStyle="{StaticResource minorcrossLineStyle}" MajorLineStyle="{StaticResource crossLineStyle}" AxisLineStyle="{StaticResource axisLineStyle}" MinValue="0" MaxValue="1" MinorTicksCount="3" ShowCrossLines="True" Header="时间(S)" StringFormat="00.0"/>
+                        </chart:SparrowChart.XAxis>
+                        <chart:SparrowChart.YAxis>
+                            <chart:LinearYAxis CrossLineStyle="{StaticResource crossLineStyle}"  MinorLineStyle="{StaticResource minorcrossLineStyle}" MajorLineStyle="{StaticResource crossLineStyle}" MinValue="0" MaxValue="1" AxisLineStyle="{StaticResource axisLineStyle}" MinorTicksCount="3" ShowCrossLines="True" StringFormat="00.00" Header="电压(V)"/>
+                        </chart:SparrowChart.YAxis>
+                        <chart:LineSeries Label="输入电压" PointsSource="{Binding ScopeCHBCollection}" Stroke="Yellow" XPath="Value" YPath="Value1" StrokeThickness="1" UseSinglePart="True"/>
+                        <chart:ScatterSeries Label="边沿点" PointsSource="{Binding ScopeCHBEdgeCollection}" Stroke="Red" XPath="Value" YPath="Value1" ScatterSize="10"  StrokeThickness="2" UseSinglePart="True"/>
+                    </chart:SparrowChart>
+
+                </Canvas>
+            </DockPanel>
+
+            <DockPanel Grid.Row="1">
+                <TextBlock DockPanel.Dock="Top">结果处理</TextBlock>
+                <chart:SparrowChart x:Name="SparrowChart" Foreground="White" FontFamily="Arial" ContainerBorderStyle="{StaticResource containerStyle}" Margin="5" MinHeight="200">
+                    <chart:SparrowChart.Background>
+                        <LinearGradientBrush EndPoint="0.504,1.5" StartPoint="0.504,0.03">
+                            <GradientStop Color="#FF00170B" Offset="0"/>
+                            <GradientStop Color="#FF005C2C" Offset="0.8"/>
+                        </LinearGradientBrush>
+                    </chart:SparrowChart.Background>
+                    <chart:SparrowChart.XAxis>
+                        <chart:LinearXAxis CrossLineStyle="{StaticResource crossLineStyle}" MinorLineStyle="{StaticResource minorcrossLineStyle}" MajorLineStyle="{StaticResource crossLineStyle}" AxisLineStyle="{StaticResource axisLineStyle}" MinValue="0" MaxValue="1" MinorTicksCount="3" ShowCrossLines="True" Header="时间(S)" StringFormat="00.0"/>
+                    </chart:SparrowChart.XAxis>
+                    <chart:SparrowChart.YAxis>
+                        <chart:LinearYAxis CrossLineStyle="{StaticResource crossLineStyle}"  MinorLineStyle="{StaticResource minorcrossLineStyle}" MajorLineStyle="{StaticResource crossLineStyle}" MinValue="0" MaxValue="1" AxisLineStyle="{StaticResource axisLineStyle}" MinorTicksCount="3" ShowCrossLines="True" StringFormat="00.00" Header="电压(V)"/>
+                    </chart:SparrowChart.YAxis>
+                    <chart:LineSeries Label="输入电压" PointsSource="{Binding ScopeCHACollection}" Stroke="Yellow" XPath="Value" YPath="Value1" StrokeThickness="1" UseSinglePart="True"/>
+                    <chart:ScatterSeries Label="边沿点" PointsSource="{Binding ScopeCHAEdgeCollection}" Stroke="Red" XPath="Value" YPath="Value1" ScatterSize="10"  StrokeThickness="2" UseSinglePart="True"/>
+                </chart:SparrowChart>
+
+            </DockPanel>
+
+        </Grid>
+
 
     </DockPanel>
 </Window>
