@@ -102,6 +102,38 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
 
     }
 
+    /// <summary>
+    /// 示波器数据读取完成事件
+    /// </summary>
+    public class ScopeReadDataCompletedEventArgs : EventArgs
+    {
+        private double[] ch1;
+        private double[] ch2;
+
+        /// <summary>
+        /// 创建ScopeReadDataCompletedEventArgs新实例
+        /// </summary>
+        /// <param name="ch1"></param>
+        /// <param name="ch2"></param>
+        public ScopeReadDataCompletedEventArgs(double[] ch1, double[] ch2)
+        {
+            this.ch1 = ch1;
+            this.ch2 = ch2;
+        }
+
+        /// <summary>
+        /// 获取数据
+        /// </summary>
+        /// <param name="ch1"></param>
+        /// <param name="ch2"></param>
+        public void GetData(out double[] ch1, out double[] ch2)
+        {
+            ch1 = this.ch1;
+            ch2 = this.ch2;
+        }
+
+    }
+
     public class LOTOA02 : IScopeBase
     {
         //声明需要的变量
@@ -665,6 +697,112 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
                     }
                 }
             }
+        }
+
+        #endregion
+
+        #region 连续采集模式
+
+        #region 事件
+
+        public event EventHandler<ScopeReadDataCompletedEventArgs> ScopeReadDataCompleted;
+
+        protected void OnScopeReadDataCompleted(double[] ch1, double[] ch2)
+        {
+            ScopeReadDataCompleted?.Invoke(this, new ScopeReadDataCompletedEventArgs(ch1, ch2));
+            
+        }
+
+        #endregion
+
+        public static uint CaculateEvtNum(int readCount)
+        {
+            if (readCount <= 131072)
+            {
+                return 1u;
+            }
+            else if (readCount <= 524288)
+            {
+                return 4u;
+            }
+            else if (readCount <= 1048576)
+            {
+                return 16u;
+            }
+            else if (readCount <= 2097152)
+            {
+                return 32u;
+            }
+            else
+            {
+                return 64u;
+            }
+        }
+
+        private bool _shouldStop = false;
+
+        /// <summary>
+        /// 停止采集线程
+        /// </summary>
+        public void StopSampleThread()
+        {
+            _shouldStop = true;
+
+        }
+
+        /// <summary>
+        /// 开始连续采集
+        /// </summary>
+        public void StartSerialSampple()
+        {
+            //开始采集
+            StartSample();
+
+            new Thread(() =>
+            {
+                lock (lockObject)
+                {
+                    int eventTimeout = 2000;
+                    double[] channelData1 = new double[0];
+                    double[] channelData2 = new double[0];
+                    uint eventNumber = CaculateEvtNum((int)sampleCount * 2);
+
+                    //获取数据
+                    int res = MyDLLimport.AiReadBulkData((int)sampleCount * 2, eventNumber, eventTimeout, g_pBuffer);
+
+                    while (!_shouldStop)
+                    {
+                        //获取当前的事件
+                        int currentEventID = MyDLLimport.EventCheck(eventTimeout);
+
+                        if ((currentEventID == 1365) || (currentEventID == -1))
+                        {
+                            break;
+                        }
+
+                        if (currentEventID == (eventNumber - 1))
+                        {
+                            break;
+                        }
+
+                        channelData1 = new double[sampleCount - invalidDataCount];
+                        channelData2 = new double[sampleCount - invalidDataCount];
+                        unsafe
+                        {
+                            byte* pData = (byte*)g_pBuffer;
+                            for (uint i = invalidDataCount; i < sampleCount; i++)
+                            {
+                                channelData1[i - invalidDataCount] = (*(pData + i * 2) - currentCHAZero) * currentCHAScale;
+                                channelData2[i - invalidDataCount] = (*(pData + i * 2 + 1) - currentCHBZero) * currentCHBScale;
+                            }
+                        }
+
+                        OnScopeReadDataCompleted(channelData1, channelData2);
+                    }
+                        
+                }
+            }).Start();
+
         }
 
         #endregion
