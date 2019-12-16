@@ -9,6 +9,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using Framework.Infrastructure.Serialization;
 
 namespace AnalogSignalAnalysisWpf
 {
@@ -56,6 +57,31 @@ namespace AnalogSignalAnalysisWpf
             Output2 = Output * 10.197;
         }
     }
+
+    /// <summary>
+    /// 导入的IO数据
+    /// </summary>
+    public class ImportIOData
+    {
+        //数据列表
+        public Dictionary<int, double> RecordVoltages = new Dictionary<int, double>();
+
+        /// <summary>
+        /// 最大电压
+        /// </summary>
+        public double MaxVoltage { get; set; }
+
+        /// <summary>
+        /// 最大时间
+        /// </summary>
+        public double MaxTime { get; set; }
+
+        /// <summary>
+        /// 时间间隔(MS)
+        /// </summary>
+        public int TimeInterval { get; set; } = 50;
+    }
+
 
     /// <summary>
     /// 电压表
@@ -274,8 +300,25 @@ namespace AnalogSignalAnalysisWpf
                 SystemParamManager.SystemParam.InputOutputMeasureParams.OutputType = value;
                 SystemParamManager.SaveParams();
 
-                IsEnableLoopupTableOutput = value == 1;
-                IsEnableNormalOutput = !IsEnableLoopupTableOutput;
+                if (outputType == 0)
+                {
+                    IsEnableNormalOutput = true;
+                    IsEnableLoopupTableOutput = false;
+                    IsEnableConfigFileOutput = false;
+                }
+                else if (outputType == 1)
+                {
+                    IsEnableNormalOutput = false;
+                    IsEnableLoopupTableOutput = true;
+                    IsEnableConfigFileOutput = false;
+                }
+                else if (outputType == 2)
+                {
+                    IsEnableNormalOutput = false;
+                    IsEnableLoopupTableOutput = false;
+                    IsEnableConfigFileOutput = true;
+                }
+
             }
         }
 
@@ -421,6 +464,16 @@ namespace AnalogSignalAnalysisWpf
             }
         }
 
+        private bool isEnableConfigFileOutput;
+
+        /// <summary>
+        /// 使能配置文件输出模式
+        /// </summary>
+        public bool IsEnableConfigFileOutput
+        {
+            get { return isEnableConfigFileOutput; }
+            set { isEnableConfigFileOutput = value; NotifyOfPropertyChange(() => IsEnableConfigFileOutput); }
+        }
 
         private bool isMeasuring;
 
@@ -663,6 +716,11 @@ namespace AnalogSignalAnalysisWpf
 
         #region 方法
 
+        /// <summary>
+        /// 导入的IO数据
+        /// </summary>
+        private ImportIOData importIOData = new ImportIOData();
+
         private object lockObject = new object();
 
         /// <summary>
@@ -840,11 +898,13 @@ namespace AnalogSignalAnalysisWpf
                     //输出结果
                     OnMeasurementCompleted(new InputOutputMeasurementCompletedEventArgs(true, infos));
                 }
-                else
+                //正常模式
+                else if (IsEnableNormalOutput)
                 {
                     if (MinVoltage > MaxVoltage)
                     {
                         OnMeasurementCompleted(new InputOutputMeasurementCompletedEventArgs());
+                        return;
                     }
                     
                     double currentVoltage = MinVoltage;
@@ -896,6 +956,64 @@ namespace AnalogSignalAnalysisWpf
 
                     //输出结果
                     OnMeasurementCompleted(new InputOutputMeasurementCompletedEventArgs(true, infos));
+                }
+                //配置文件模式
+                //还有些问题,应当设置为连续采集模式
+                else if (IsEnableConfigFileOutput)
+                {
+                    if ((importIOData == null) || (importIOData.RecordVoltages == null) || (importIOData.RecordVoltages.Count <= 0))
+                    {
+                        OnMeasurementCompleted(new InputOutputMeasurementCompletedEventArgs());
+                        return;
+                    }
+
+                    double currentVoltage = 0;
+                    Power.Voltage = 0;
+                    Power.IsEnableOutput = true;
+
+                    foreach (var item in importIOData.RecordVoltages.Values)
+                    {
+                        currentVoltage = item;
+
+                        if (currentVoltage != 0)
+                        {
+                            //设置当前电压
+                            Power.Voltage = currentVoltage;
+                        }
+                        Thread.Sleep(importIOData.TimeInterval);
+
+                        //读取Scope数据
+                        double[] originalData;
+                        Scope.ReadDataBlock(0, out originalData);
+
+                        //数据滤波
+                        double[] filterData;
+                        Analysis.MeanFilter(originalData, 7, out filterData);
+
+                        //电压转气压
+                        double[] pressureData = filterData.ToList().ConvertAll(x => VoltageToPressure(x)).ToArray();
+
+                        //获取中值
+                        var medianData = Analysis.Median(pressureData);
+                        if (double.IsNaN(medianData))
+                        {
+                            OnMeasurementCompleted(new InputOutputMeasurementCompletedEventArgs());
+                        }
+
+                        CurrentInput = currentVoltage;
+                        CurrentOutput = medianData;
+
+                        if (infos.Count >= 2)
+                        {
+                            CurrentOutput = infos[infos.Count - 1].Output * 0.5 + infos[infos.Count - 2].Output * 0.2 + medianData * 0.3;
+                        }
+
+                        infos.Add(new InputOutputMeasurementInfo(CurrentInput, CurrentOutput));
+
+                        stopwatch.Stop();
+                        ShowIOData(stopwatch.Elapsed.TotalMilliseconds, currentVoltage, medianData);
+                        stopwatch.Start();
+                    }
                 }
             });
 
@@ -985,6 +1103,15 @@ namespace AnalogSignalAnalysisWpf
         {
             SystemParamManager.SystemParam.InputOutputMeasureParams.VoltageTable = new ObservableCollection<VoltageTable>(VoltageTable);
             SystemParamManager.SaveParams();
+        }
+
+        /// <summary>
+        /// 导入配置信息文件
+        /// </summary>
+        /// <param name="file"></param>
+        public void ImportConfigFile(string file)
+        {
+            importIOData = JsonSerialization.DeserializeObjectFromFile<ImportIOData>(file);
         }
 
         #endregion

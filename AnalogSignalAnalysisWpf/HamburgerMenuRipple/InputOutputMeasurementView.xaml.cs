@@ -41,5 +41,20 @@ namespace AnalogSignalAnalysisWpf
             BindingExpression be = tb.GetBindingExpression(TextBox.TextProperty);
             be.UpdateSource();
         }
+
+        private void SelcetImportConfigFile_Click(object sender, RoutedEventArgs e)
+        {
+            var ofd = new Microsoft.Win32.OpenFileDialog
+            {
+                DefaultExt = ".json",
+                Filter = "json file|*.json",
+            };
+
+            if (ofd.ShowDialog() == true)
+            {
+                var model = DataContext as InputOutputMeasurementViewModel;
+                model.ImportConfigFile(ofd.FileName);
+            }
+        }
     }
 }
