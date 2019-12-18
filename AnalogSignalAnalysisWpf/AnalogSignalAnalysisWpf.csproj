@@ -224,6 +224,7 @@
       <DependentUpon>HamburgerMenuRipple.xaml</DependentUpon>
     </Compile>
     <Compile Include="HamburgerMenuRipple\InputOutputMeasurementViewModel.cs" />
+    <Compile Include="HamburgerMenuRipple\NewIOMeasurementViewModel.cs" />
     <Compile Include="HamburgerMenuRipple\ReportView.xaml.cs">
       <DependentUpon>ReportView.xaml</DependentUpon>
     </Compile>
