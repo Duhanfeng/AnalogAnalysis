@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using Framework.Infrastructure.Serialization;
+using System.IO;
 
 namespace AnalogSignalAnalysisWpf
 {
@@ -363,13 +364,33 @@ namespace AnalogSignalAnalysisWpf
 
         #endregion
 
-
         #region 应用
+
+        private string importFile;
+
+        /// <summary>
+        /// 导入的配置文件
+        /// </summary>
+        public string ImportFile
+        {
+            get { return importFile; }
+            set { importFile = value; NotifyOfPropertyChange(() => ImportFile); }
+        }
 
         /// <summary>
         /// 外部记录的数据
         /// </summary>
         public ExternRecordData ExternRecordData { get; set; }
+
+        /// <summary>
+        /// 测量线程
+        /// </summary>
+        private Thread measureThread;
+
+        /// <summary>
+        /// 产生电压标志
+        /// </summary>
+        private bool isGenerateVol = false;
 
         /// <summary>
         /// 电压转气压
@@ -380,6 +401,100 @@ namespace AnalogSignalAnalysisWpf
         {
 
             return (voltage - SystemParamManager.SystemParam.GlobalParam.PressureZeroVoltage) * SystemParamManager.SystemParam.GlobalParam.PressureK;
+        }
+
+        /// <summary>
+        /// 启动
+        /// </summary>
+        public void Start()
+        {
+            lock (lockObject)
+            {
+                if (IsMeasuring)
+                {
+                    return;
+                }
+            }
+
+            if (!IsHardwareValid)
+            {
+                RunningStatus = "硬件无效";
+                return;
+            }
+
+            //配置文件校验
+            if (string.IsNullOrWhiteSpace(ImportFile) || !File.Exists(ImportFile))
+            {
+                OnMessageRaised(MessageLevel.Err, "配置文件无效");
+                return;
+            }
+
+            RunningStatus = "运行中";
+
+            //复位示波器设置
+            Scope.Disconnect();
+            Scope.Connect();
+            Scope.CHAScale = SystemParamManager.SystemParam.GlobalParam.Scale;
+            Scope.SampleRate = SystemParamManager.SystemParam.GlobalParam.SampleRate;
+            Scope.CHAVoltageDIV = SystemParamManager.SystemParam.GlobalParam.VoltageDIV;
+
+            //设置电源模块直通
+            PLC.PWMSwitch = false;
+            PLC.FlowSwitch = true;
+
+            //开启测量线程
+            measureThread = new System.Threading.Thread(() =>
+            {
+                //加载文件
+                ExternRecordData = JsonSerialization.DeserializeObjectFromFile<ExternRecordData>("data.json");
+
+                if (ExternRecordData == null)
+                {
+                    return;
+                }
+                ExternRecordData.TimeInterval = 1000;
+
+                Stopwatch stopwatch = new Stopwatch();
+
+                int index = 0;
+                double lastVol = 0;
+                foreach (var item in ExternRecordData.RecordVoltages.Values)
+                {
+                    stopwatch.Start();
+                    while (true)
+                    {
+                        if (stopwatch.Elapsed.TotalMilliseconds >= ExternRecordData.TimeInterval)
+                        {
+                            if (item > 0)
+                            {
+                                //设置当前电压
+                                Power.Voltage = item;
+
+                                Console.WriteLine($"[{stopwatch.Elapsed.TotalMilliseconds:F3}:{index}]: vol: {item}");
+                                lastVol = item;
+                            }
+                            else
+                            {
+                                //设置当前电压
+                                Power.Voltage = lastVol;
+
+                                Console.WriteLine($"[{stopwatch.Elapsed.TotalMilliseconds:F3}:{index}]: vol: {lastVol}");
+                            }
+
+                            index++;
+                            stopwatch.Restart();
+                            break;
+                        }
+                    }
+
+                }
+
+
+
+            });
+
+            measureThread.Start();
+            measureThread.Start();
         }
 
         #endregion

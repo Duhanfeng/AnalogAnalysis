@@ -102,37 +102,6 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
 
     }
 
-    /// <summary>
-    /// 示波器数据读取完成事件
-    /// </summary>
-    public class ScopeReadDataCompletedEventArgs : EventArgs
-    {
-        private double[] ch1;
-        private double[] ch2;
-
-        /// <summary>
-        /// 创建ScopeReadDataCompletedEventArgs新实例
-        /// </summary>
-        /// <param name="ch1"></param>
-        /// <param name="ch2"></param>
-        public ScopeReadDataCompletedEventArgs(double[] ch1, double[] ch2)
-        {
-            this.ch1 = ch1;
-            this.ch2 = ch2;
-        }
-
-        /// <summary>
-        /// 获取数据
-        /// </summary>
-        /// <param name="ch1"></param>
-        /// <param name="ch2"></param>
-        public void GetData(out double[] ch1, out double[] ch2)
-        {
-            ch1 = this.ch1;
-            ch2 = this.ch2;
-        }
-
-    }
 
     public class LOTOA02 : IScopeBase
     {
