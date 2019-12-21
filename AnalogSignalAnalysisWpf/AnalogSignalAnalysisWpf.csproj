@@ -224,6 +224,9 @@
       <DependentUpon>HamburgerMenuRipple.xaml</DependentUpon>
     </Compile>
     <Compile Include="HamburgerMenuRipple\InputOutputMeasurementViewModel.cs" />
+    <Compile Include="HamburgerMenuRipple\NewIOMeasurementView.xaml.cs">
+      <DependentUpon>NewIOMeasurementView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="HamburgerMenuRipple\NewIOMeasurementViewModel.cs" />
     <Compile Include="HamburgerMenuRipple\ReportView.xaml.cs">
       <DependentUpon>ReportView.xaml</DependentUpon>
@@ -285,6 +288,10 @@
     <Page Include="HamburgerMenuRipple\HamburgerMenuRipple.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="HamburgerMenuRipple\NewIOMeasurementView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="HamburgerMenuRipple\ReportView.xaml">
       <SubType>Designer</SubType>

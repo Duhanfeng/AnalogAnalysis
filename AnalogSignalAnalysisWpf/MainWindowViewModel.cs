@@ -225,6 +225,7 @@ namespace AnalogSignalAnalysisWpf
             //设置测试model实例
             FrequencyMeasurementViewModel = new FrequencyMeasurementViewModel(Scope, Power, PLC, PWM);
             InputOutputMeasurementViewModel = new InputOutputMeasurementViewModel(Scope, Power, PLC, PWM);
+            NewIOMeasurementViewModel = new NewIOMeasurementViewModel(Scope, Power, PLC, PWM);
             PNVoltageMeasurementViewModel = new PNVoltageMeasurementViewModel(Scope, Power, PLC, PWM);
             ThroughputMeasurementViewModel = new ThroughputMeasurementViewModel(Scope, Power, PLC, PWM);
             BurnInTestViewModel = new BurnInTestViewModel(Scope, Power, PLC, PWM);
@@ -232,18 +233,21 @@ namespace AnalogSignalAnalysisWpf
 
             FrequencyMeasurementViewModel.MeasurementStarted += MeasurementViewModel_MeasurementStarted;
             InputOutputMeasurementViewModel.MeasurementStarted += MeasurementViewModel_MeasurementStarted;
+            NewIOMeasurementViewModel.MeasurementStarted += MeasurementViewModel_MeasurementStarted;
             PNVoltageMeasurementViewModel.MeasurementStarted += MeasurementViewModel_MeasurementStarted;
             ThroughputMeasurementViewModel.MeasurementStarted += MeasurementViewModel_MeasurementStarted;
             FlowMeasureViewModel.MeasurementStarted += MeasurementViewModel_MeasurementStarted;
 
             FrequencyMeasurementViewModel.MeasurementCompleted += FrequencyMeasurementViewModel_MeasurementCompleted;
             InputOutputMeasurementViewModel.MeasurementCompleted += InputOutputMeasurementViewModel_MeasurementCompleted;
+            NewIOMeasurementViewModel.MeasurementCompleted += NewIOMeasurementViewModel_MeasurementCompleted;
             PNVoltageMeasurementViewModel.MeasurementCompleted += PNVoltageMeasurementViewModel_MeasurementCompleted;
             ThroughputMeasurementViewModel.MeasurementCompleted += ThroughputMeasurementViewModel_MeasurementCompleted;
             FlowMeasureViewModel.MeasurementCompleted += ThroughputMeasurementViewModel_MeasurementCompleted;
 
             FrequencyMeasurementViewModel.MessageRaised += FrequencyMeasurementViewModel_MessageRaised;
             InputOutputMeasurementViewModel.MessageRaised += InputOutputMeasurementViewModel_MessageRaised;
+            NewIOMeasurementViewModel.MessageRaised += InputOutputMeasurementViewModel_MessageRaised;
             PNVoltageMeasurementViewModel.MessageRaised += PNVoltageMeasurementViewModel_MessageRaised;
             ThroughputMeasurementViewModel.MessageRaised += ThroughputMeasurementViewModel_MessageRaised;
             FlowMeasureViewModel.MessageRaised += ThroughputMeasurementViewModel_MessageRaised;
@@ -252,7 +256,7 @@ namespace AnalogSignalAnalysisWpf
             SystemParamManager.LoadUser();
 
         }
-
+        
         private void MeasurementViewModel_MeasurementStarted(object sender, EventArgs e)
         {
             lock (measureLock)
@@ -269,6 +273,10 @@ namespace AnalogSignalAnalysisWpf
                 PNMeasureStatus = "测试中";
             }
             else if (sender is InputOutputMeasurementViewModel)
+            {
+                IOMeasureStatus = "测试中";
+            }
+            else if (sender is NewIOMeasurementViewModel)
             {
                 IOMeasureStatus = "测试中";
             }
@@ -352,6 +360,32 @@ namespace AnalogSignalAnalysisWpf
                             IOMeasureStatus = "测试失败";
                             InputOutputInfos = new ObservableCollection<InputOutputMeasurementInfo>();
                         }
+                    }, null);
+                });
+            }).Start();
+            NotifyOfPropertyChange(() => IsEnableTest);
+        }
+
+        private void NewIOMeasurementViewModel_MeasurementCompleted(object sender, EventArgs e)
+        {
+            lock (measureLock)
+            {
+                IsMeasuring = false;
+            }
+
+            new Thread(delegate ()
+            {
+                ThreadPool.QueueUserWorkItem(delegate
+                {
+                    System.Threading.SynchronizationContext.SetSynchronizationContext(new System.Windows.Threading.DispatcherSynchronizationContext(System.Windows.Application.Current.Dispatcher));
+                    System.Threading.SynchronizationContext.Current.Send(pl =>
+                    {
+                        //if (e.IsSuccess)
+                        {
+                            IOMeasureStatus = "测试完成";
+                            //InputOutputInfos = new ObservableCollection<InputOutputMeasurementInfo>(e.Infos);
+                        }
+
                     }, null);
                 });
             }).Start();
@@ -2083,6 +2117,11 @@ namespace AnalogSignalAnalysisWpf
         public InputOutputMeasurementViewModel InputOutputMeasurementViewModel { get; set; }
 
         /// <summary>
+        /// 输入输出测试Model(新)
+        /// </summary>
+        public NewIOMeasurementViewModel NewIOMeasurementViewModel { get; set; }
+
+        /// <summary>
         /// 吸合释放电压测试Model
         /// </summary>
         public PNVoltageMeasurementViewModel PNVoltageMeasurementViewModel { get; set; }
@@ -2541,6 +2580,7 @@ namespace AnalogSignalAnalysisWpf
 
                 FrequencyMeasurementViewModel.IsAdmin = IsAdmin;
                 InputOutputMeasurementViewModel.IsAdmin = IsAdmin;
+                NewIOMeasurementViewModel.IsAdmin = IsAdmin;
                 PNVoltageMeasurementViewModel.IsAdmin = IsAdmin;
                 ThroughputMeasurementViewModel.IsAdmin = IsAdmin;
             }
@@ -2550,6 +2590,7 @@ namespace AnalogSignalAnalysisWpf
 
                 FrequencyMeasurementViewModel.IsAdmin = IsAdmin;
                 InputOutputMeasurementViewModel.IsAdmin = IsAdmin;
+                NewIOMeasurementViewModel.IsAdmin = IsAdmin;
                 PNVoltageMeasurementViewModel.IsAdmin = IsAdmin;
                 ThroughputMeasurementViewModel.IsAdmin = IsAdmin;
                 OnMessageRaised(MessageLevel.Err, "登录失败");
@@ -2565,6 +2606,7 @@ namespace AnalogSignalAnalysisWpf
 
             FrequencyMeasurementViewModel.IsAdmin = IsAdmin;
             InputOutputMeasurementViewModel.IsAdmin = IsAdmin;
+            NewIOMeasurementViewModel.IsAdmin = IsAdmin;
             PNVoltageMeasurementViewModel.IsAdmin = IsAdmin;
             ThroughputMeasurementViewModel.IsAdmin = IsAdmin;
         }

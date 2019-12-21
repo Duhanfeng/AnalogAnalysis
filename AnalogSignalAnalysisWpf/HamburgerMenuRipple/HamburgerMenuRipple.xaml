@@ -215,6 +215,11 @@
                                 <local:InputOutputMeasurementView />
                             </Controls:HamburgerMenuIconItem.Tag>
                         </Controls:HamburgerMenuIconItem>
+                        <Controls:HamburgerMenuIconItem Icon="{iconPacks:FontAwesome Kind=WaveSquareSolid}" Label="输入输出曲线(新)">
+                            <Controls:HamburgerMenuIconItem.Tag>
+                                <local:NewIOMeasurementView />
+                            </Controls:HamburgerMenuIconItem.Tag>
+                        </Controls:HamburgerMenuIconItem>
                     </Controls:HamburgerMenuItemCollection>
                 </Controls:HamburgerMenu.ItemsSource>
 

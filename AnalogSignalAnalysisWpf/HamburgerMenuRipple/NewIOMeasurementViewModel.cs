@@ -388,9 +388,9 @@ namespace AnalogSignalAnalysisWpf
         private Thread measureThread;
 
         /// <summary>
-        /// 产生电压标志
+        /// 示波器应该采集标志
         /// </summary>
-        private bool isGenerateVol = false;
+        private bool shouldScopeSample = false;
 
         /// <summary>
         /// 电压转气压
@@ -456,6 +456,14 @@ namespace AnalogSignalAnalysisWpf
 
                 Stopwatch stopwatch = new Stopwatch();
 
+                //设置示波器采集
+                shouldScopeSample = true;
+                Scope.ScopeReadDataCompleted -= Scope_ScopeReadDataCompleted;
+                Scope.ScopeReadDataCompleted += Scope_ScopeReadDataCompleted;
+
+                //开始连续采集
+                Scope.StartSerialSampple();
+
                 int index = 0;
                 double lastVol = 0;
                 foreach (var item in ExternRecordData.RecordVoltages.Values)
@@ -489,12 +497,37 @@ namespace AnalogSignalAnalysisWpf
 
                 }
 
-
+                //输出完成电压后,设置相关标志位
+                shouldScopeSample = false;
 
             });
 
             measureThread.Start();
-            measureThread.Start();
+        }
+
+        private void Scope_ScopeReadDataCompleted(object sender, ScopeReadDataCompletedEventArgs e)
+        {
+            double[] ch1, ch2;
+            e.GetData(out ch1, out ch2);
+
+            //显示结果
+
+            if (!shouldScopeSample)
+            {
+                var scope = sender as IScopeBase;
+                scope.ScopeReadDataCompleted -= Scope_ScopeReadDataCompleted;
+                scope.StopSampleThread();
+            }
+
+        }
+
+        /// <summary>
+        /// 导入配置信息文件
+        /// </summary>
+        /// <param name="file"></param>
+        public void ImportConfigFile(string file)
+        {
+            ExternRecordData = JsonSerialization.DeserializeObjectFromFile<ExternRecordData>(file);
         }
 
         #endregion
