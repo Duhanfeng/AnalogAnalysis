@@ -758,47 +758,149 @@ namespace AnalogSignalAnalysisWpf
         {
             if (IsScopeValid)
             {
-                double[] channelAData;
-                double[] channelBData;
-                Scope.ReadDataBlock(out channelAData, out channelBData);
+                ScopeSampleTime = ScopeSampleTime;
 
-                //设置通道A数据
-                //数据滤波
-                double[] filterData;
-                Analysis.MeanFilter(channelAData, 11, out filterData);
-                ScopeAverageCHA = Analysis.Mean(filterData);
-
-                //显示数据
-                var collection = new ObservableCollection<Data>();
-                for (int i = 0; i < channelAData.Length / SampleInterval; i++)
+                if (Scope.SampleRate == ESampleRate.Sps_96K)
                 {
-                    collection.Add(new Data() { Value1 = filterData[i * SampleInterval], Value = i * 1000.0 / ((int)Scope.SampleRate) * SampleInterval });
-                }
-                ScopeCHACollection = collection;
+                    Scope.ScopeReadDataCompleted -= Scope_ScopeReadDataCompleted;
+                    Scope.ScopeReadDataCompleted += Scope_ScopeReadDataCompleted;
 
-                if (ScopeCHBEnable)
-                {
-                    Analysis.MeanFilter(channelBData, 11, out filterData);
-                    ScopeAverageCHB = Analysis.Mean(filterData);
-
-                    //显示通道B数据
-                    collection = new ObservableCollection<Data>();
-                    for (int i = 0; i < channelBData.Length / SampleInterval; i++)
-                    {
-                        collection.Add(new Data() { Value1 = filterData[i * SampleInterval], Value = i * 1000.0 / ((int)Scope.SampleRate) * SampleInterval });
-                    }
-                    ScopeChBCollection = collection;
+                    //开始连续采集
+                    Scope.StartSerialSampple(15000);
                 }
                 else
                 {
-                    ScopeAverageCHB = -1;
-                    ScopeChBCollection = new ObservableCollection<Data>();
+                    double[] channelAData;
+                    double[] channelBData;
+                    Scope.ReadDataBlock(out channelAData, out channelBData);
+
+                    //设置通道A数据
+                    //数据滤波
+                    double[] filterData;
+                    Analysis.MeanFilter(channelAData, 11, out filterData);
+                    ScopeAverageCHA = Analysis.Mean(filterData);
+
+                    //显示数据
+                    var collection = new ObservableCollection<Data>();
+                    for (int i = 0; i < channelAData.Length / SampleInterval; i++)
+                    {
+                        collection.Add(new Data() { Value1 = filterData[i * SampleInterval], Value = i * 1000.0 / ((int)Scope.SampleRate) * SampleInterval });
+                    }
+                    ScopeCHACollection = collection;
+
+                    if (ScopeCHBEnable)
+                    {
+                        Analysis.MeanFilter(channelBData, 11, out filterData);
+                        ScopeAverageCHB = Analysis.Mean(filterData);
+
+                        //显示通道B数据
+                        collection = new ObservableCollection<Data>();
+                        for (int i = 0; i < channelBData.Length / SampleInterval; i++)
+                        {
+                            collection.Add(new Data() { Value1 = filterData[i * SampleInterval], Value = i * 1000.0 / ((int)Scope.SampleRate) * SampleInterval });
+                        }
+                        ScopeCHBCollection = collection;
+                    }
+                    else
+                    {
+                        ScopeAverageCHB = -1;
+                        ScopeCHBCollection = new ObservableCollection<Data>();
+                    }
                 }
 
             }
         }
 
+        private void Scope_ScopeReadDataCompleted(object sender, ScopeReadDataCompletedEventArgs e)
+        {
+            double[] globleChannel1;
+            double[] globleChannel2;
+            double[] currentChannel1;
+            double[] currentChannel2;
+
+            e.GetData(out globleChannel1, out globleChannel2, out currentChannel1, out currentChannel2);
+
+            //设置通道A数据
+            //数据滤波
+            double[] filterData;
+            Analysis.MeanFilter(currentChannel1, 11, out filterData);
+            ScopeAverageCHA = Analysis.Mean(filterData);
+
+            //显示数据
+            ObservableCollection<Data> collectionA;
+
+            if (e.CurrentPacket == 0)
+            {
+                collectionA = new ObservableCollection<Data>();
+            }
+            else
+            {
+                collectionA = new ObservableCollection<Data>(ScopeCHACollection);
+            }
+
+            for (int i = 0; i < currentChannel1.Length / SampleInterval; i++)
+            {
+                collectionA.Add(new Data() { Value1 = filterData[i * SampleInterval], Value = (e.CurrentPacket * currentChannel1.Length + i) * 1000.0 / ((int)Scope.SampleRate) * SampleInterval });
+            }
+
+            ObservableCollection<Data> collectionB = new ObservableCollection<Data>();
+
+            if (ScopeCHBEnable)
+            {
+                Analysis.MeanFilter(currentChannel2, 11, out filterData);
+                ScopeAverageCHB = Analysis.Mean(filterData);
+
+                if (e.CurrentPacket == 0)
+                {
+                    collectionB = new ObservableCollection<Data>();
+                }
+                else
+                {
+                    collectionB = new ObservableCollection<Data>(ScopeCHBCollection);
+                }
+
+                //显示通道B数据
+                for (int i = 0; i < currentChannel2.Length / SampleInterval; i++)
+                {
+                    collectionB.Add(new Data() { Value1 = filterData[i * SampleInterval], Value = (e.CurrentPacket * currentChannel2.Length + i) * 1000.0 / ((int)Scope.SampleRate) * SampleInterval });
+                }
+            }
+            else
+            {
+                ScopeAverageCHB = -1;
+            }
+
+            //显示图像
+            ScopeCHACollection = collectionA;
+            ScopeCHBCollection = collectionB;
+
+            if (e.CurrentPacket == (e.TotalPacket - 1))
+            {
+                new Thread(delegate ()
+                {
+                    ThreadPool.QueueUserWorkItem(delegate
+                    {
+                        SynchronizationContext.SetSynchronizationContext(new System.Windows.Threading.DispatcherSynchronizationContext(System.Windows.Application.Current.Dispatcher));
+                        SynchronizationContext.Current.Send(pl =>
+                        {
+                            OnMessageRaised(MessageLevel.Message, "采集完成");
+                        }, null);
+                    });
+                }).Start();
+
+            }
+
+        }
+
         #region 配置参数
+
+        private string scopeSampleButton = "开始采集";
+
+        public string ScopeSampleButton
+        {
+            get { return scopeSampleButton; }
+            set { scopeSampleButton = value; NotifyOfPropertyChange(() => ScopeSampleButton); }
+        }
 
         /// <summary>
         /// 放大倍数
@@ -1040,6 +1142,15 @@ namespace AnalogSignalAnalysisWpf
                     Scope.SampleRate = EnumHelper.GetEnum<ESampleRate>(value);
                     SystemParamManager.SystemParam.ScopeParams.SampleRate = Scope.SampleRate;
                     SystemParamManager.SaveParams();
+
+                    if (Scope.SampleRate == ESampleRate.Sps_96K)
+                    {
+                        ScopeSampleButton = "连续采集";
+                    }
+                    else
+                    {
+                        ScopeSampleButton = "单次采集";
+                    }
                 }
                 NotifyOfPropertyChange(() => ScopeSampleRate);
             }
@@ -1147,7 +1258,7 @@ namespace AnalogSignalAnalysisWpf
         /// <summary>
         /// 通道B数据
         /// </summary>
-        public ObservableCollection<Data> ScopeChBCollection
+        public ObservableCollection<Data> ScopeCHBCollection
         {
             get
             {
@@ -1156,7 +1267,7 @@ namespace AnalogSignalAnalysisWpf
             set
             {
                 scopeChBCollection = value;
-                NotifyOfPropertyChange(() => ScopeChBCollection);
+                NotifyOfPropertyChange(() => ScopeCHBCollection);
             }
         }
 

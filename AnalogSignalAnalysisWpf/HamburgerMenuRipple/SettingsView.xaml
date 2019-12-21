@@ -104,7 +104,7 @@
                                 </chart:LinearYAxis>
                             </chart:SparrowChart.YAxis>
                             <chart:LineSeries Label="CH1" PointsSource="{Binding ScopeCHACollection}" Stroke="Yellow" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
-                            <chart:LineSeries Label="CH2" PointsSource="{Binding ScopeChBCollection}" Stroke="YellowGreen" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
+                            <chart:LineSeries Label="CH2" PointsSource="{Binding ScopeCHBCollection}" Stroke="Red" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
                         </chart:SparrowChart>
                     </Grid>
                     

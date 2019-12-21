@@ -8,18 +8,43 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
     /// </summary>
     public class ScopeReadDataCompletedEventArgs : EventArgs
     {
-        private double[] ch1;
-        private double[] ch2;
+        private double[] _globalChannel1 = new double[0];
+        private double[] _globalChannel2 = new double[0];
+
+        private double[] _currentCHannel1 = new double[0];
+        private double[] _currentCHannel2 = new double[0];
+
+        /// <summary>
+        /// 总共的数据包
+        /// </summary>
+        public int TotalPacket { get; }
+
+        /// <summary>
+        /// 当前的数据包
+        /// </summary>
+        public int CurrentPacket { get; }
 
         /// <summary>
         /// 创建ScopeReadDataCompletedEventArgs新实例
         /// </summary>
         /// <param name="ch1"></param>
         /// <param name="ch2"></param>
-        public ScopeReadDataCompletedEventArgs(double[] ch1, double[] ch2)
+        public ScopeReadDataCompletedEventArgs(double[] globalChannel1, double[] globalChannel2)
         {
-            this.ch1 = ch1;
-            this.ch2 = ch2;
+            _globalChannel1 = globalChannel1;
+            _globalChannel2 = globalChannel2;
+        }
+
+        public ScopeReadDataCompletedEventArgs(double[] globalChannel1, double[] globalChannel2, double[] currentChannel1, double[] currentChannel2, int totalPacket, int currentPacket)
+        {
+            _globalChannel1 = globalChannel1;
+            _globalChannel2 = globalChannel2;
+
+            _currentCHannel1 = currentChannel1;
+            _currentCHannel2 = currentChannel2;
+
+            TotalPacket = totalPacket;
+            CurrentPacket = currentPacket;
         }
 
         /// <summary>
@@ -27,12 +52,24 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         /// </summary>
         /// <param name="ch1"></param>
         /// <param name="ch2"></param>
-        public void GetData(out double[] ch1, out double[] ch2)
+        public void GetData(out double[] globalChannel1, out double[] globalChannel2)
         {
-            ch1 = this.ch1;
-            ch2 = this.ch2;
+            globalChannel1 = _globalChannel1;
+            globalChannel2 = _globalChannel2;
         }
 
+        /// <summary>
+        /// 获取数据
+        /// </summary>
+        /// <param name="ch1"></param>
+        /// <param name="ch2"></param>
+        public void GetData(out double[] globalChannel1, out double[] globalChannel2, out double[] currentCHannel1, out double[] currentCHannel2)
+        {
+            GetData(out globalChannel1, out globalChannel2);
+
+            currentCHannel1 = _currentCHannel1;
+            currentCHannel2 = _currentCHannel2;
+        }
     }
 
     public interface IScopeBase
@@ -102,7 +139,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         /// <summary>
         /// 开始连续采集
         /// </summary>
-        void StartSerialSampple();
+        void StartSerialSampple(int serialSampleTime);
 
         #region 属性
 

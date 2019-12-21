@@ -226,6 +226,21 @@ namespace AnalogSignalAnalysisWpf
 
         #endregion
 
+        #region 输入参数
+
+        private string importFile;
+
+        /// <summary>
+        /// 导入的配置文件
+        /// </summary>
+        public string ImportFile
+        {
+            get { return importFile; }
+            set { importFile = value; NotifyOfPropertyChange(() => ImportFile); }
+        }
+
+        #endregion
+
         #region 硬件接口
 
         /// <summary>
@@ -255,6 +270,16 @@ namespace AnalogSignalAnalysisWpf
         {
             get
             {
+#if true
+                if (Scope?.IsConnect == true)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+#else
                 if ((Scope?.IsConnect == true) &&
                     (Power?.IsConnect == true) &&
                     (PLC?.IsConnect == true) &&
@@ -266,6 +291,8 @@ namespace AnalogSignalAnalysisWpf
                 {
                     return false;
                 }
+#endif
+
             }
         }
 
@@ -300,6 +327,151 @@ namespace AnalogSignalAnalysisWpf
 
         #endregion
 
+        #region 显示参数
+
+        private ObservableCollection<Data> powerCollection;
+
+        /// <summary>
+        /// 输出参数
+        /// </summary>
+        public ObservableCollection<Data> PowerCollection
+        {
+            get
+            {
+                return powerCollection;
+            }
+            set
+            {
+                powerCollection = value;
+                NotifyOfPropertyChange(() => PowerCollection);
+            }
+        }
+
+        private ObservableCollection<Data> scopeChACollection;
+
+        /// <summary>
+        /// 通道A数据
+        /// </summary>
+        public ObservableCollection<Data> ScopeCHACollection
+        {
+            get
+            {
+                return scopeChACollection;
+            }
+            set
+            {
+                scopeChACollection = value;
+                NotifyOfPropertyChange(() => ScopeCHACollection);
+            }
+        }
+
+        private ObservableCollection<Data> scopeChBCollection;
+
+        /// <summary>
+        /// 通道B数据
+        /// </summary>
+        public ObservableCollection<Data> ScopeCHBCollection
+        {
+            get
+            {
+                return scopeChBCollection;
+            }
+            set
+            {
+                scopeChBCollection = value;
+                NotifyOfPropertyChange(() => ScopeCHBCollection);
+            }
+        }
+
+        private ObservableCollection<Data> tempPowerCollection = new ObservableCollection<Data>();
+        private ObservableCollection<Data> tempCHACollection = new ObservableCollection<Data>();
+        private ObservableCollection<Data> tempCHBCollection = new ObservableCollection<Data>();
+
+        /// <summary>
+        /// 追加电源数据
+        /// </summary>
+        /// <param name="datas"></param>
+        private void AppendPowerCollection(IEnumerable<Data> datas)
+        {
+            foreach (var item in datas)
+            {
+                tempPowerCollection.Add(item);
+            }
+
+            PowerCollection = PowerCollection = new ObservableCollection<Data>(tempPowerCollection);
+        }
+
+        /// <summary>
+        /// 追加电源数据
+        /// </summary>
+        /// <param name="datas"></param>
+        private void AppendPowerCollection(Data data)
+        {
+            tempPowerCollection.Add(data);
+
+            PowerCollection = new ObservableCollection<Data>(tempPowerCollection);
+
+        }
+
+        /// <summary>
+        /// 清除电源集合
+        /// </summary>
+        private void ClearPowerCollection()
+        {
+            tempPowerCollection  = new ObservableCollection<Data>();
+            PowerCollection = new ObservableCollection<Data>();
+        }
+
+        /// <summary>
+        /// 追加CHA
+        /// </summary>
+        /// <param name="datas"></param>
+        private void AppendScopeCHACollection(IEnumerable<Data> datas)
+        {
+            foreach (var item in datas)
+            {
+                tempCHACollection.Add(item);
+            }
+
+            ScopeCHACollection = new ObservableCollection<Data>(tempCHACollection);
+
+        }
+        
+        /// <summary>
+        /// 清除CHA集合
+        /// </summary>
+        private void ClearScopeCHACollection()
+        {
+            tempCHACollection = new ObservableCollection<Data>();
+            ScopeCHACollection = new ObservableCollection<Data>();
+        }
+
+        /// <summary>
+        /// 追加CHB
+        /// </summary>
+        /// <param name="datas"></param>
+        private void AppendScopeCHBCollection(IEnumerable<Data> datas)
+        {
+            foreach (var item in datas)
+            {
+                tempCHBCollection.Add(item);
+            }
+
+            ScopeCHBCollection = new ObservableCollection<Data>(tempCHBCollection);
+
+        }
+
+        /// <summary>
+        /// 清除CHB集合
+        /// </summary>
+        private void ClearScopeCHBCollection()
+        {
+            tempCHBCollection = new ObservableCollection<Data>();
+            ScopeCHBCollection = new ObservableCollection<Data>();
+        }
+
+        #endregion
+
         #region 事件
 
         /// <summary>
@@ -325,7 +497,7 @@ namespace AnalogSignalAnalysisWpf
         /// 测量完成事件
         /// </summary>
         /// <param name="e"></param>
-        protected void OnMeasurementCompleted(EventArgs e)
+        protected void OnMeasurementCompleted()
         {
             CanMeasure = true;
 
@@ -343,7 +515,7 @@ namespace AnalogSignalAnalysisWpf
             {
                 IsMeasuring = false;
             }
-            MeasurementCompleted?.Invoke(this, e);
+            MeasurementCompleted?.Invoke(this, new EventArgs());
         }
 
         /// <summary>
@@ -366,17 +538,6 @@ namespace AnalogSignalAnalysisWpf
 
         #region 应用
 
-        private string importFile;
-
-        /// <summary>
-        /// 导入的配置文件
-        /// </summary>
-        public string ImportFile
-        {
-            get { return importFile; }
-            set { importFile = value; NotifyOfPropertyChange(() => ImportFile); }
-        }
-
         /// <summary>
         /// 外部记录的数据
         /// </summary>
@@ -391,6 +552,11 @@ namespace AnalogSignalAnalysisWpf
         /// 示波器应该采集标志
         /// </summary>
         private bool shouldScopeSample = false;
+
+        /// <summary>
+        /// 采用间隔(界面)
+        /// </summary>
+        private readonly int SampleInterval = 10;
 
         /// <summary>
         /// 电压转气压
@@ -429,14 +595,28 @@ namespace AnalogSignalAnalysisWpf
                 return;
             }
 
+            //加载文件
+            ExternRecordData = JsonSerialization.DeserializeObjectFromFile<ExternRecordData>(ImportFile);
+
+            if (!(ExternRecordData?.RecordVoltages?.Values?.Count > 0))
+            {
+                OnMessageRaised(MessageLevel.Err, "配置文件无效");
+                return;
+            }
+
+            int totalTime = (ExternRecordData.RecordVoltages.Values.Count + 5) * ExternRecordData.TimeInterval;
+
             RunningStatus = "运行中";
 
             //复位示波器设置
             Scope.Disconnect();
             Scope.Connect();
             Scope.CHAScale = SystemParamManager.SystemParam.GlobalParam.Scale;
-            Scope.SampleRate = SystemParamManager.SystemParam.GlobalParam.SampleRate;
             Scope.CHAVoltageDIV = SystemParamManager.SystemParam.GlobalParam.VoltageDIV;
+            Scope.IsCHBEnable = true;
+            Scope.CHBScale = SystemParamManager.SystemParam.GlobalParam.Scale;
+            Scope.CHBVoltageDIV = SystemParamManager.SystemParam.GlobalParam.VoltageDIV;
+            Scope.SampleRate = ESampleRate.Sps_96K;
 
             //设置电源模块直通
             PLC.PWMSwitch = false;
@@ -445,14 +625,12 @@ namespace AnalogSignalAnalysisWpf
             //开启测量线程
             measureThread = new System.Threading.Thread(() =>
             {
-                //加载文件
-                ExternRecordData = JsonSerialization.DeserializeObjectFromFile<ExternRecordData>("data.json");
-
-                if (ExternRecordData == null)
+                lock (lockObject)
                 {
-                    return;
+                    IsMeasuring = true;
                 }
-                ExternRecordData.TimeInterval = 1000;
+
+                OnMeasurementStarted();
 
                 Stopwatch stopwatch = new Stopwatch();
 
@@ -461,8 +639,17 @@ namespace AnalogSignalAnalysisWpf
                 Scope.ScopeReadDataCompleted -= Scope_ScopeReadDataCompleted;
                 Scope.ScopeReadDataCompleted += Scope_ScopeReadDataCompleted;
 
+                //清除界面数据
+                ClearPowerCollection();
+                ClearScopeCHACollection();
+                ClearScopeCHBCollection();
+
                 //开始连续采集
-                Scope.StartSerialSampple();
+                Scope.StartSerialSampple(totalTime);
+
+                var collection = new ObservableCollection<Data>();
+
+                int totalCount = ExternRecordData.RecordVoltages.Values.Count;
 
                 int index = 0;
                 double lastVol = 0;
@@ -477,28 +664,37 @@ namespace AnalogSignalAnalysisWpf
                             {
                                 //设置当前电压
                                 Power.Voltage = item;
-
-                                Console.WriteLine($"[{stopwatch.Elapsed.TotalMilliseconds:F3}:{index}]: vol: {item}");
+                                Console.WriteLine($"[{stopwatch.Elapsed.TotalMilliseconds:F2}:{index}]: vol: {item:F3}");
                                 lastVol = item;
+
+                                collection.Add(new Data() { Value1 = item / 1000, Value = index * ExternRecordData.TimeInterval });
                             }
                             else
                             {
                                 //设置当前电压
                                 Power.Voltage = lastVol;
-
-                                Console.WriteLine($"[{stopwatch.Elapsed.TotalMilliseconds:F3}:{index}]: vol: {lastVol}");
+                                Console.WriteLine($"[{stopwatch.Elapsed.TotalMilliseconds:F2}:{index}]: vol: {lastVol:F3}");
                             }
 
                             index++;
                             stopwatch.Restart();
                             break;
                         }
+                        
                     }
 
+                    if ((index % (totalCount / 20)) == 0)
+                    {
+                        AppendPowerCollection(collection);
+                        collection = new ObservableCollection<Data>();
+                    }
                 }
+
+                AppendPowerCollection(new Data() { Value1 = lastVol / 1000, Value = index * ExternRecordData.TimeInterval });
 
                 //输出完成电压后,设置相关标志位
                 shouldScopeSample = false;
+                OnMeasurementCompleted();
 
             });
 
@@ -507,10 +703,43 @@ namespace AnalogSignalAnalysisWpf
 
         private void Scope_ScopeReadDataCompleted(object sender, ScopeReadDataCompletedEventArgs e)
         {
-            double[] ch1, ch2;
-            e.GetData(out ch1, out ch2);
 
-            //显示结果
+#if true
+            double[] globleChannel1;
+            double[] globleChannel2;
+            double[] currentChannel1;
+            double[] currentChannel2;
+
+            e.GetData(out globleChannel1, out globleChannel2, out currentChannel1, out currentChannel2);
+
+            //设置通道A数据
+            //数据滤波
+            double[] filterData;
+            Analysis.MeanFilter(currentChannel1, 11, out filterData);
+
+            //显示数据
+            ObservableCollection<Data> collectionA = new ObservableCollection<Data>();
+
+            for (int i = 0; i < currentChannel1.Length / SampleInterval; i++)
+            {
+                collectionA.Add(new Data() { Value1 = filterData[i * SampleInterval], Value = (e.CurrentPacket * currentChannel1.Length + i) * 1000.0 / ((int)Scope.SampleRate) });
+            }
+
+            ObservableCollection<Data> collectionB = new ObservableCollection<Data>();
+
+            Analysis.MeanFilter(currentChannel2, 11, out filterData);
+
+            //显示通道B数据
+            for (int i = 0; i < currentChannel2.Length / SampleInterval; i++)
+            {
+                collectionB.Add(new Data() { Value1 = filterData[i * SampleInterval], Value = (e.CurrentPacket * currentChannel2.Length + i) * 1000.0 / ((int)Scope.SampleRate) });
+            }
+
+            //显示图像
+            AppendScopeCHACollection(collectionA);
+            AppendScopeCHBCollection(collectionB);
+#endif
+
 
             if (!shouldScopeSample)
             {
@@ -527,6 +756,7 @@ namespace AnalogSignalAnalysisWpf
         /// <param name="file"></param>
         public void ImportConfigFile(string file)
         {
+            ImportFile = file;
             ExternRecordData = JsonSerialization.DeserializeObjectFromFile<ExternRecordData>(file);
         }
 

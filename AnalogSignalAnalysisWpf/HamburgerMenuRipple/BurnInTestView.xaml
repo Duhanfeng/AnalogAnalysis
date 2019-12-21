@@ -109,8 +109,8 @@
             </StackPanel>
         </StackPanel>
 
-        <Expander Grid.Column="1" Grid.RowSpan="3" ExpandDirection="Left" IsExpanded="True">
-            <StackPanel Margin="10" IsEnabled="{Binding IsMeasuring, Converter={StaticResource BoolToInvertConverter}}">
+        <Expander Grid.Column="1" ExpandDirection="Left" IsExpanded="True">
+            <StackPanel Margin="10" IsEnabled="{Binding IsMeasuring, Converter={StaticResource BoolToInvertConverter}}" MinWidth="200">
                 <StackPanel>
                     <TextBlock Text="配置参数" Foreground="Green" Margin="0,10,0,0"/>
                     <DockPanel Margin="0,10,0,0">

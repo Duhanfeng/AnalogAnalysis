@@ -676,9 +676,9 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
 
         public event EventHandler<ScopeReadDataCompletedEventArgs> ScopeReadDataCompleted;
 
-        protected void OnScopeReadDataCompleted(double[] ch1, double[] ch2)
+        protected void OnScopeReadDataCompleted(double[] globalChannel1, double[] globalChannel2, double[] currentChannel1, double[] currentChannel2, int totalPacket, int currentPacket)
         {
-            ScopeReadDataCompleted?.Invoke(this, new ScopeReadDataCompletedEventArgs(ch1, ch2));
+            ScopeReadDataCompleted?.Invoke(this, new ScopeReadDataCompletedEventArgs(globalChannel1, globalChannel2, currentChannel1, currentChannel2, totalPacket, currentPacket));
             
         }
 
@@ -722,20 +722,26 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         /// <summary>
         /// 开始连续采集
         /// </summary>
-        public void StartSerialSampple()
+        public void StartSerialSampple(int serialSampleTime)
         {
-            //开始采集
-            StartSample();
-
             new Thread(() =>
             {
                 lock (lockObject)
                 {
+                    _shouldStop = false;
+                    SampleTime = serialSampleTime;
+
+                    //开始AD采集
+                    MyDLLimport.USBCtrlTransSimple((Int32)0x33);
+
                     int eventTimeout = 2000;
-                    double[] channelData1 = new double[0];
-                    double[] channelData2 = new double[0];
+                    double[] channelData1 = new double[sampleCount];
+                    double[] channelData2 = new double[sampleCount];
                     uint eventNumber = CaculateEvtNum((int)sampleCount * 2);
 
+                    //单次包的数据长度
+                    uint packetDataLength = sampleCount / eventNumber;
+                    
                     //获取数据
                     int res = MyDLLimport.AiReadBulkData((int)sampleCount * 2, eventNumber, eventTimeout, g_pBuffer);
 
@@ -749,26 +755,51 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
                             break;
                         }
 
+                        
+                        if (packetDataLength < invalidDataCount)
+                        {
+                            throw new Exception("数据异常");
+                        }
+
+                        double[] currentChannel1 = new double[packetDataLength];
+                        double[] currentChannel2 = new double[packetDataLength];
+
+                        unsafe
+                        {
+                            byte* pData = (byte*)g_pBuffer;
+
+                            if (currentEventID == 0)
+                            {
+                                for (uint i = invalidDataCount; i < packetDataLength; i++)
+                                {
+                                    currentChannel1[i] = (*(pData + i * 2) - currentCHAZero) * currentCHAScale;
+                                    currentChannel2[i] = (*(pData + i * 2 + 1) - currentCHBZero) * currentCHBScale;
+
+                                    channelData1[i] = currentChannel1[i];
+                                    channelData2[i] = currentChannel2[i];
+                                }
+                            }
+                            else
+                            {
+                                for (uint i = 0; i < packetDataLength; i++)
+                                {
+                                    currentChannel1[i - 0] = (*(pData + (packetDataLength * currentEventID + i) * 2) - currentCHAZero) * currentCHAScale;
+                                    currentChannel2[i - 0] = (*(pData + (packetDataLength * currentEventID + i) * 2 + 1) - currentCHBZero) * currentCHBScale;
+
+                                    channelData1[packetDataLength * currentEventID + i] = currentChannel1[i];
+                                    channelData2[packetDataLength * currentEventID + i] = currentChannel2[i];
+                                }
+                            }
+                        }
+
+                        OnScopeReadDataCompleted(channelData1, channelData2, currentChannel1, currentChannel2, (int)eventNumber, currentEventID);
+
                         if (currentEventID == (eventNumber - 1))
                         {
                             break;
                         }
-
-                        channelData1 = new double[sampleCount - invalidDataCount];
-                        channelData2 = new double[sampleCount - invalidDataCount];
-                        unsafe
-                        {
-                            byte* pData = (byte*)g_pBuffer;
-                            for (uint i = invalidDataCount; i < sampleCount; i++)
-                            {
-                                channelData1[i - invalidDataCount] = (*(pData + i * 2) - currentCHAZero) * currentCHAScale;
-                                channelData2[i - invalidDataCount] = (*(pData + i * 2 + 1) - currentCHBZero) * currentCHBScale;
-                            }
-                        }
-
-                        OnScopeReadDataCompleted(channelData1, channelData2);
                     }
-                        
+                    
                 }
             }).Start();
 

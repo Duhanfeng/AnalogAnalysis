@@ -53,7 +53,7 @@ namespace AnalogSignalAnalysisWpf
                     }
                     else if (item.Tag is NewIOMeasurementView)
                     {
-                        (item.Tag as NewIOMeasurementView).DataContext = (DataContext as MainWindowViewModel).InputOutputMeasurementViewModel;
+                        (item.Tag as NewIOMeasurementView).DataContext = (DataContext as MainWindowViewModel).NewIOMeasurementViewModel;
                     }
 
                 }
