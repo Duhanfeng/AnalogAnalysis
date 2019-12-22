@@ -11,6 +11,10 @@ using System.Linq;
 using System.Threading;
 using Framework.Infrastructure.Serialization;
 using System.IO;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.Windows.Media.Imaging;
+using System.Windows;
 
 namespace AnalogSignalAnalysisWpf
 {
@@ -347,6 +351,24 @@ namespace AnalogSignalAnalysisWpf
             }
         }
 
+        private ObservableCollection<Data> powerCollection2;
+
+        /// <summary>
+        /// 输出参数
+        /// </summary>
+        public ObservableCollection<Data> PowerCollection2
+        {
+            get
+            {
+                return powerCollection2;
+            }
+            set
+            {
+                powerCollection2 = value;
+                NotifyOfPropertyChange(() => PowerCollection2);
+            }
+        }
+
         private ObservableCollection<Data> scopeChACollection;
 
         /// <summary>
@@ -384,6 +406,7 @@ namespace AnalogSignalAnalysisWpf
         }
 
         private ObservableCollection<Data> tempPowerCollection = new ObservableCollection<Data>();
+        private ObservableCollection<Data> tempPowerCollection2 = new ObservableCollection<Data>();
         private ObservableCollection<Data> tempCHACollection = new ObservableCollection<Data>();
         private ObservableCollection<Data> tempCHBCollection = new ObservableCollection<Data>();
 
@@ -420,6 +443,41 @@ namespace AnalogSignalAnalysisWpf
         {
             tempPowerCollection  = new ObservableCollection<Data>();
             PowerCollection = new ObservableCollection<Data>();
+        }
+
+        /// <summary>
+        /// 追加电源数据
+        /// </summary>
+        /// <param name="datas"></param>
+        private void AppendPowerCollection2(IEnumerable<Data> datas)
+        {
+            foreach (var item in datas)
+            {
+                tempPowerCollection2.Add(item);
+            }
+
+            PowerCollection2 = new ObservableCollection<Data>(tempPowerCollection2);
+        }
+
+        /// <summary>
+        /// 追加电源数据
+        /// </summary>
+        /// <param name="datas"></param>
+        private void AppendPowerCollection2(Data data)
+        {
+            tempPowerCollection2.Add(data);
+
+            PowerCollection2 = new ObservableCollection<Data>(tempPowerCollection2);
+
+        }
+
+        /// <summary>
+        /// 清除电源集合
+        /// </summary>
+        private void ClearPowerCollection2()
+        {
+            tempPowerCollection2 = new ObservableCollection<Data>();
+            PowerCollection2 = new ObservableCollection<Data>();
         }
 
         /// <summary>
@@ -534,6 +592,13 @@ namespace AnalogSignalAnalysisWpf
             MessageRaised?.Invoke(this, new MessageRaisedEventArgs(messageLevel, message, exception));
         }
 
+        public event EventHandler<EventArgs> Compared;
+
+        protected void OnCompared()
+        {
+            Compared?.Invoke(this, new EventArgs());
+        }
+
         #endregion
 
         #region 应用
@@ -641,6 +706,7 @@ namespace AnalogSignalAnalysisWpf
 
                 //清除界面数据
                 ClearPowerCollection();
+                ClearPowerCollection2();
                 ClearScopeCHACollection();
                 ClearScopeCHBCollection();
 
@@ -701,6 +767,18 @@ namespace AnalogSignalAnalysisWpf
             measureThread.Start();
         }
 
+        /// <summary>
+        /// 比较
+        /// </summary>
+        public void Compare()
+        {
+            ClearPowerCollection2();
+            AppendPowerCollection2(tempPowerCollection);
+
+            new Thread(() => { Thread.Sleep(1000); OnCompared(); }).Start();
+
+        }
+
         private void Scope_ScopeReadDataCompleted(object sender, ScopeReadDataCompletedEventArgs e)
         {
 
@@ -740,12 +818,23 @@ namespace AnalogSignalAnalysisWpf
             AppendScopeCHBCollection(collectionB);
 #endif
 
-
-            if (!shouldScopeSample)
+            if (e.CurrentPacket == (e.TotalPacket - 1))
             {
                 var scope = sender as IScopeBase;
                 scope.ScopeReadDataCompleted -= Scope_ScopeReadDataCompleted;
-                scope.StopSampleThread();
+
+                Compare();
+
+                new Thread(() =>
+                {
+                    currentBurnInTime++;
+                    if (currentBurnInTime < TestTime)
+                    {
+                        Thread.Sleep(2000);
+                        Start();
+                    }
+                }).Start();
+                
             }
 
         }
@@ -758,6 +847,38 @@ namespace AnalogSignalAnalysisWpf
         {
             ImportFile = file;
             ExternRecordData = JsonSerialization.DeserializeObjectFromFile<ExternRecordData>(file);
+        }
+
+        private int testTime;
+
+        /// <summary>
+        /// 测试次数
+        /// </summary>
+        public int TestTime
+        {
+            get { return testTime; }
+            set { testTime = value; NotifyOfPropertyChange(() => TestTime); }
+        }
+
+        /// <summary>
+        /// 当前老化测试次数
+        /// </summary>
+        private int currentBurnInTime = 0;
+
+        /// <summary>
+        /// 老化测试
+        /// </summary>
+        public void BurnIn()
+        {
+            currentBurnInTime = 0;
+            Start();
+
+            new Thread(() => 
+            { 
+
+
+            }).Start();
+
         }
 
         #endregion
