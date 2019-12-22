@@ -60,12 +60,12 @@ namespace MouseRecordTool
         }
 
         /// <summary>
-        /// 电压
+        /// 电压(V)
         /// </summary>
         public double Voltage { get; set; } = -1;
 
         /// <summary>
-        /// 时间
+        /// 时间(MS)
         /// </summary>
         public double Time { get; set; } = -1;
 
@@ -233,6 +233,27 @@ namespace MouseRecordTool
 
         private void Canvas_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            //读取数据
+            try
+            {
+                Time = int.Parse(SampleTimeTextBox.Text) * 1000;
+                Voltage = int.Parse(MaxVoltageTextBox.Text) * 1000;
+                TimeInterval = int.Parse(SampleIntervalTextBox.Text);
+            }
+            catch (Exception)
+            {
+
+                MessageBox.Show("数据异常");
+            }
+
+            if (SparrowChart != null)
+            {
+                SparrowChart.XAxis.MaxValue = $"{Time / 1000.0}";
+                SparrowChart.YAxis.MaxValue = $"{Voltage / 1000.0}";
+                SparrowChart.UpdateLayout();
+                MainWindowModel.SetData(new Dictionary<int, double>());
+            }
+
             Canvas canvas = sender as Canvas;
 
             //Voltages.Clear();
