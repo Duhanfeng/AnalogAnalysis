@@ -60,7 +60,7 @@
                         <chart:LinearXAxis CrossLineStyle="{StaticResource crossLineStyle}" MinorLineStyle="{StaticResource minorcrossLineStyle}" MajorLineStyle="{StaticResource crossLineStyle}" AxisLineStyle="{StaticResource axisLineStyle}" MinorTicksCount="3" ShowCrossLines="True" Header="Time(ms)" StringFormat="0.0"/>
                     </chart:SparrowChart.XAxis>
                     <chart:SparrowChart.YAxis>
-                        <chart:LinearYAxis CrossLineStyle="{StaticResource crossLineStyle}"  MinorLineStyle="{StaticResource minorcrossLineStyle}" MajorLineStyle="{StaticResource crossLineStyle}" MinValue="0" MaxValue="24" AxisLineStyle="{StaticResource axisLineStyle}" MinorTicksCount="3" ShowCrossLines="True" StringFormat="0.0" Header="Voltage(V)"/>
+                        <chart:LinearYAxis CrossLineStyle="{StaticResource crossLineStyle}"  MinorLineStyle="{StaticResource minorcrossLineStyle}" MajorLineStyle="{StaticResource crossLineStyle}" MinValue="0" MaxValue="5" AxisLineStyle="{StaticResource axisLineStyle}" MinorTicksCount="3" ShowCrossLines="True" StringFormat="0.0" Header="Voltage(V)"/>
                     </chart:SparrowChart.YAxis>
                     <chart:LineSeries Label="电源电压" PointsSource="{Binding PowerCollection}" Stroke="Yellow" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
                 </chart:SparrowChart>
@@ -81,10 +81,10 @@
                         <chart:LinearXAxis CrossLineStyle="{StaticResource crossLineStyle}" MinorLineStyle="{StaticResource minorcrossLineStyle}" MajorLineStyle="{StaticResource crossLineStyle}" AxisLineStyle="{StaticResource axisLineStyle}" MinorTicksCount="3" ShowCrossLines="True" Header="Time(ms)" StringFormat="0.0"/>
                     </chart:SparrowChart.XAxis>
                     <chart:SparrowChart.YAxis>
-                        <chart:LinearYAxis CrossLineStyle="{StaticResource crossLineStyle}"  MinorLineStyle="{StaticResource minorcrossLineStyle}" MajorLineStyle="{StaticResource crossLineStyle}" MinValue="0" MaxValue="24.0" AxisLineStyle="{StaticResource axisLineStyle}" MinorTicksCount="3" ShowCrossLines="True" StringFormat="0.00" Header="气压(MPa)"/>
+                        <chart:LinearYAxis CrossLineStyle="{StaticResource crossLineStyle}"  MinorLineStyle="{StaticResource minorcrossLineStyle}" MajorLineStyle="{StaticResource crossLineStyle}" MinValue="0" MaxValue="5.0" AxisLineStyle="{StaticResource axisLineStyle}" MinorTicksCount="3" ShowCrossLines="True" StringFormat="0.00" Header="气压(MPa)"/>
                     </chart:SparrowChart.YAxis>
-                    <chart:LineSeries Label="CHA" PointsSource="{Binding ScopeCHACollection}" Stroke="Yellow" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
-                    <chart:LineSeries Label="CHB" PointsSource="{Binding ScopeCHBCollection}" Stroke="MediumAquamarine" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
+                    <chart:LineSeries Label="CHA" PointsSource="{Binding ScopeCHACollection}" Stroke="Yellow" XPath="Value" YPath="Value1" StrokeThickness="1" UseSinglePart="True"/>
+                    <chart:LineSeries Label="CHB" PointsSource="{Binding ScopeCHBCollection}" Stroke="MediumAquamarine" XPath="Value" YPath="Value1" StrokeThickness="1" UseSinglePart="True"/>
                     <chart:LineSeries Label="Power" PointsSource="{Binding PowerCollection2}" Stroke="BlueViolet" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
                 </chart:SparrowChart>
             </DockPanel>

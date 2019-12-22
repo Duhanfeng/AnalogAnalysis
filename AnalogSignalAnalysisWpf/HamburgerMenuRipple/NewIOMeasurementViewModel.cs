@@ -669,7 +669,7 @@ namespace AnalogSignalAnalysisWpf
                 return;
             }
 
-            int totalTime = (ExternRecordData.RecordVoltages.Values.Count + 5) * ExternRecordData.TimeInterval;
+            int totalTime = (ExternRecordData.RecordVoltages.Values.Count) * ExternRecordData.TimeInterval + 3000;
 
             RunningStatus = "运行中";
 
@@ -698,6 +698,7 @@ namespace AnalogSignalAnalysisWpf
                 OnMeasurementStarted();
 
                 Stopwatch stopwatch = new Stopwatch();
+                Stopwatch totalStopwatch = new Stopwatch();
 
                 //设置示波器采集
                 shouldScopeSample = true;
@@ -710,6 +711,9 @@ namespace AnalogSignalAnalysisWpf
                 ClearScopeCHACollection();
                 ClearScopeCHBCollection();
 
+                Power.Voltage = 0;
+                Power.IsEnableOutput = true;
+
                 //开始连续采集
                 Scope.StartSerialSampple(totalTime);
 
@@ -719,6 +723,7 @@ namespace AnalogSignalAnalysisWpf
 
                 int index = 0;
                 double lastVol = 0;
+                totalStopwatch.Start();
                 foreach (var item in ExternRecordData.RecordVoltages.Values)
                 {
                     stopwatch.Start();
@@ -726,27 +731,28 @@ namespace AnalogSignalAnalysisWpf
                     {
                         if (stopwatch.Elapsed.TotalMilliseconds >= ExternRecordData.TimeInterval)
                         {
+                            stopwatch.Restart();
+
                             if (item > 0)
                             {
                                 //设置当前电压
-                                Power.Voltage = item;
+                                Power.Voltage = item / 1000;
                                 Console.WriteLine($"[{stopwatch.Elapsed.TotalMilliseconds:F2}:{index}]: vol: {item:F3}");
                                 lastVol = item;
 
-                                collection.Add(new Data() { Value1 = item / 1000, Value = index * ExternRecordData.TimeInterval });
+                                collection.Add(new Data() { Value1 = item / 1000, Value = totalStopwatch.Elapsed.TotalMilliseconds });
                             }
                             else
                             {
                                 //设置当前电压
-                                Power.Voltage = lastVol;
+                                Power.Voltage = lastVol / 1000;
                                 Console.WriteLine($"[{stopwatch.Elapsed.TotalMilliseconds:F2}:{index}]: vol: {lastVol:F3}");
                             }
 
                             index++;
-                            stopwatch.Restart();
                             break;
                         }
-                        
+                        Thread.Sleep(2);
                     }
 
                     if ((index % (totalCount / 20)) == 0)
@@ -756,7 +762,7 @@ namespace AnalogSignalAnalysisWpf
                     }
                 }
 
-                AppendPowerCollection(new Data() { Value1 = lastVol / 1000, Value = index * ExternRecordData.TimeInterval });
+                //AppendPowerCollection(new Data() { Value1 = lastVol / 1000, Value = index * ExternRecordData.TimeInterval });
 
                 //输出完成电压后,设置相关标志位
                 shouldScopeSample = false;
@@ -777,6 +783,35 @@ namespace AnalogSignalAnalysisWpf
 
             new Thread(() => { Thread.Sleep(1000); OnCompared(); }).Start();
 
+        }
+
+        public void Compare(double[] globleChannel1, double[] globleChannel2)
+        {
+            ObservableCollection<Data> collectionA = new ObservableCollection<Data>();
+            ObservableCollection<Data> collectionB = new ObservableCollection<Data>();
+
+            double[] filterData;
+            Analysis.MeanFilter(globleChannel1, 11, out filterData);
+
+            for (int i = 0; i < globleChannel1.Length; i++)
+            {
+                collectionA.Add(new Data() { Value1 = filterData[i], Value = i * 1000.0 / ((int)Scope.SampleRate) });
+            }
+
+            Analysis.MeanFilter(globleChannel2, 11, out filterData);
+
+            for (int i = 0; i < globleChannel2.Length; i++)
+            {
+                collectionB.Add(new Data() { Value1 = filterData[i], Value = i * 1000.0 / ((int)Scope.SampleRate) });
+            }
+
+            ClearScopeCHACollection();
+            ClearScopeCHBCollection();
+
+            AppendScopeCHACollection(collectionA);
+            AppendScopeCHACollection(collectionB);
+
+            Compare();
         }
 
         private void Scope_ScopeReadDataCompleted(object sender, ScopeReadDataCompletedEventArgs e)
@@ -823,7 +858,7 @@ namespace AnalogSignalAnalysisWpf
                 var scope = sender as IScopeBase;
                 scope.ScopeReadDataCompleted -= Scope_ScopeReadDataCompleted;
 
-                Compare();
+                Compare(globleChannel1, globleChannel2);
 
                 new Thread(() =>
                 {
