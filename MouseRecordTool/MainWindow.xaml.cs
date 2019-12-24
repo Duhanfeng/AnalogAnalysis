@@ -76,6 +76,11 @@ namespace MouseRecordTool
         /// </summary>
         public int TimeInterval { get; set; } = 50;
 
+        /// <summary>
+        /// 频率(Hz)
+        /// </summary>
+        public int Frequency { get; set; } = -1;
+
 #if false
         
         //X轴改变
@@ -359,6 +364,27 @@ namespace MouseRecordTool
 
         private void ExportButton_Click(object sender, RoutedEventArgs e)
         {
+            //数据教研
+            try
+            {
+                Time = double.Parse(SampleTimeTextBox.Text) * 1000;
+                Voltage = double.Parse(MaxVoltageTextBox.Text) * 1000;
+                TimeInterval = int.Parse(SampleIntervalTextBox.Text);
+                Frequency = int.Parse(SinewaveFrequencyTextBox.Text);
+
+                if ((Time <= 0) || (Voltage <= 0) || (TimeInterval <= 0) || (Frequency <= 0))
+                {
+                    MessageBox.Show("数据必须大于0!");
+                    return;
+                }
+            }
+            catch (Exception)
+            {
+
+                MessageBox.Show("数据异常");
+                return;
+            }
+
             // 创建一个保存文件式的对话框
             var sfd = new Microsoft.Win32.SaveFileDialog();
 
@@ -375,6 +401,8 @@ namespace MouseRecordTool
                     MaxVoltage = Voltage,
                     MaxTime = Time,
                     TimeInterval = TimeInterval,
+                    GraphType = GraphType,
+                    Frequency = Frequency,
                     RecordVoltages = new Dictionary<int, double>(RecordVoltages),
                 };
 
@@ -392,6 +420,8 @@ namespace MouseRecordTool
 
         public bool IsCustom { get; set; } = false;
 
+        public int GraphType { get; set; }
+
         /// <summary>
         /// 图表类型
         /// </summary>
@@ -405,22 +435,26 @@ namespace MouseRecordTool
 
                 if (index == 0)
                 {
+                    CheckButton.IsEnabled = true;
                     IsCustom = true;
                     //CustomGroupBox.IsEnabled = true;
                     SinewaveStackPanel.IsEnabled = false;
                 }
                 else if ((index == 1) || (index == 2))
                 {
+                    CheckButton.IsEnabled = false;
                     IsCustom = false;
                     //CustomGroupBox.IsEnabled = false;
                     SinewaveStackPanel.IsEnabled = true;
                 }
                 else
                 {
+                    CheckButton.IsEnabled = false;
                     IsCustom = false;
                     //CustomGroupBox.IsEnabled = false;
                     SinewaveStackPanel.IsEnabled = false;
                 }
+                GraphType = index;
 
                 //清空图表
                 try
@@ -524,9 +558,7 @@ namespace MouseRecordTool
     /// </summary>
     public class ExportData
     {
-        //数据列表
-        public Dictionary<int, double> RecordVoltages = new Dictionary<int, double>();
-
+        
         /// <summary>
         /// 最大电压
         /// </summary>
@@ -541,6 +573,22 @@ namespace MouseRecordTool
         /// 时间间隔(MS)
         /// </summary>
         public int TimeInterval { get; set; } = 50;
+
+        /// <summary>
+        /// 图表类型
+        /// 0-自定义
+        /// 1-脉冲
+        /// 2-正弦波
+        /// </summary>
+        public int GraphType { get; set; }
+
+        //数据列表
+        public Dictionary<int, double> RecordVoltages = new Dictionary<int, double>();
+
+        /// <summary>
+        /// 频率(Hz)
+        /// </summary>
+        public int Frequency { get; set; }
     }
 
     public class MainWindowModel : Screen
