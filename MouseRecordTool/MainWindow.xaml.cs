@@ -43,6 +43,8 @@ namespace MouseRecordTool
             var data = new Dictionary<int, double>();
             data.Add(0, 0);
             MainWindowModel.SetData(data);
+
+            GraphTypeComboBox_SelectionChanged(GraphTypeComboBox, null);
         }
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -74,6 +76,8 @@ namespace MouseRecordTool
         /// </summary>
         public int TimeInterval { get; set; } = 50;
 
+#if false
+        
         //X轴改变
         private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -204,6 +208,8 @@ namespace MouseRecordTool
             
         }
 
+#endif
+
         //public class VoltagePoint
         //{
         //    /// <summary>
@@ -233,114 +239,115 @@ namespace MouseRecordTool
 
         private void Canvas_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            //读取数据
-            try
+            if (IsCustom)
             {
-                Time = int.Parse(SampleTimeTextBox.Text) * 1000;
-                Voltage = int.Parse(MaxVoltageTextBox.Text) * 1000;
-                TimeInterval = int.Parse(SampleIntervalTextBox.Text);
+                //读取数据
+                try
+                {
+                    Time = int.Parse(SampleTimeTextBox.Text) * 1000;
+                    Voltage = int.Parse(MaxVoltageTextBox.Text) * 1000;
+                    TimeInterval = int.Parse(SampleIntervalTextBox.Text);
+                }
+                catch (Exception)
+                {
+
+                    MessageBox.Show("数据异常");
+                }
+
+                if (SparrowChart != null)
+                {
+                    SparrowChart.XAxis.MaxValue = $"{Time / 1000.0}";
+                    SparrowChart.YAxis.MaxValue = $"{Voltage / 1000.0}";
+                    SparrowChart.UpdateLayout();
+                    MainWindowModel.SetData(new Dictionary<int, double>());
+                }
+
+                Canvas canvas = sender as Canvas;
+
+                //Voltages.Clear();
+                pointList.Clear();
+                canvas.Children.Clear();
+                canvas.Children.Add(BackgroudChart);
+                canvas.Children.Add(coordLabel);
+
+                Point point = e.GetPosition(canvas);
+                coordLabel.SetValue(Canvas.LeftProperty, point.X + 5);
+                coordLabel.SetValue(Canvas.TopProperty, point.Y - 15);
+
+                if ((Voltage <= 0) || (Time <= 0))
+                {
+                    MessageBox.Show("未选择有效的XY轴范围");
+                    return;
+                }
+
+                //容量
+                RecordVoltages.Clear();
+                int capacity = (int)(Time / TimeInterval);
+
+                for (int i = 0; i < capacity; i++)
+                {
+                    RecordVoltages.Add(TimeInterval * i, 0);
+                }
             }
-            catch (Exception)
-            {
-
-                MessageBox.Show("数据异常");
-            }
-
-            if (SparrowChart != null)
-            {
-                SparrowChart.XAxis.MaxValue = $"{Time / 1000.0}";
-                SparrowChart.YAxis.MaxValue = $"{Voltage / 1000.0}";
-                SparrowChart.UpdateLayout();
-                MainWindowModel.SetData(new Dictionary<int, double>());
-            }
-
-            Canvas canvas = sender as Canvas;
-
-            //Voltages.Clear();
-            pointList.Clear();
-            canvas.Children.Clear();
-            canvas.Children.Add(BackgroudChart);
-            canvas.Children.Add(coordLabel);
-
-            Point point = e.GetPosition(canvas);
-            coordLabel.SetValue(Canvas.LeftProperty, point.X + 5);
-            coordLabel.SetValue(Canvas.TopProperty, point.Y - 15);
-
-            if ((Voltage == -1) || (Time == -1))
-            {
-                MessageBox.Show("未选择有效的XY轴范围");
-                return;
-            }
-
-            //容量
-            RecordVoltages.Clear();
-            int capacity = (int)(Time / TimeInterval);
-
-            for (int i = 0; i < capacity; i++)
-            {
-                RecordVoltages.Add(TimeInterval * i, 0);
-            }
+            
         }
 
         private void Canvas_PreviewMouseMove(object sender, MouseEventArgs e)
         {
-            Canvas canvas = sender as Canvas;
-
-            if (e.LeftButton == MouseButtonState.Pressed)
+            if (IsCustom)
             {
-                // 返回指针相对于Canvas的位置
-                Point point = e.GetPosition(canvas);
+                Canvas canvas = sender as Canvas;
 
-                //获取控件的大小
-                double xRatio = (point.X - BasePoint.X) / (canvas.ActualWidth - BasePoint.X);
-                double yRatio = (BasePoint.Y - point.Y) / BasePoint.Y;
-
-                if ((xRatio < 0) || (xRatio > 1) || (yRatio < 0) || (yRatio > 1))
+                if (e.LeftButton == MouseButtonState.Pressed)
                 {
-                    return;
-                }
+                    // 返回指针相对于Canvas的位置
+                    Point point = e.GetPosition(canvas);
 
-                //var voltagePoint = new VoltagePoint();
+                    //获取控件的大小
+                    double xRatio = (point.X - BasePoint.X) / (canvas.ActualWidth - BasePoint.X);
+                    double yRatio = (BasePoint.Y - point.Y) / BasePoint.Y;
 
-                //voltagePoint.Voltage = Voltage * yRatio;
-                //voltagePoint.Time = Time * xRatio;
-                //Voltages.Add(voltagePoint);
-
-                pointList.Add(point);
-                coordLabel.SetValue(Canvas.LeftProperty, point.X + 5);
-                coordLabel.SetValue(Canvas.TopProperty, point.Y - 15);
-                coordLabel.Text = $"{Time * xRatio / 1000.0:F2}S,{Voltage * yRatio / 1000.0:F2}V";
-
-                //记录点
-                RecordVoltages[(int)((Time * xRatio) / TimeInterval + 0.5) * TimeInterval] = Voltage * yRatio;
-
-                // 去重复点
-                var disList = pointList.Distinct().ToList();
-                var count = disList.Count(); // 总点数
-
-                //if (point != this.startPoint && this.startPoint != null)
-                {
-                    var l = new Line();
-                    l.Stroke = Brushes.Red;
-                    l.StrokeThickness = 1;
-
-                    if (count < 2)
+                    if ((xRatio < 0) || (xRatio > 1) || (yRatio < 0) || (yRatio > 1))
+                    {
                         return;
-                    l.X1 = disList[count - 2].X;  // count-2  保证 line的起始点为点集合中的倒数第二个点。
-                    l.Y1 = disList[count - 2].Y;
-                    // 终点X,Y 为当前point的X,Y
-                    l.X2 = point.X;
-                    l.Y2 = point.Y;
-                    canvas.Children.Add(l);
+                    }
+
+                    //var voltagePoint = new VoltagePoint();
+
+                    //voltagePoint.Voltage = Voltage * yRatio;
+                    //voltagePoint.Time = Time * xRatio;
+                    //Voltages.Add(voltagePoint);
+
+                    pointList.Add(point);
+                    coordLabel.SetValue(Canvas.LeftProperty, point.X + 5);
+                    coordLabel.SetValue(Canvas.TopProperty, point.Y - 15);
+                    coordLabel.Text = $"{Time * xRatio / 1000.0:F2}S,{Voltage * yRatio / 1000.0:F2}V";
+
+                    //记录点
+                    RecordVoltages[(int)((Time * xRatio) / TimeInterval + 0.5) * TimeInterval] = Voltage * yRatio;
+
+                    // 去重复点
+                    var disList = pointList.Distinct().ToList();
+                    var count = disList.Count(); // 总点数
+
+                    //if (point != this.startPoint && this.startPoint != null)
+                    {
+                        var l = new Line();
+                        l.Stroke = Brushes.Red;
+                        l.StrokeThickness = 1;
+
+                        if (count < 2)
+                            return;
+                        l.X1 = disList[count - 2].X;  // count-2  保证 line的起始点为点集合中的倒数第二个点。
+                        l.Y1 = disList[count - 2].Y;
+                        // 终点X,Y 为当前point的X,Y
+                        l.X2 = point.X;
+                        l.Y2 = point.Y;
+                        canvas.Children.Add(l);
+                    }
                 }
-
             }
-
-        }
-
-        private void Canvas_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            Canvas canvas = sender as Canvas;
+            
         }
 
         private void CheckButton_Click(object sender, RoutedEventArgs e)
@@ -383,6 +390,132 @@ namespace MouseRecordTool
 
         }
 
+        public bool IsCustom { get; set; } = false;
+
+        /// <summary>
+        /// 图表类型
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void GraphTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (IsLoaded)
+            {
+                int index = (sender as ComboBox).SelectedIndex;
+
+                if (index == 0)
+                {
+                    IsCustom = true;
+                    //CustomGroupBox.IsEnabled = true;
+                    SinewaveStackPanel.IsEnabled = false;
+                }
+                else if ((index == 1) || (index == 2))
+                {
+                    IsCustom = false;
+                    //CustomGroupBox.IsEnabled = false;
+                    SinewaveStackPanel.IsEnabled = true;
+                }
+                else
+                {
+                    IsCustom = false;
+                    //CustomGroupBox.IsEnabled = false;
+                    SinewaveStackPanel.IsEnabled = false;
+                }
+
+                //清空图表
+                try
+                {
+                    Time = int.Parse(SampleTimeTextBox.Text) * 1000;
+                    Voltage = int.Parse(MaxVoltageTextBox.Text) * 1000;
+                    TimeInterval = int.Parse(SampleIntervalTextBox.Text);
+                }
+                catch (Exception)
+                {
+
+                    MessageBox.Show("数据异常");
+                }
+
+                if (SparrowChart != null)
+                {
+                    SparrowChart.XAxis.MaxValue = $"{Time / 1000.0}";
+                    SparrowChart.YAxis.MaxValue = $"{Voltage / 1000.0}";
+                    SparrowChart.UpdateLayout();
+                    MainWindowModel.SetData(new Dictionary<int, double>());
+                }
+
+                //Voltages.Clear();
+                pointList.Clear();
+                Canvas.Children.Clear();
+                Canvas.Children.Add(BackgroudChart);
+                //Canvas.Children.Add(coordLabel);
+
+                if ((Voltage <= 0) || (Time <= 0))
+                {
+                    MessageBox.Show("未选择有效的XY轴范围");
+                    return;
+                }
+
+                //容量
+                RecordVoltages.Clear();
+                int capacity = (int)(Time / TimeInterval);
+
+                for (int i = 0; i < capacity; i++)
+                {
+                    RecordVoltages.Add(TimeInterval * i, 0);
+                }
+            }
+            
+        }
+
+        /// <summary>
+        /// 产生波形
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void GenerateButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Time = int.Parse(SampleTimeTextBox.Text) * 1000;
+                Voltage = int.Parse(MaxVoltageTextBox.Text) * 1000;
+                TimeInterval = int.Parse(SampleIntervalTextBox.Text);
+            }
+            catch (Exception)
+            {
+
+                MessageBox.Show("数据异常");
+            }
+
+            if (SparrowChart != null)
+            {
+                SparrowChart.XAxis.MaxValue = $"{Time / 1000.0}";
+                SparrowChart.YAxis.MaxValue = $"{Voltage / 1000.0}";
+                SparrowChart.UpdateLayout();
+                MainWindowModel.SetData(new Dictionary<int, double>());
+            }
+
+            
+            //Voltages.Clear();
+            pointList.Clear();
+            Canvas.Children.Clear();
+            Canvas.Children.Add(BackgroudChart);
+            //Canvas.Children.Add(coordLabel);
+            
+            if ((Voltage <= 0) || (Time <= 0))
+            {
+                MessageBox.Show("未选择有效的XY轴范围");
+                return;
+            }
+
+            //容量
+            RecordVoltages.Clear();
+            int capacity = (int)(Time / TimeInterval);
+
+            for (int i = 0; i < capacity; i++)
+            {
+                RecordVoltages.Add(TimeInterval * i, 0);
+            }
+        }
     }
 
 
