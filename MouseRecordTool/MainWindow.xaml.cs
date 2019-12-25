@@ -69,7 +69,7 @@ namespace MouseRecordTool
         /// <summary>
         /// 时间(MS)
         /// </summary>
-        public double Time { get; set; } = -1;
+        public int Time { get; set; } = -1;
 
         /// <summary>
         /// 时间间隔(MS)
@@ -80,6 +80,11 @@ namespace MouseRecordTool
         /// 频率(Hz)
         /// </summary>
         public int Frequency { get; set; } = -1;
+
+        /// <summary>
+        /// 占空比
+        /// </summary>
+        public int DutyRatio { get; set; }
 
 #if false
         
@@ -249,7 +254,7 @@ namespace MouseRecordTool
                 //读取数据
                 try
                 {
-                    Time = int.Parse(SampleTimeTextBox.Text) * 1000;
+                    Time = (int)(double.Parse(SampleTimeTextBox.Text) * 1000);
                     Voltage = int.Parse(MaxVoltageTextBox.Text) * 1000;
                     TimeInterval = int.Parse(SampleIntervalTextBox.Text);
                 }
@@ -287,7 +292,7 @@ namespace MouseRecordTool
 
                 //容量
                 RecordVoltages.Clear();
-                int capacity = (int)(Time / TimeInterval);
+                int capacity = (Time / TimeInterval);
 
                 for (int i = 0; i < capacity; i++)
                 {
@@ -357,8 +362,107 @@ namespace MouseRecordTool
 
         private void CheckButton_Click(object sender, RoutedEventArgs e)
         {
+            var points = pointList.Distinct().ToList();
+            var validPoints = new List<Point>();
+
+            if (points?.Count > 0)
+            {
+                var xLength = Canvas.ActualWidth - BasePoint.X;
+                int pointCount = Time / TimeInterval;
+                double xInterval = xLength / pointCount;
+                double currentX = BasePoint.X;
+                int currentTime = 0;
+
+                RecordVoltages.Clear();
+                for (int i = 0; i < pointCount; i++)
+                {
+                    RecordVoltages.Add(i * TimeInterval, 0);
+                }
+
+                for (int i = 1; i < points.Count; i++)
+                {
+                    while (true)
+                    {
+                        if (currentX > points[i].X)
+                        {
+                            //到下一个点
+                            break;
+                        }
+                        else if ((currentX > points[i - 1].X) && (currentX < points[i].X))
+                        {
+                            //计算线公式
+                            double a = (points[i].Y - points[i - 1].Y) / (points[i].X - points[i - 1].X);
+                            double b1 = points[i].Y - a * points[i].X;
+                            double b2 = points[i - 1].Y - a * points[i - 1].X;
+
+                            //计算当前点
+                            double y = currentX * a + b1;
+                            Point point = new Point(currentX, y);
+                            validPoints.Add(point);
+
+                            double yRatio = (BasePoint.Y - y) / BasePoint.Y;
+                            RecordVoltages[currentTime] = Voltage * yRatio;
+
+                            //递进
+                            currentX += xInterval;
+                            currentTime += TimeInterval;
+                        }
+                        else
+                        {
+                            //当前点小于有效点,递进
+                            currentX += xInterval;
+                            currentTime += TimeInterval;
+                        }
+                    }
+
+                }
+
+                MainWindowModel.SetData(RecordVoltages);
+
+            }
+
+
+#if false
+
+            var y = RecordVoltages.Values.ToList();
+
+            if (y?.Count > 0)
+            {
+                for (int i = 1; i < y.Count; i++)
+                {
+                    if ((y[i - 1] != 0) && (y[i] == 0))
+                    {
+                        //确认当前点为无效点
+                        //double 
+                        for (int j = 0; j < y.Count; j++)
+                        {
+
+                        }
+
+
+
+                    }
+
+
+                }
+            }
+
+
             //ScopeCHACollection.Clear();
             MainWindowModel.SetData(RecordVoltages);
+
+            List<Line> lines = new List<Line>();
+
+            foreach (var item in Canvas.Children)
+            {
+                if (item is Line)
+                {
+                    lines.Add(item as Line);
+                }
+            }
+
+#endif
+
 
         }
 
@@ -367,10 +471,11 @@ namespace MouseRecordTool
             //数据教研
             try
             {
-                Time = double.Parse(SampleTimeTextBox.Text) * 1000;
+                Time = (int)(double.Parse(SampleTimeTextBox.Text) * 1000);
                 Voltage = double.Parse(MaxVoltageTextBox.Text) * 1000;
                 TimeInterval = int.Parse(SampleIntervalTextBox.Text);
-                Frequency = int.Parse(SinewaveFrequencyTextBox.Text);
+                Frequency = int.Parse(FrequencyTextBox.Text);
+                DutyRatio = int.Parse(DutyRatioTextBox.Text);
 
                 if ((Time <= 0) || (Voltage <= 0) || (TimeInterval <= 0) || (Frequency <= 0))
                 {
@@ -565,9 +670,9 @@ namespace MouseRecordTool
         public double MaxVoltage { get; set; }
 
         /// <summary>
-        /// 最大时间
+        /// 最大时间(MS)
         /// </summary>
-        public double MaxTime { get; set; }
+        public int MaxTime { get; set; }
 
         /// <summary>
         /// 时间间隔(MS)
@@ -589,6 +694,11 @@ namespace MouseRecordTool
         /// 频率(Hz)
         /// </summary>
         public int Frequency { get; set; }
+
+        /// <summary>
+        /// 占空比
+        /// </summary>
+        public int DutyRatio { get; set; }
     }
 
     public class MainWindowModel : Screen
@@ -693,7 +803,7 @@ namespace MouseRecordTool
 
             foreach (var item in data)
             {
-                if (item.Value != 0)
+                if (item.Value >= 0)
                 {
                     scope.Add(new Data
                     {
