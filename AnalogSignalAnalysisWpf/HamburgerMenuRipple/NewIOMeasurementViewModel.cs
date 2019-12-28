@@ -614,11 +614,6 @@ namespace AnalogSignalAnalysisWpf
         private Thread measureThread;
 
         /// <summary>
-        /// 示波器应该采集标志
-        /// </summary>
-        private bool shouldScopeSample = false;
-
-        /// <summary>
         /// 采用间隔(界面)
         /// </summary>
         private readonly int SampleInterval = 10;
@@ -701,7 +696,6 @@ namespace AnalogSignalAnalysisWpf
                 Stopwatch totalStopwatch = new Stopwatch();
 
                 //设置示波器采集
-                shouldScopeSample = true;
                 Scope.ScopeReadDataCompleted -= Scope_ScopeReadDataCompleted;
                 Scope.ScopeReadDataCompleted += Scope_ScopeReadDataCompleted;
 
@@ -765,7 +759,6 @@ namespace AnalogSignalAnalysisWpf
                 //AppendPowerCollection(new Data() { Value1 = lastVol / 1000, Value = index * ExternRecordData.TimeInterval });
 
                 //输出完成电压后,设置相关标志位
-                shouldScopeSample = false;
                 OnMeasurementCompleted();
 
             });
@@ -853,6 +846,7 @@ namespace AnalogSignalAnalysisWpf
             AppendScopeCHBCollection(collectionB);
 #endif
 
+            //当最后一包数据,则注销事件,并在2S后启动下一次测量任务
             if (e.CurrentPacket == (e.TotalPacket - 1))
             {
                 var scope = sender as IScopeBase;
@@ -860,6 +854,7 @@ namespace AnalogSignalAnalysisWpf
 
                 Compare(globleChannel1, globleChannel2);
 
+                //继续老化(若有)
                 new Thread(() =>
                 {
                     currentBurnInTime++;
@@ -882,6 +877,24 @@ namespace AnalogSignalAnalysisWpf
         {
             ImportFile = file;
             ExternRecordData = JsonSerialization.DeserializeObjectFromFile<ExternRecordData>(file);
+        }
+
+        /// <summary>
+        /// 导入模板文件
+        /// </summary>
+        /// <param name="file"></param>
+        public void ImportTemplate(string file)
+        {
+
+        }
+
+        /// <summary>
+        /// 导出模板文件
+        /// </summary>
+        /// <param name="file"></param>
+        public void ExportTemplate(string file)
+        {
+
         }
 
         private int testTime;

@@ -45,6 +45,8 @@ namespace MouseRecordTool
             MainWindowModel.SetData(data);
 
             GraphTypeComboBox_SelectionChanged(GraphTypeComboBox, null);
+
+            MaxFrequencyTextBlock.Text = "<=10";
         }
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -84,156 +86,7 @@ namespace MouseRecordTool
         /// <summary>
         /// 占空比
         /// </summary>
-        public int DutyRatio { get; set; }
-
-#if false
-        
-        //X轴改变
-        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            ComboBox comboBox = sender as ComboBox;
-            switch (comboBox.SelectedIndex)
-            {
-                case 0:
-                    Time = 2000;
-                    break;
-                case 1:
-                    Time = 5000;
-                    break;
-                case 2:
-                    Time = 10000;
-                    break;
-                case 3:
-                    Time = 20000;
-                    break;
-                default:
-                    return;
-            }
-            
-            if (Canvas != null)
-            {
-                Canvas.Children.Clear();
-                Canvas.Children.Add(BackgroudChart);
-                Canvas.Children.Add(coordLabel);
-
-                coordLabel.Text = "";
-
-                BackgroudChart.SetValue(Canvas.LeftProperty, 0.0);
-                BackgroudChart.SetValue(Canvas.TopProperty, 0.0);
-                BackgroudChart.Width = Canvas.ActualWidth;
-                BackgroudChart.Height = Canvas.ActualHeight;
-            }
-
-            if (SparrowChart != null)
-            {
-                BackgroudChart.XAxis.MaxValue = $"{Time / 1000.0}";
-                BackgroudChart.UpdateLayout();
-                BackgroudChart.RefreshLegend();
-
-                SparrowChart.XAxis.MaxValue = $"{Time / 1000.0}";
-                SparrowChart.UpdateLayout();
-                MainWindowModel.SetData(new Dictionary<int, double>());
-            }
-
-        }
-
-        //Y轴改变
-        private void ComboBox_SelectionChanged_1(object sender, SelectionChangedEventArgs e)
-        {
-            ComboBox comboBox = sender as ComboBox;
-            switch (comboBox.SelectedIndex)
-            {
-                case 0:
-                    Voltage = 5000;
-                    break;
-                case 1:
-                    Voltage = 12000;
-                    break;
-                case 2:
-                    Voltage = 24000;
-                    break;
-                default:
-                    return;
-            }
-
-            if (Canvas != null)
-            {
-                Canvas.Children.Clear();
-                Canvas.Children.Add(BackgroudChart);
-                Canvas.Children.Add(coordLabel);
-
-                coordLabel.Text = "";
-
-                BackgroudChart.SetValue(Canvas.LeftProperty, 0.0);
-                BackgroudChart.SetValue(Canvas.TopProperty, 0.0);
-                BackgroudChart.Width = Canvas.ActualWidth;
-                BackgroudChart.Height = Canvas.ActualHeight;
-            }
-
-            if (SparrowChart != null)
-            {
-                SparrowChart.YAxis.MaxValue = $"{Voltage / 1000.0}";
-                SparrowChart.UpdateLayout();
-                MainWindowModel.SetData(new Dictionary<int, double>());
-            }
-
-        }
-
-        /// <summary>
-        /// 选择采样间隔
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void ComboBox_SelectionChanged_2(object sender, SelectionChangedEventArgs e)
-        {
-            ComboBox comboBox = sender as ComboBox;
-            switch (comboBox.SelectedIndex)
-            {
-                case 0:
-                    TimeInterval = 10;
-                    break;
-                case 1:
-                    TimeInterval = 50;
-                    break;
-                case 2:
-                    TimeInterval = 100;
-                    break;
-                default:
-                    break;
-            }
-
-            if (Canvas != null)
-            {
-                Canvas.Children.Clear();
-                Canvas.Children.Add(BackgroudChart);
-                Canvas.Children.Add(coordLabel);
-
-                coordLabel.Text = "";
-
-                BackgroudChart.SetValue(Canvas.LeftProperty, 0.0);
-                BackgroudChart.SetValue(Canvas.TopProperty, 0.0);
-                BackgroudChart.Width = Canvas.ActualWidth;
-                BackgroudChart.Height = Canvas.ActualHeight;
-            }
-            
-        }
-
-#endif
-
-        //public class VoltagePoint
-        //{
-        //    /// <summary>
-        //    /// 电压
-        //    /// </summary>
-        //    public double Voltage { get; set; }
-
-        //    /// <summary>
-        //    /// 时间
-        //    /// </summary>
-        //    public double Time { get; set; }
-        //}
-
-        //public List<VoltagePoint> Voltages { get; set; } = new List<VoltagePoint>();
+        public int DutyRatio { get; set; } = 50;
 
         /// <summary>
         /// 记录的电压值
@@ -245,11 +98,19 @@ namespace MouseRecordTool
         /// </summary>
         private List<Point> pointList = new List<Point>();
 
+        /// <summary>
+        /// 基础点(表格中原点的位置)
+        /// </summary>
         private Point BasePoint { get; set; } = new Point(47, 175.76);
+
+        /// <summary>
+        /// 图表类型
+        /// </summary>
+        public int GraphType { get; set; } = 0;
 
         private void Canvas_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (IsCustom)
+            if (GraphType == 0)
             {
                 //读取数据
                 try
@@ -304,7 +165,7 @@ namespace MouseRecordTool
 
         private void Canvas_PreviewMouseMove(object sender, MouseEventArgs e)
         {
-            if (IsCustom)
+            if (GraphType == 0)
             {
                 Canvas canvas = sender as Canvas;
 
@@ -362,113 +223,153 @@ namespace MouseRecordTool
 
         private void CheckButton_Click(object sender, RoutedEventArgs e)
         {
-            var points = pointList.Distinct().ToList();
-            var validPoints = new List<Point>();
-
-            if (points?.Count > 0)
+            if (GraphType == 0)
             {
-                var xLength = Canvas.ActualWidth - BasePoint.X;
-                int pointCount = Time / TimeInterval;
-                double xInterval = xLength / pointCount;
-                double currentX = BasePoint.X;
-                int currentTime = 0;
+                var points = pointList.Distinct().ToList();
+                var validPoints = new List<Point>();
 
-                RecordVoltages.Clear();
-                for (int i = 0; i < pointCount; i++)
+                if (points?.Count > 0)
                 {
-                    RecordVoltages.Add(i * TimeInterval, 0);
+                    var xLength = Canvas.ActualWidth - BasePoint.X;
+                    int pointCount = Time / TimeInterval;
+                    double xInterval = xLength / pointCount;
+                    double currentX = BasePoint.X;
+                    int currentTime = 0;
+
+                    RecordVoltages.Clear();
+                    for (int i = 0; i < pointCount; i++)
+                    {
+                        RecordVoltages.Add(i * TimeInterval, 0);
+                    }
+
+                    for (int i = 1; i < points.Count; i++)
+                    {
+                        while (true)
+                        {
+                            if (currentX > points[i].X)
+                            {
+                                //到下一个点
+                                break;
+                            }
+                            else if ((currentX > points[i - 1].X) && (currentX < points[i].X))
+                            {
+                                //计算线公式
+                                double a = (points[i].Y - points[i - 1].Y) / (points[i].X - points[i - 1].X);
+                                double b1 = points[i].Y - a * points[i].X;
+                                double b2 = points[i - 1].Y - a * points[i - 1].X;
+
+                                //计算当前点
+                                double y = currentX * a + b1;
+                                Point point = new Point(currentX, y);
+                                validPoints.Add(point);
+
+                                double yRatio = (BasePoint.Y - y) / BasePoint.Y;
+                                RecordVoltages[currentTime] = Voltage * yRatio;
+
+                                //递进
+                                currentX += xInterval;
+                                currentTime += TimeInterval;
+                            }
+                            else
+                            {
+                                //当前点小于有效点,递进
+                                currentX += xInterval;
+                                currentTime += TimeInterval;
+                            }
+                        }
+
+                    }
+
+                    MainWindowModel.SetPulseData(RecordVoltages);
+
                 }
 
-                for (int i = 1; i < points.Count; i++)
+            }
+            else
+            {
+                //数据校验
+                try
                 {
-                    while (true)
+                    Time = (int)(double.Parse(SampleTimeTextBox.Text) * 1000);
+                    Voltage = double.Parse(MaxVoltageTextBox.Text) * 1000;
+                    TimeInterval = int.Parse(SampleIntervalTextBox.Text);
+                    Frequency = int.Parse(FrequencyTextBox.Text);
+                    DutyRatio = int.Parse(DutyRatioTextBox.Text);
+
+                    if ((Time <= 0) || (Voltage <= 0) || (TimeInterval <= 0) || (Frequency <= 0))
                     {
-                        if (currentX > points[i].X)
+                        MessageBox.Show("数据必须大于0!");
+                        return;
+                    }
+
+                    double sampleFrequency = 1000.0 / TimeInterval;
+
+                    if (sampleFrequency < (Frequency * 2))
+                    {
+                        MessageBox.Show($"采样频率({sampleFrequency.ToString("F2")})必须大于输出频率的2倍({Frequency.ToString("F2")} * 2)");
+                        return;
+                    }
+                }
+                catch (Exception)
+                {
+
+                    MessageBox.Show("数据异常");
+                    return;
+                }
+
+                if (SparrowChart != null)
+                {
+                    SparrowChart.XAxis.MaxValue = $"{Time * 1.2 / 1000.0}";
+                    SparrowChart.YAxis.MaxValue = $"{Voltage * 1.2 / 1000.0}";
+                    SparrowChart.UpdateLayout();
+                    MainWindowModel.SetData(new Dictionary<int, double>());
+                }
+
+                //Voltages.Clear();
+                pointList.Clear();
+                Canvas.Children.Clear();
+                Canvas.Children.Add(BackgroudChart);
+
+                //容量
+                RecordVoltages.Clear();
+                int capacity = (int)(Time / TimeInterval);
+
+                for (int i = 0; i < capacity; i++)
+                {
+                    RecordVoltages.Add(TimeInterval * i, 0);
+                }
+
+                if (GraphType == 1)
+                {
+                    //(周期,单位MS)
+                    double cycleTime = 1 * 1000.0 / Frequency;
+                    double positiveTime = cycleTime * (DutyRatio * 0.01);
+                    for (int i = 0; i < RecordVoltages.Count; i++)
+                    {
+                        //当前在周期中的时间
+                        double currentTime = (TimeInterval * i) % cycleTime;
+
+                        //判断是高电平还是低电平
+                        if (currentTime < positiveTime)
                         {
-                            //到下一个点
-                            break;
-                        }
-                        else if ((currentX > points[i - 1].X) && (currentX < points[i].X))
-                        {
-                            //计算线公式
-                            double a = (points[i].Y - points[i - 1].Y) / (points[i].X - points[i - 1].X);
-                            double b1 = points[i].Y - a * points[i].X;
-                            double b2 = points[i - 1].Y - a * points[i - 1].X;
-
-                            //计算当前点
-                            double y = currentX * a + b1;
-                            Point point = new Point(currentX, y);
-                            validPoints.Add(point);
-
-                            double yRatio = (BasePoint.Y - y) / BasePoint.Y;
-                            RecordVoltages[currentTime] = Voltage * yRatio;
-
-                            //递进
-                            currentX += xInterval;
-                            currentTime += TimeInterval;
+                            RecordVoltages[TimeInterval * i] = Voltage;
                         }
                         else
                         {
-                            //当前点小于有效点,递进
-                            currentX += xInterval;
-                            currentTime += TimeInterval;
+                            RecordVoltages[TimeInterval * i] = 0;
                         }
                     }
 
                 }
 
-                MainWindowModel.SetData(RecordVoltages);
-
+                MainWindowModel.SetPulseData(RecordVoltages);
             }
-
-
-#if false
-
-            var y = RecordVoltages.Values.ToList();
-
-            if (y?.Count > 0)
-            {
-                for (int i = 1; i < y.Count; i++)
-                {
-                    if ((y[i - 1] != 0) && (y[i] == 0))
-                    {
-                        //确认当前点为无效点
-                        //double 
-                        for (int j = 0; j < y.Count; j++)
-                        {
-
-                        }
-
-
-
-                    }
-
-
-                }
-            }
-
-
-            //ScopeCHACollection.Clear();
-            MainWindowModel.SetData(RecordVoltages);
-
-            List<Line> lines = new List<Line>();
-
-            foreach (var item in Canvas.Children)
-            {
-                if (item is Line)
-                {
-                    lines.Add(item as Line);
-                }
-            }
-
-#endif
-
 
         }
 
         private void ExportButton_Click(object sender, RoutedEventArgs e)
         {
-            //数据教研
+            //数据校验
             try
             {
                 Time = (int)(double.Parse(SampleTimeTextBox.Text) * 1000);
@@ -495,7 +396,8 @@ namespace MouseRecordTool
 
             //设置保存的文件的类型，注意过滤器的语法  
             sfd.Filter = "json file|*.json";
-            sfd.FileName = "";
+            sfd.FileName = NameTextBox.Text + "-" + DateTime.Now.ToString("yyyyMMdd-HHmmss")
+;
 
             //调用ShowDialog()方法显示该对话框，该方法的返回值代表用户是否点击了确定按钮  
             if (sfd.ShowDialog() == true)
@@ -503,6 +405,7 @@ namespace MouseRecordTool
                 //此处做你想做的事 ...=sfd.FileName; 
                 ExportData exportData = new ExportData
                 {
+                    DutyRatio = DutyRatio,
                     MaxVoltage = Voltage,
                     MaxTime = Time,
                     TimeInterval = TimeInterval,
@@ -523,10 +426,6 @@ namespace MouseRecordTool
 
         }
 
-        public bool IsCustom { get; set; } = false;
-
-        public int GraphType { get; set; }
-
         /// <summary>
         /// 图表类型
         /// </summary>
@@ -541,22 +440,16 @@ namespace MouseRecordTool
                 if (index == 0)
                 {
                     CheckButton.IsEnabled = true;
-                    IsCustom = true;
-                    //CustomGroupBox.IsEnabled = true;
                     SinewaveStackPanel.IsEnabled = false;
                 }
                 else if ((index == 1) || (index == 2))
                 {
-                    CheckButton.IsEnabled = false;
-                    IsCustom = false;
-                    //CustomGroupBox.IsEnabled = false;
+                    CheckButton.IsEnabled = true;
                     SinewaveStackPanel.IsEnabled = true;
                 }
                 else
                 {
                     CheckButton.IsEnabled = false;
-                    IsCustom = false;
-                    //CustomGroupBox.IsEnabled = false;
                     SinewaveStackPanel.IsEnabled = false;
                 }
                 GraphType = index;
@@ -613,47 +506,65 @@ namespace MouseRecordTool
         /// <param name="e"></param>
         private void GenerateButton_Click(object sender, RoutedEventArgs e)
         {
+
+            
+        }
+
+        private void SampleIntervalTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            //数据校验
             try
             {
-                Time = int.Parse(SampleTimeTextBox.Text) * 1000;
-                Voltage = int.Parse(MaxVoltageTextBox.Text) * 1000;
-                TimeInterval = int.Parse(SampleIntervalTextBox.Text);
+                if (e.Key == Key.Enter)
+                {
+                    TimeInterval = int.Parse(SampleIntervalTextBox.Text);
+                    SampleFrequencyTextBox.Text = (1000.0 / TimeInterval).ToString("F2");
+                    MaxFrequencyTextBlock.Text = "<=" + (1000.0 / TimeInterval / 2).ToString("F2");
+                }
             }
             catch (Exception)
             {
-
                 MessageBox.Show("数据异常");
-            }
-
-            if (SparrowChart != null)
-            {
-                SparrowChart.XAxis.MaxValue = $"{Time / 1000.0}";
-                SparrowChart.YAxis.MaxValue = $"{Voltage / 1000.0}";
-                SparrowChart.UpdateLayout();
-                MainWindowModel.SetData(new Dictionary<int, double>());
-            }
-
-            
-            //Voltages.Clear();
-            pointList.Clear();
-            Canvas.Children.Clear();
-            Canvas.Children.Add(BackgroudChart);
-            //Canvas.Children.Add(coordLabel);
-            
-            if ((Voltage <= 0) || (Time <= 0))
-            {
-                MessageBox.Show("未选择有效的XY轴范围");
                 return;
             }
+            
+        }
 
-            //容量
-            RecordVoltages.Clear();
-            int capacity = (int)(Time / TimeInterval);
-
-            for (int i = 0; i < capacity; i++)
+        private void SampleIntervalTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            //数据校验
+            try
             {
-                RecordVoltages.Add(TimeInterval * i, 0);
+                TimeInterval = int.Parse(SampleIntervalTextBox.Text);
+                SampleFrequencyTextBox.Text = (1000.0 / TimeInterval).ToString("F2");
+                MaxFrequencyTextBlock.Text = "<=" + (1000.0 / TimeInterval / 2).ToString("F2");
             }
+            catch (Exception)
+            {
+                MessageBox.Show("数据异常");
+                return;
+            }
+        }
+
+        private void SparrowChart_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (e.Delta > 0)
+            {
+                SparrowChart.Width = SparrowChart.ActualWidth + 50;
+            }
+            else
+            {
+                if (SparrowChartScrollViewer.ActualWidth < (SparrowChart.ActualWidth))
+                {
+                    double width = SparrowChart.ActualWidth - 50;
+                    if (width > SparrowChartScrollViewer.ActualWidth - 20)
+                    {
+                        SparrowChart.Width = width;
+                    }
+                }
+                
+            }
+                        
         }
     }
 
@@ -687,7 +598,9 @@ namespace MouseRecordTool
         /// </summary>
         public int GraphType { get; set; }
 
-        //数据列表
+        /// <summary>
+        /// 数据列表
+        /// </summary>
         public Dictionary<int, double> RecordVoltages = new Dictionary<int, double>();
 
         /// <summary>
@@ -818,6 +731,39 @@ namespace MouseRecordTool
 
             ScopeCHBCollection = new ObservableCollection<Data>();
             ScopeCHBEdgeCollection = new ObservableCollection<Data>();
+        }
+
+        
+        public void SetPulseData(Dictionary<int, double> data)
+        {
+            double lastValue = 0;
+
+            var scope = new ObservableCollection<Data>();
+
+            foreach (var item in data)
+            {
+                if (item.Value >= 0)
+                {
+                    if (lastValue != item.Value)
+                    {
+                        scope.Add(new Data
+                        {
+                            Value = item.Key / 1000.0,
+                            Value1 = lastValue / 1000.0
+                        });
+                    }
+                    scope.Add(new Data
+                    {
+                        Value = item.Key / 1000.0,
+                        Value1 = item.Value / 1000.0
+                    });
+
+                    lastValue = item.Value;
+                }
+            }
+
+            ScopeCHACollection = new ObservableCollection<Data>(scope);
+
         }
     }
 }
