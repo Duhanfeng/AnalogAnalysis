@@ -55,15 +55,17 @@ namespace AnalogSignalAnalysisWpf
 
         private void Model_Compared(object sender, EventArgs e)
         {
-            if (!Directory.Exists("IORecord"))
+            string dir = $"IORecordImage/{DateTime.Now.ToString("yyyy-MM-dd")}";
+
+            if (!Directory.Exists(dir))
             {
-                Directory.CreateDirectory("IORecord");
+                Directory.CreateDirectory(dir);
             }
 
             Dispatcher.Invoke(new Action(() =>
             {
                 var bmp = ToBitmapTool.ToBitmap(SparrowChart);
-                bmp.Save($"IORecord/{DateTime.Now.ToString("yyyy-MM-dd HHmmss")}.bmp");
+                bmp.Save($"{dir}/{DateTime.Now.ToString("HHmmss")}.bmp");
             }));
 
         }
@@ -126,7 +128,7 @@ namespace AnalogSignalAnalysisWpf
                 //此处做你想做的事 ...=sfd.FileName; 
 
                 var model = DataContext as NewIOMeasurementViewModel;
-                model.ImportTemplate(sfd.FileName);
+                model.ExportTemplate(sfd.FileName);
             }
 
         }

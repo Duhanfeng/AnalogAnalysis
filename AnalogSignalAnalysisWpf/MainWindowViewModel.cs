@@ -419,7 +419,7 @@ namespace AnalogSignalAnalysisWpf
 
         private void InputOutputMeasurementViewModel_MessageRaised(object sender, MessageRaisedEventArgs e)
         {
-            AddRunningMessage(e.Message);
+            OnMessageRaised(e.MessageLevel, e.Message);
         }
 
         private void PNVoltageMeasurementViewModel_MessageRaised(object sender, MessageRaisedEventArgs e)

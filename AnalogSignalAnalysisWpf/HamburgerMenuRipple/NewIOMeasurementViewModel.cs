@@ -243,6 +243,11 @@ namespace AnalogSignalAnalysisWpf
             set { importFile = value; NotifyOfPropertyChange(() => ImportFile); }
         }
 
+        /// <summary>
+        /// 模板数据
+        /// </summary>
+        public ObservableCollection<Data> Template { get; set; } = new ObservableCollection<Data>();
+
         #endregion
 
         #region 硬件接口
@@ -403,6 +408,17 @@ namespace AnalogSignalAnalysisWpf
                 scopeChBCollection = value;
                 NotifyOfPropertyChange(() => ScopeCHBCollection);
             }
+        }
+
+        private ObservableCollection<Data> templateDataCollection;
+
+        /// <summary>
+        /// 模板数据集合
+        /// </summary>
+        public ObservableCollection<Data> TemplateDataCollection
+        {
+            get { return templateDataCollection; }
+            set { templateDataCollection = value; NotifyOfPropertyChange(() => TemplateDataCollection); }
         }
 
         private ObservableCollection<Data> tempPowerCollection = new ObservableCollection<Data>();
@@ -778,22 +794,30 @@ namespace AnalogSignalAnalysisWpf
 
         }
 
-        public void Compare(double[] globleChannel1, double[] globleChannel2)
+        /// <summary>
+        /// 显示完整的图表
+        /// </summary>
+        /// <param name="globleChannel1"></param>
+        /// <param name="globleChannel2"></param>
+        public void ShowCompleteGraph(double[] globleChannel1, double[] globleChannel2)
         {
             ObservableCollection<Data> collectionA = new ObservableCollection<Data>();
             ObservableCollection<Data> collectionB = new ObservableCollection<Data>();
 
-            double[] filterData;
-            Analysis.MeanFilter(globleChannel1, 11, out filterData);
+            double[] pressureChA = globleChannel1.ToList().ConvertAll(x => VoltageToPressure(x)).ToArray();
+            double[] pressureChB = globleChannel2.ToList().ConvertAll(x => VoltageToPressure(x)).ToArray();
 
-            for (int i = 0; i < globleChannel1.Length; i++)
+            double[] filterData;
+            Analysis.MeanFilter(pressureChA, 11, out filterData);
+
+            for (int i = 0; i < pressureChA.Length; i++)
             {
                 collectionA.Add(new Data() { Value1 = filterData[i], Value = i * 1000.0 / ((int)Scope.SampleRate) });
             }
 
-            Analysis.MeanFilter(globleChannel2, 11, out filterData);
+            Analysis.MeanFilter(pressureChB, 11, out filterData);
 
-            for (int i = 0; i < globleChannel2.Length; i++)
+            for (int i = 0; i < pressureChB.Length; i++)
             {
                 collectionB.Add(new Data() { Value1 = filterData[i], Value = i * 1000.0 / ((int)Scope.SampleRate) });
             }
@@ -804,9 +828,17 @@ namespace AnalogSignalAnalysisWpf
             AppendScopeCHACollection(collectionA);
             AppendScopeCHACollection(collectionB);
 
-            Compare();
+            //显示模板数据
+            TemplateDataCollection = new ObservableCollection<Data>(Template);
+
+            //Compare();
         }
 
+        /// <summary>
+        /// 示波器读取数据完成事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Scope_ScopeReadDataCompleted(object sender, ScopeReadDataCompletedEventArgs e)
         {
 
@@ -852,11 +884,17 @@ namespace AnalogSignalAnalysisWpf
                 var scope = sender as IScopeBase;
                 scope.ScopeReadDataCompleted -= Scope_ScopeReadDataCompleted;
 
-                Compare(globleChannel1, globleChannel2);
+                ShowCompleteGraph(globleChannel1, globleChannel2);
 
                 //继续老化(若有)
                 new Thread(() =>
                 {
+                    if ((currentBurnInTime % BackupInterval) == 0)
+                    {
+                        //备份截图
+                        new Thread(() => { Thread.Sleep(1000); OnCompared(); }).Start();
+                    }
+
                     currentBurnInTime++;
                     if (currentBurnInTime < TestTime)
                     {
@@ -885,7 +923,17 @@ namespace AnalogSignalAnalysisWpf
         /// <param name="file"></param>
         public void ImportTemplate(string file)
         {
+            //导入模板
+            var temp = JsonSerialization.DeserializeObjectFromFile<ObservableCollection<Data>>(file);
 
+            if (temp != null)
+            {
+                Template = new ObservableCollection<Data>(temp);
+            }
+            else
+            {
+                OnMessageRaised(MessageLevel.Err, "文件无效");
+            }
         }
 
         /// <summary>
@@ -894,7 +942,36 @@ namespace AnalogSignalAnalysisWpf
         /// <param name="file"></param>
         public void ExportTemplate(string file)
         {
+            JsonSerialization.SerializeObjectToFile(Template, file);
+            OnMessageRaised(MessageLevel.Message, "导出成功");
+        }
 
+        /// <summary>
+        /// 设置当前为模板
+        /// </summary>
+        public void SetTemplate()
+        {
+            if (ScopeCHACollection != null)
+            {
+                //设置当前结果为模板
+                Template = new ObservableCollection<Data>(ScopeCHACollection);
+            }
+            else
+            {
+                //Template = new ObservableCollection<Data>();
+                OnMessageRaised(MessageLevel.Err, "设置模板失败");
+            }
+        }
+
+        private int backupInterval = 5;
+
+        /// <summary>
+        /// 备份间隔
+        /// </summary>
+        public int BackupInterval
+        {
+            get { return backupInterval; }
+            set { backupInterval = value; }
         }
 
         private int testTime;
