@@ -15,6 +15,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Windows.Media.Imaging;
 using System.Windows;
+using CsvHelper;
 
 namespace AnalogSignalAnalysisWpf
 {
@@ -708,7 +709,6 @@ namespace AnalogSignalAnalysisWpf
 
                 OnMeasurementStarted();
 
-                Stopwatch stopwatch = new Stopwatch();
                 Stopwatch totalStopwatch = new Stopwatch();
 
                 //设置示波器采集
@@ -720,6 +720,7 @@ namespace AnalogSignalAnalysisWpf
                 ClearPowerCollection2();
                 ClearScopeCHACollection();
                 ClearScopeCHBCollection();
+                TemplateDataCollection = new ObservableCollection<Data>();
 
                 Power.Voltage = 0;
                 Power.IsEnableOutput = true;
@@ -734,42 +735,39 @@ namespace AnalogSignalAnalysisWpf
                 int index = 0;
                 double lastVol = 0;
                 totalStopwatch.Start();
-                foreach (var item in ExternRecordData.RecordVoltages.Values)
+                foreach (var item in ExternRecordData.RecordVoltages)
                 {
-                    stopwatch.Start();
                     while (true)
                     {
-                        if (stopwatch.Elapsed.TotalMilliseconds >= ExternRecordData.TimeInterval)
+                        if (totalStopwatch.Elapsed.TotalMilliseconds >= item.Key)
                         {
-                            stopwatch.Restart();
-
-                            if (item > 0)
+                            if (item.Value >= 0)
                             {
                                 //设置当前电压
-                                Power.Voltage = item / 1000;
-                                Console.WriteLine($"[{stopwatch.Elapsed.TotalMilliseconds:F2}:{index}]: vol: {item:F3}");
-                                lastVol = item;
+                                Power.Voltage = item.Value / 1000;
 
-                                collection.Add(new Data() { Value1 = item / 1000, Value = totalStopwatch.Elapsed.TotalMilliseconds });
-                            }
-                            else
-                            {
-                                //设置当前电压
-                                Power.Voltage = lastVol / 1000;
-                                Console.WriteLine($"[{stopwatch.Elapsed.TotalMilliseconds:F2}:{index}]: vol: {lastVol:F3}");
+                                if (lastVol != item.Value)
+                                {
+                                    collection.Add(new Data() { Value1 = lastVol / 1000, Value = totalStopwatch.Elapsed.TotalMilliseconds });
+                                }
+                                collection.Add(new Data() { Value1 = item.Value / 1000, Value = totalStopwatch.Elapsed.TotalMilliseconds });
+                                lastVol = item.Value;
+
                             }
 
                             index++;
                             break;
                         }
-                        Thread.Sleep(2);
+                        //Thread.Sleep(2);
                     }
 
-                    if ((index % (totalCount / 20)) == 0)
-                    {
-                        AppendPowerCollection(collection);
-                        collection = new ObservableCollection<Data>();
-                    }
+                    AppendPowerCollection(collection);
+                    collection = new ObservableCollection<Data>();
+
+                    //if ((index % (totalCount / 1)) == 0)
+                    //{
+                        
+                    //}
                 }
 
                 //AppendPowerCollection(new Data() { Value1 = lastVol / 1000, Value = index * ExternRecordData.TimeInterval });
@@ -801,32 +799,47 @@ namespace AnalogSignalAnalysisWpf
         /// <param name="globleChannel2"></param>
         public void ShowCompleteGraph(double[] globleChannel1, double[] globleChannel2)
         {
+            double lastValue = 0;
             ObservableCollection<Data> collectionA = new ObservableCollection<Data>();
             ObservableCollection<Data> collectionB = new ObservableCollection<Data>();
 
             double[] pressureChA = globleChannel1.ToList().ConvertAll(x => VoltageToPressure(x)).ToArray();
             double[] pressureChB = globleChannel2.ToList().ConvertAll(x => VoltageToPressure(x)).ToArray();
 
+            //double[] pressureChA = globleChannel1;
+            //double[] pressureChB = globleChannel2;
+
             double[] filterData;
             Analysis.MeanFilter(pressureChA, 11, out filterData);
 
             for (int i = 0; i < pressureChA.Length; i++)
             {
+                if (lastValue != filterData[i])
+                {
+                    collectionA.Add(new Data() { Value1 = lastValue, Value = i * 1000.0 / ((int)Scope.SampleRate) });
+                }
                 collectionA.Add(new Data() { Value1 = filterData[i], Value = i * 1000.0 / ((int)Scope.SampleRate) });
+                lastValue = filterData[i];
             }
 
+            lastValue = 0;
             Analysis.MeanFilter(pressureChB, 11, out filterData);
 
             for (int i = 0; i < pressureChB.Length; i++)
             {
+                if (lastValue != filterData[i])
+                {
+                    collectionB.Add(new Data() { Value1 = lastValue, Value = i * 1000.0 / ((int)Scope.SampleRate) });
+                }
                 collectionB.Add(new Data() { Value1 = filterData[i], Value = i * 1000.0 / ((int)Scope.SampleRate) });
+                lastValue = filterData[i];
             }
 
             ClearScopeCHACollection();
             ClearScopeCHBCollection();
 
             AppendScopeCHACollection(collectionA);
-            AppendScopeCHACollection(collectionB);
+            AppendScopeCHBCollection(collectionB);
 
             //显示模板数据
             TemplateDataCollection = new ObservableCollection<Data>(Template);
@@ -850,25 +863,28 @@ namespace AnalogSignalAnalysisWpf
 
             e.GetData(out globleChannel1, out globleChannel2, out currentChannel1, out currentChannel2);
 
+            double[] pressureChA = currentChannel1.ToList().ConvertAll(x => VoltageToPressure(x)).ToArray();
+            double[] pressureChB = currentChannel2.ToList().ConvertAll(x => VoltageToPressure(x)).ToArray();
+
             //设置通道A数据
             //数据滤波
             double[] filterData;
-            Analysis.MeanFilter(currentChannel1, 11, out filterData);
+            Analysis.MeanFilter(pressureChA, 11, out filterData);
 
             //显示数据
             ObservableCollection<Data> collectionA = new ObservableCollection<Data>();
 
-            for (int i = 0; i < currentChannel1.Length / SampleInterval; i++)
+            for (int i = 0; i < pressureChA.Length / SampleInterval; i++)
             {
                 collectionA.Add(new Data() { Value1 = filterData[i * SampleInterval], Value = (e.CurrentPacket * currentChannel1.Length + i) * 1000.0 / ((int)Scope.SampleRate) });
             }
 
             ObservableCollection<Data> collectionB = new ObservableCollection<Data>();
 
-            Analysis.MeanFilter(currentChannel2, 11, out filterData);
+            Analysis.MeanFilter(pressureChB, 11, out filterData);
 
             //显示通道B数据
-            for (int i = 0; i < currentChannel2.Length / SampleInterval; i++)
+            for (int i = 0; i < pressureChB.Length / SampleInterval; i++)
             {
                 collectionB.Add(new Data() { Value1 = filterData[i * SampleInterval], Value = (e.CurrentPacket * currentChannel2.Length + i) * 1000.0 / ((int)Scope.SampleRate) });
             }
@@ -924,16 +940,21 @@ namespace AnalogSignalAnalysisWpf
         public void ImportTemplate(string file)
         {
             //导入模板
-            var temp = JsonSerialization.DeserializeObjectFromFile<ObservableCollection<Data>>(file);
+            try
+            {
+                using (var reader = new StreamReader(file))
+                using (var csv = new CsvReader(reader))
+                {
+                    csv.Configuration.HasHeaderRecord = true;
+                    Template = new ObservableCollection<Data>(csv.GetRecords<Data>().ToList());
+                }
+                OnMessageRaised(MessageLevel.Message, "导入模板成功");
+            }
+            catch (Exception)
+            {
+                OnMessageRaised(MessageLevel.Message, "导入模板失败");
+            }
 
-            if (temp != null)
-            {
-                Template = new ObservableCollection<Data>(temp);
-            }
-            else
-            {
-                OnMessageRaised(MessageLevel.Err, "文件无效");
-            }
         }
 
         /// <summary>
@@ -942,8 +963,20 @@ namespace AnalogSignalAnalysisWpf
         /// <param name="file"></param>
         public void ExportTemplate(string file)
         {
-            JsonSerialization.SerializeObjectToFile(Template, file);
-            OnMessageRaised(MessageLevel.Message, "导出成功");
+            try
+            {
+                using (var writer = new StreamWriter(file))
+                using (var csv = new CsvWriter(writer))
+                {
+                    csv.WriteRecords(Template);
+                }
+                OnMessageRaised(MessageLevel.Message, "导出模板成功");
+            }
+            catch (Exception)
+            {
+                OnMessageRaised(MessageLevel.Message, "导出模板失败");
+            }
+
         }
 
         /// <summary>
@@ -953,8 +986,16 @@ namespace AnalogSignalAnalysisWpf
         {
             if (ScopeCHACollection != null)
             {
+                var tempDataCollection = new ObservableCollection<Data>();
+
+                for (int i = 0; i < ScopeCHACollection.Count / 10; i++)
+                {
+                    tempDataCollection.Add(ScopeCHACollection[i * 10]);
+                }
+
                 //设置当前结果为模板
-                Template = new ObservableCollection<Data>(ScopeCHACollection);
+                Template = new ObservableCollection<Data>(tempDataCollection);
+                OnMessageRaised(MessageLevel.Err, "设置模板成功");
             }
             else
             {

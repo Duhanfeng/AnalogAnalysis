@@ -64,8 +64,8 @@ namespace AnalogSignalAnalysisWpf
 
             Dispatcher.Invoke(new Action(() =>
             {
-                var bmp = ToBitmapTool.ToBitmap(SparrowChart);
-                bmp.Save($"{dir}/{DateTime.Now.ToString("HHmmss")}.bmp");
+                //var bmp = ToBitmapTool.ToBitmap(SparrowChart);
+                //bmp.Save($"{dir}/{DateTime.Now.ToString("HHmmss")}.bmp");
             }));
 
         }
@@ -96,8 +96,8 @@ namespace AnalogSignalAnalysisWpf
         {
             var ofd = new Microsoft.Win32.OpenFileDialog();
 
-            ofd.DefaultExt = ".json";
-            ofd.Filter = "json file|*.json";
+            ofd.DefaultExt = ".csv";
+            ofd.Filter = "csv file|*.csv";
 
             if (ofd.ShowDialog() == true)
             {
@@ -119,8 +119,8 @@ namespace AnalogSignalAnalysisWpf
             var sfd = new Microsoft.Win32.SaveFileDialog();
 
             //设置保存的文件的类型，注意过滤器的语法  
-            sfd.Filter = "json file|*.json";
-            sfd.FileName = "";
+            sfd.Filter = "csv file|*.csv";
+            sfd.FileName = "模板文件-" + DateTime.Now.ToString("yyyy-MM-dd");
 
             //调用ShowDialog()方法显示该对话框，该方法的返回值代表用户是否点击了确定按钮  
             if (sfd.ShowDialog() == true)

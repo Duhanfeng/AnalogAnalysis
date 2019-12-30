@@ -12,19 +12,19 @@ namespace AnalogSignalAnalysisWpf.LiveData
         {
 
         }
-        public Data(DateTime date, double value, double value1, double value2)
+        public Data(double value, double value1)
         {
-            Date = date;
+            //Date = date;
             Value = value;
             Value1 = value1;
-            Value2 = value2;
+            //Value2 = value2;
         }
 
-        public DateTime Date
-        {
-            get;
-            set;
-        }
+        //public DateTime Date
+        //{
+        //    get;
+        //    set;
+        //}
 
         public double Value
         {
@@ -36,10 +36,10 @@ namespace AnalogSignalAnalysisWpf.LiveData
             get;
             set;
         }
-        public double Value2
-        {
-            get;
-            set;
-        }
+        //public double Value2
+        //{
+        //    get;
+        //    set;
+        //}
     }
 }
