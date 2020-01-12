@@ -438,7 +438,7 @@ namespace AnalogSignalAnalysisWpf
                 tempPowerCollection.Add(item);
             }
 
-            PowerCollection = PowerCollection = new ObservableCollection<Data>(tempPowerCollection);
+            PowerCollection = new ObservableCollection<Data>(tempPowerCollection);
         }
 
         /// <summary>
