@@ -16,6 +16,7 @@ using System.Drawing.Imaging;
 using System.Windows.Media.Imaging;
 using System.Windows;
 using CsvHelper;
+using Sparrow.Chart;
 
 namespace AnalogSignalAnalysisWpf
 {
@@ -24,7 +25,9 @@ namespace AnalogSignalAnalysisWpf
     /// </summary>
     public class ExternRecordData
     {
-        //数据列表
+        /// <summary>
+        /// 数据列表
+        /// </summary>
         public Dictionary<int, double> RecordVoltages = new Dictionary<int, double>();
 
         /// <summary>
@@ -41,6 +44,11 @@ namespace AnalogSignalAnalysisWpf
         /// 时间间隔(MS)
         /// </summary>
         public int TimeInterval { get; set; } = 50;
+
+        /// <summary>
+        /// 模板
+        /// </summary>
+        public ObservableCollection<DoublePoint> Template { get; set; }
     }
 
     public class NewIOMeasurementViewModel : Screen
@@ -923,6 +931,9 @@ namespace AnalogSignalAnalysisWpf
 
         }
 
+        #region 模板设置
+
+
         /// <summary>
         /// 导入配置信息文件
         /// </summary>
@@ -1004,6 +1015,10 @@ namespace AnalogSignalAnalysisWpf
             }
         }
 
+        #endregion
+
+        #region 老化测试
+
         private int backupInterval = 5;
 
         /// <summary>
@@ -1039,13 +1054,15 @@ namespace AnalogSignalAnalysisWpf
             currentBurnInTime = 0;
             Start();
 
-            new Thread(() => 
-            { 
+            new Thread(() =>
+            {
 
 
             }).Start();
 
         }
+
+        #endregion
 
         #endregion
     }

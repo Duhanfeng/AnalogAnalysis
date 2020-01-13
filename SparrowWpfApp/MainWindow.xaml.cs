@@ -421,6 +421,59 @@ namespace SparrowWpfApp
 
         #region 模板
 
+        /// <summary>
+        /// 记录的模板
+        /// </summary>
+        private ObservableCollection<DoublePoint> recordTemplateCollection = new ObservableCollection<DoublePoint>();
+
+        private ObservableCollection<DoublePoint> templateCollection = new ObservableCollection<DoublePoint>();
+
+        /// <summary>
+        /// 模板
+        /// </summary>
+        public ObservableCollection<DoublePoint> TemplateCollection
+        {
+            get
+            {
+                return templateCollection;
+            }
+            set
+            {
+                templateCollection = value;
+                NotifyOfPropertyChange(() => TemplateCollection);
+            }
+        }
+
+
+        /// <summary>
+        /// 显示模板
+        /// </summary>
+        /// <param name="baseTime"></param>
+        public void ShowTemplate(double baseTime = 0)
+        {
+            if (recordTemplateCollection?.Count > 0)
+            {
+                var tempTemplate = new ObservableCollection<DoublePoint>();
+                foreach (var item in recordTemplateCollection)
+                {
+                    var temp = new DoublePoint();
+                    temp.Data = item.Data + baseTime;
+                    temp.Value = item.Value;
+                    tempTemplate.Add(temp);
+                }
+                TemplateCollection = tempTemplate;
+            }
+
+        }
+
+        /// <summary>
+        /// 清除模板
+        /// </summary>
+        public void ClearTemplate()
+        {
+            TemplateCollection = new ObservableCollection<DoublePoint>();
+        }
+
         #endregion
 
         #region 电源模块输出数据
