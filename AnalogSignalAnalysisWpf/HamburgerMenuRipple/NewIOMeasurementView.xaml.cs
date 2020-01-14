@@ -40,7 +40,7 @@ namespace AnalogSignalAnalysisWpf
             if (ofd.ShowDialog() == true)
             {
                 var model = DataContext as NewIOMeasurementViewModel;
-                model.ImportConfigFile(ofd.FileName);
+                //model.ImportConfigFile(ofd.FileName);
             }
         }
 
@@ -103,7 +103,7 @@ namespace AnalogSignalAnalysisWpf
             {
                 //此处做你想做的事 ...=ofd.SafeFileName; 
                 var model = DataContext as NewIOMeasurementViewModel;
-                model.ImportTemplate(ofd.FileName);
+                //model.ImportTemplate(ofd.FileName);
             }
 
         }
@@ -128,7 +128,7 @@ namespace AnalogSignalAnalysisWpf
                 //此处做你想做的事 ...=sfd.FileName; 
 
                 var model = DataContext as NewIOMeasurementViewModel;
-                model.ExportTemplate(sfd.FileName);
+                //model.ExportTemplate(sfd.FileName);
             }
 
         }

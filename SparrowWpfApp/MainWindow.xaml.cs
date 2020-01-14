@@ -16,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Framework.Infrastructure.Serialization;
 
 namespace SparrowWpfApp
 {
@@ -31,6 +32,9 @@ namespace SparrowWpfApp
             DataContext = new MainWindowModel();
         }
     }
+
+    #region 事件
+
 
     /// <summary>
     /// 示波器数据读取完成事件
@@ -101,6 +105,11 @@ namespace SparrowWpfApp
         }
     }
 
+    #endregion
+
+    #region 示波器模拟
+
+
     public class Sample
     {
         private Random randomNumber = new Random();
@@ -161,7 +170,7 @@ namespace SparrowWpfApp
                         currentChannel2[i] = value2;
                     }
 
-                    ScopeReadDataCompleted?.Invoke(this, new ScopeReadDataCompletedEventArgs(channelData1, channelData2, currentChannel1, currentChannel2, totalPacket, currentPacket % totalPacket));
+                    ScopeReadDataCompleted?.Invoke(this, new ScopeReadDataCompletedEventArgs(channelData1, channelData2, currentChannel1, currentChannel2, totalPacket, currentPacket % totalPacket + 1));
                     Thread.Sleep(1000 / 20);
                     currentPacket++;
                 }
@@ -171,6 +180,8 @@ namespace SparrowWpfApp
             thread.Start();
         }
     }
+
+    #endregion
 
     public class MainWindowModel : Screen
     {
@@ -194,6 +205,13 @@ namespace SparrowWpfApp
             e.GetData(out double[] globalChannel1, out double[] globalChannel2, out double[] currentCHannel1, out double[] currentCHannel2);
 
             AppendScopeData(currentCHannel1, currentCHannel2, true);
+
+            //最后一个包
+            if (e.CurrentPacket == e.TotalPacket)
+            {
+                ExportAsTemplate();
+            }
+
         }
 
         #region 数据模型
@@ -417,6 +435,22 @@ namespace SparrowWpfApp
             ScopeCHBCollection = scopeCHBCollection;
         }
 
+        /// <summary>
+        /// 将当前数据导出为模板
+        /// </summary>
+        public void ExportAsTemplate(string file = "temp.json")
+        {
+            //将当前结果设置为模板
+            TemplateCollection = new ObservableCollection<DoublePoint>(ScopeCHACollection);
+
+            //导出模板
+            bool result = JsonSerialization.SerializeObjectToFile(ScopeCHACollection, file);
+            if (!result)
+            {
+                Console.WriteLine("导出失败");
+            }
+        }
+
         #endregion
 
         #region 模板
@@ -443,7 +477,6 @@ namespace SparrowWpfApp
                 NotifyOfPropertyChange(() => TemplateCollection);
             }
         }
-
 
         /// <summary>
         /// 显示模板

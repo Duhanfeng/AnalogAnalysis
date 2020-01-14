@@ -18,22 +18,6 @@
             <converters:BoolToColorConverter x:Key="BoolToColorConverter" />
             <converters:BoolToInvertConverter x:Key="BoolToInvertConverter" />
             <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
-            <Style x:Key="containerStyle" TargetType="Border">
-                <Setter Property="BorderBrush" Value="#FFAAFFAA"/>
-                <Setter Property="BorderThickness" Value="1"/>
-            </Style>
-            <Style TargetType="{x:Type Line}" x:Key="crossLineStyle">
-                <Setter Property="Stroke" Value="#FFAAFFAA"/>
-                <Setter Property="StrokeThickness" Value="1"/>
-            </Style>
-            <Style TargetType="{x:Type Line}" x:Key="axisLineStyle">
-                <Setter Property="Stroke" Value="#FFAAFFAA"/>
-                <Setter Property="StrokeThickness" Value="0"/>
-            </Style>
-            <Style TargetType="{x:Type Line}" x:Key="minorcrossLineStyle">
-                <Setter Property="Stroke" Value="#FF225633"/>
-                <Setter Property="StrokeThickness" Value="0.25"/>
-            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -45,8 +29,8 @@
 
         <StackPanel>
             <DockPanel>
-                <!--<TextBlock DockPanel.Dock="Top" FontSize="16">输入电压</TextBlock>-->
-                <chart:SparrowChart Foreground="White" FontFamily="Arial" ContainerBorderStyle="{StaticResource containerStyle}" Margin="5" MinHeight="200">
+                
+                <!--<chart:SparrowChart Visibility="Collapsed" Foreground="White" FontFamily="Arial" ContainerBorderStyle="{StaticResource containerStyle}" Margin="5" MinHeight="200">
                     <chart:SparrowChart.Background>
                         <LinearGradientBrush EndPoint="0.504,1.5" StartPoint="0.504,0.03">
                             <GradientStop Color="#FF00170B" Offset="0"/>
@@ -66,49 +50,85 @@
                     <chart:LineSeries Label="CHA" PointsSource="{Binding ScopeCHACollection}" Stroke="Yellow" XPath="Value" YPath="Value1" StrokeThickness="1" UseSinglePart="True"/>
                     <chart:LineSeries Label="CHB" PointsSource="{Binding ScopeCHBCollection}" Stroke="MediumAquamarine" XPath="Value" YPath="Value1" StrokeThickness="1" UseSinglePart="True"/>
                     <chart:LineSeries Label="模板" PointsSource="{Binding TemplateDataCollection}" Stroke="BlueViolet" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
-                </chart:SparrowChart>
-            </DockPanel>
-            <DockPanel Visibility="Collapsed">
-                <!--<TextBlock DockPanel.Dock="Top" FontSize="16">检测气压</TextBlock>-->
-                <chart:SparrowChart x:Name="SparrowChart" Foreground="White" FontFamily="Arial" ContainerBorderStyle="{StaticResource containerStyle}" Margin="5" MinHeight="200">
-                    <chart:SparrowChart.Background>
-                        <LinearGradientBrush EndPoint="0.504,1.5" StartPoint="0.504,0.03">
-                            <GradientStop Color="#FF00170B" Offset="0"/>
-                            <GradientStop Color="#FF005C2C" Offset="0.8"/>
-                        </LinearGradientBrush>
-                    </chart:SparrowChart.Background>
-                    <chart:SparrowChart.Legend>
-                        <chart:Legend Padding="10" Header="输入输出曲线测试"/>
-                    </chart:SparrowChart.Legend>
+                </chart:SparrowChart>-->
+                
+                <chart:SparrowChart Visibility="Visible"  
+                                    Margin="5" 
+                                    RenderingMode="GDIRendering" 
+                                    SmoothingMode="HighSpeed" 
+                                    CompositingMode="SourceCopy"
+                                    CompositingQuality="HighSpeed"
+                                    Height="300">
                     <chart:SparrowChart.XAxis>
-                        <chart:LinearXAxis CrossLineStyle="{StaticResource crossLineStyle}" MinorLineStyle="{StaticResource minorcrossLineStyle}" MajorLineStyle="{StaticResource crossLineStyle}" AxisLineStyle="{StaticResource axisLineStyle}" MinorTicksCount="3" ShowCrossLines="True" Header="Time(ms)" StringFormat="0.0"/>
+                        <chart:LinearXAxis ShowCrossLines="True"
+                                       Header="时间(S)" 
+                                       StringFormat="0.0"/>
                     </chart:SparrowChart.XAxis>
                     <chart:SparrowChart.YAxis>
-                        <chart:LinearYAxis CrossLineStyle="{StaticResource crossLineStyle}"  MinorLineStyle="{StaticResource minorcrossLineStyle}" MajorLineStyle="{StaticResource crossLineStyle}" MinValue="0" MaxValue="5.0" AxisLineStyle="{StaticResource axisLineStyle}" MinorTicksCount="3" ShowCrossLines="True" StringFormat="0.00" Header="气压(MPa)"/>
+                        <chart:LinearYAxis MinValue="0"
+                                       MaxValue="1" 
+                                       ShowCrossLines="True" 
+                                       Header="电压(V)"
+                                       StringFormat="0.0" />
                     </chart:SparrowChart.YAxis>
-                    <chart:LineSeries Label="CHA" PointsSource="{Binding ScopeCHACollection}" Stroke="Yellow" XPath="Value" YPath="Value1" StrokeThickness="1" UseSinglePart="True"/>
-                    <chart:LineSeries Label="CHB" PointsSource="{Binding ScopeCHBCollection}" Stroke="MediumAquamarine" XPath="Value" YPath="Value1" StrokeThickness="1" UseSinglePart="True"/>
-                    <chart:LineSeries Label="模板" PointsSource="{Binding TemplateDataCollection}" Stroke="BlueViolet" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
+                    <chart:LineSeries Label="CHA" 
+                                  PointsSource="{Binding ScopeCHACollection}" 
+                                  Stroke="Red" 
+                                  XPath="Data" 
+                                  YPath="Value"
+                                  StrokeThickness="1"
+                                  UseSinglePart="True"/>
+                    <chart:LineSeries Label="CHB" 
+                                  PointsSource="{Binding ScopeCHBCollection}" 
+                                  Stroke="Green" 
+                                  XPath="Data" 
+                                  YPath="Value"
+                                  StrokeThickness="1"
+                                  UseSinglePart="True"/>
+                    <chart:LineSeries Label="Power" 
+                                  PointsSource="{Binding PowerCollection}" 
+                                  Stroke="Yellow" 
+                                  XPath="Data" 
+                                  YPath="Value"
+                                  StrokeThickness="1"
+                                  UseSinglePart="True"/>
+                    <chart:LineSeries Label="Template" 
+                                  PointsSource="{Binding TemplateCollection}" 
+                                  Stroke="Blue" 
+                                  XPath="Data" 
+                                  YPath="Value"
+                                  StrokeThickness="1"
+                                  UseSinglePart="True"/>
                 </chart:SparrowChart>
+
             </DockPanel>
+            <StackPanel Orientation="Horizontal">
+                <Rectangle Margin="10,0" Width="20" Height="20" Fill="Red"/>
+                <TextBlock VerticalAlignment="Center">CHA</TextBlock>
+                <Rectangle Margin="10,0" Width="20" Height="20" Fill="Green"/>
+                <TextBlock VerticalAlignment="Center">CHB</TextBlock>
+                <Rectangle Margin="10,0" Width="20" Height="20" Fill="Yellow"/>
+                <TextBlock VerticalAlignment="Center">模板</TextBlock>
+                <Rectangle Margin="10,0" Width="20" Height="20" Fill="Blue"/>
+                <TextBlock VerticalAlignment="Center">电源输出</TextBlock>
+            </StackPanel>
+
             <StackPanel Margin="10">
                 <StackPanel Orientation="Horizontal">
-                    <Button cal:Message.Attach="Start" IsEnabled="{Binding CanMeasure}" Margin="0,0,20,0" MinWidth="80">运行</Button>
                     <TextBlock Text="当前状态:" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <Ellipse Width="20" Height="20" Fill="{Binding IsMeasuring, Converter={StaticResource BoolToColorConverter}}" Margin="0,0,10,0"/>
                     <TextBox Text="{Binding RunningStatus}" IsReadOnly="True" MinWidth="150" Margin="0,0,20,0"/>
-                    <Button Visibility="Collapsed" cal:Message.Attach="Compare" IsEnabled="{Binding CanMeasure}" Margin="0,0,20,0" MinWidth="80">重合比较</Button>
-                </StackPanel>
-                <StackPanel Margin="0,5"/>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="每" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <TextBox MinWidth="40" Margin="0,0,10,0" Text="{Binding BackupInterval, UpdateSourceTrigger=Explicit}" KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
-                    <TextBlock Text="次老化测试,保存一次图片" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <Button cal:Message.Attach="Start" IsEnabled="{Binding CanMeasure}" Margin="0,0,20,0" MinWidth="80">运行</Button>
                 </StackPanel>
                 <StackPanel Margin="0,5"/>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="老化测试次数:" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <TextBox MinWidth="80" Margin="0,0,20,0" Text="{Binding TestTime, UpdateSourceTrigger=Explicit}" KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+                    <StackPanel Orientation="Horizontal" Margin="20,0">
+                        <TextBlock Text="每" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBox MinWidth="40" Margin="0,0,10,0" Text="{Binding BackupInterval, UpdateSourceTrigger=Explicit}" KeyDown="TextBox_KeyDown" LostFocus="TextBox_LostFocus"/>
+                        <TextBlock Text="次老化测试,保存一次图片" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    </StackPanel>
                     <Button cal:Message.Attach="BurnIn" IsEnabled="{Binding CanMeasure}" Margin="0,0,20,0" MinWidth="80">开始老化</Button>
                 </StackPanel>
             </StackPanel>

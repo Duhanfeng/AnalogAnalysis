@@ -61,76 +61,27 @@
                                   UseSinglePart="True"/>
                 <chart:LineSeries Label="CHB" 
                                   PointsSource="{Binding ScopeCHBCollection}" 
-                                  Stroke="Yellow" 
+                                  Stroke="Green" 
                                   XPath="Data" 
                                   YPath="Value"
                                   StrokeThickness="1"
                                   UseSinglePart="True"/>
                 <chart:LineSeries Label="Power" 
-                                  PointsSource="{Binding PowerPointsCollection}" 
-                                  Stroke="Red" 
+                                  PointsSource="{Binding PowerCollection}" 
+                                  Stroke="Yellow" 
                                   XPath="Data" 
                                   YPath="Value"
                                   StrokeThickness="1"
                                   UseSinglePart="True"/>
                 <chart:LineSeries Label="Template" 
-                                  PointsSource="{Binding TemplatePointsCollection}" 
-                                  Stroke="Red" 
+                                  PointsSource="{Binding TemplateCollection}" 
+                                  Stroke="Blue" 
                                   XPath="Data" 
                                   YPath="Value"
                                   StrokeThickness="1"
                                   UseSinglePart="True"/>
             </chart:SparrowChart>
             
-            <chart:SparrowChart Visibility="Collapsed"  
-                                Foreground="White" 
-                                FontFamily="Arial" 
-                                ContainerBorderStyle="{StaticResource containerStyle}" 
-                                RenderingMode="GDIRendering" 
-                                SmoothingMode="HighSpeed" 
-                                CompositingMode="SourceCopy"
-                                CompositingQuality="HighSpeed" 
-                                Theme="Metro"  
-                                Margin="5"
-                                MinHeight="200">
-                <chart:SparrowChart.Background>
-                    <LinearGradientBrush EndPoint="0.504,1.5" StartPoint="0.504,0.03">
-                        <GradientStop Color="#FF00170B" Offset="0"/>
-                        <GradientStop Color="#FF005C2C" Offset="0.8"/>
-                    </LinearGradientBrush>
-                </chart:SparrowChart.Background>
-                <chart:SparrowChart.Legend>
-                    <chart:Legend Padding="10" Header="输入输出曲线测试"/>
-                </chart:SparrowChart.Legend>
-                <chart:SparrowChart.XAxis>
-                    <chart:LinearXAxis CrossLineStyle="{StaticResource crossLineStyle}" 
-                                       MinorLineStyle="{StaticResource minorcrossLineStyle}" 
-                                       MajorLineStyle="{StaticResource crossLineStyle}" 
-                                       AxisLineStyle="{StaticResource axisLineStyle}" 
-                                       MinorTicksCount="2" 
-                                       ShowCrossLines="True" 
-                                       Header="Time(ms)" 
-                                       StringFormat="0.0"/>
-                </chart:SparrowChart.XAxis>
-                <chart:SparrowChart.YAxis>
-                    <chart:LinearYAxis CrossLineStyle="{StaticResource crossLineStyle}" 
-                                       MinorLineStyle="{StaticResource minorcrossLineStyle}" 
-                                       MajorLineStyle="{StaticResource crossLineStyle}" 
-                                       AxisLineStyle="{StaticResource axisLineStyle}" 
-                                       MaxValue="1" 
-                                       MinorTicksCount="2" 
-                                       ShowCrossLines="True" 
-                                       Header="Voltage(V)"
-                                       StringFormat="0.0" />
-                </chart:SparrowChart.YAxis>
-                <chart:LineSeries Label="CHA"
-                                  PointsSource="{Binding CHAPointsCollection}" 
-                                  Stroke="Red" 
-                                  XPath="Data" 
-                                  YPath="Value" 
-                                  StrokeThickness="1" 
-                                  UseSinglePart="True"/>
-            </chart:SparrowChart>
         </DockPanel>
     </Grid>
 </Window>

@@ -345,6 +345,7 @@ namespace AnalogSignalAnalysisWpf
 
         #endregion
 
+#if false
         #region 显示参数
 
         private ObservableCollection<Data> powerCollection;
@@ -554,6 +555,7 @@ namespace AnalogSignalAnalysisWpf
         }
 
         #endregion
+#endif
 
         #region 事件
 
@@ -625,6 +627,8 @@ namespace AnalogSignalAnalysisWpf
         }
 
         #endregion
+
+#if false
 
         #region 应用
 
@@ -1065,5 +1069,360 @@ namespace AnalogSignalAnalysisWpf
         #endregion
 
         #endregion
+
+#endif
+
+        #region 数据模型
+
+        #region 配置参数
+
+        /// <summary>
+        /// 采样率
+        /// </summary>
+        public int SampleRate { get; set; } = 96 * 1000;
+
+        /// <summary>
+        /// 显示率(点/S)
+        /// </summary>
+        public int DisplayRate { get; set; } = 100;
+
+        /// <summary>
+        /// 显示间隔(忽略此间隔中的其他数)
+        /// </summary>
+        public int DisplayInterval
+        {
+            get
+            {
+                return SampleRate / DisplayRate;
+            }
+        }
+
+        /// <summary>
+        /// 时间间隔
+        /// </summary>
+        public double TimeInterval
+        {
+            get
+            {
+                return 1.0 / DisplayRate;
+            }
+        }
+
+        /// <summary>
+        /// 总时间(S)
+        /// </summary>
+        public int TotalTime { get; set; } = 10;
+
+        /// <summary>
+        /// 总数量
+        /// </summary>
+        public int TotalCount
+        {
+            get
+            {
+
+                return IsShowLastValue ? TotalTime * DisplayRate * 2 : TotalTime * DisplayRate;
+            }
+        }
+
+        /// <summary>
+        /// 显示上一次的数据
+        /// </summary>
+        public bool IsShowLastValue { get; set; } = false;
+
+        #endregion
+
+        #region 示波器通道
+
+        #region 通道A
+
+        private ObservableCollection<DoublePoint> scopeChACollection = new ObservableCollection<DoublePoint>();
+
+        /// <summary>
+        /// 通道A数据
+        /// </summary>
+        public ObservableCollection<DoublePoint> ScopeCHACollection
+        {
+            get
+            {
+                return scopeChACollection;
+            }
+            set
+            {
+                scopeChACollection = value;
+                NotifyOfPropertyChange(() => ScopeCHACollection);
+            }
+        }
+
+        #endregion
+
+        #region 通道B
+
+        private ObservableCollection<DoublePoint> scopeChBCollection = new ObservableCollection<DoublePoint>();
+
+        /// <summary>
+        /// 通道B数据
+        /// </summary>
+        public ObservableCollection<DoublePoint> ScopeCHBCollection
+        {
+            get
+            {
+                return scopeChBCollection;
+            }
+            set
+            {
+                scopeChBCollection = value;
+                NotifyOfPropertyChange(() => ScopeCHBCollection);
+            }
+        }
+
+        #endregion
+
+        /// <summary>
+        /// 清除示波器数据
+        /// </summary>
+        public void ClearScopeData()
+        {
+            ScopeCHACollection = new ObservableCollection<DoublePoint>();
+            ScopeCHBCollection = new ObservableCollection<DoublePoint>();
+        }
+
+        /// <summary>
+        /// 追加示波器数据
+        /// </summary>
+        /// <param name="channel1">通道1数据</param>
+        /// <param name="channel2">通道2数据</param>
+        public void AppendScopeData(double[] channel1, double[] channel2, bool isLimit = true)
+        {
+            ObservableCollection<DoublePoint> scopeCHACollection;
+            ObservableCollection<DoublePoint> scopeCHBCollection;
+
+            {
+                double time = 0;
+                double lastValue = 0;
+                var tempCHA = new ObservableCollection<DoublePoint>();
+                var tempCHA2 = new ObservableCollection<DoublePoint>();
+
+                //将之前的数据转移到临时变量中
+                foreach (var item in ScopeCHACollection)
+                {
+                    tempCHA.Add(item);
+                }
+
+                if (tempCHA.Count > 0)
+                {
+                    time = tempCHA[tempCHA.Count - 1].Data;
+                    lastValue = tempCHA[tempCHA.Count - 1].Value;
+                }
+
+                //将数据追加在结尾
+                for (int i = 0; i < channel1.Length / DisplayInterval; i++)
+                {
+                    if (IsShowLastValue)
+                    {
+                        tempCHA.Add(new DoublePoint() { Data = time + (i + 1) * TimeInterval, Value = lastValue });
+                    }
+                    lastValue = channel1[i * DisplayInterval];
+                    tempCHA.Add(new DoublePoint() { Data = time + (i + 1) * TimeInterval, Value = lastValue });
+                }
+
+                //如果数据过长,则截掉前面的
+                if ((isLimit) && (tempCHA.Count > TotalCount))
+                {
+                    int difference = tempCHA.Count - TotalCount;
+
+                    for (int i = difference; i < tempCHA.Count; i++)
+                    {
+                        tempCHA2.Add(tempCHA[i]);
+                    }
+                    scopeCHACollection = tempCHA2;
+                }
+                else
+                {
+                    scopeCHACollection = tempCHA;
+                }
+            }
+
+            {
+                double time = 0;
+                double lastValue = 0;
+                var tempCHB = new ObservableCollection<DoublePoint>();
+                var tempCHB2 = new ObservableCollection<DoublePoint>();
+
+                //将之前的数据转移到临时变量中
+                foreach (var item in ScopeCHBCollection)
+                {
+                    tempCHB.Add(item);
+                }
+
+                if (tempCHB.Count > 0)
+                {
+                    time = tempCHB[tempCHB.Count - 1].Data;
+                    lastValue = tempCHB[tempCHB.Count - 1].Value;
+                }
+
+                //将数据追加在结尾
+                for (int i = 0; i < channel2.Length / DisplayInterval; i++)
+                {
+                    if (IsShowLastValue)
+                    {
+                        tempCHB.Add(new DoublePoint() { Data = time + (i + 1) * TimeInterval, Value = lastValue });
+                    }
+                    lastValue = channel2[i * DisplayInterval];
+                    tempCHB.Add(new DoublePoint() { Data = time + (i + 1) * TimeInterval, Value = lastValue });
+                }
+
+                //如果数据过长,则截掉前面的
+                if ((isLimit) && (tempCHB.Count > TotalCount))
+                {
+                    int difference = tempCHB.Count - TotalCount;
+                    for (int i = difference; i < tempCHB.Count; i++)
+                    {
+                        tempCHB2.Add(tempCHB[i]);
+                    }
+                    scopeCHBCollection = tempCHB2;
+                }
+                else
+                {
+                    scopeCHBCollection = tempCHB;
+                }
+            }
+
+            //最后才将数据赋值给绑定的变量
+            ScopeCHACollection = scopeCHACollection;
+            ScopeCHBCollection = scopeCHBCollection;
+        }
+
+        #endregion
+
+        #region 模板
+
+        private ObservableCollection<DoublePoint> templateCollection = new ObservableCollection<DoublePoint>();
+
+        /// <summary>
+        /// 模板
+        /// </summary>
+        public ObservableCollection<DoublePoint> TemplateCollection
+        {
+            get
+            {
+                return templateCollection;
+            }
+            set
+            {
+                templateCollection = value;
+                NotifyOfPropertyChange(() => TemplateCollection);
+            }
+        }
+
+        /// <summary>
+        /// 显示模板
+        /// </summary>
+        /// <param name="baseTime"></param>
+        public void ShowTemplate(ObservableCollection<DoublePoint> template, double baseTime = 0)
+        {
+            if (template?.Count > 0)
+            {
+                var tempTemplate = new ObservableCollection<DoublePoint>();
+                foreach (var item in template)
+                {
+                    var temp = new DoublePoint();
+                    temp.Data = item.Data + baseTime;
+                    temp.Value = item.Value;
+                    tempTemplate.Add(temp);
+                }
+                TemplateCollection = tempTemplate;
+            }
+
+        }
+
+        /// <summary>
+        /// 清除模板
+        /// </summary>
+        public void ClearTemplate()
+        {
+            TemplateCollection = new ObservableCollection<DoublePoint>();
+        }
+
+        #endregion
+
+        #region 电源模块输出数据
+
+        private ObservableCollection<DoublePoint> powerCollection = new ObservableCollection<DoublePoint>();
+
+        /// <summary>
+        /// 电源模块输出信息
+        /// </summary>
+        public ObservableCollection<DoublePoint> PowerCollection
+        {
+            get
+            {
+                return powerCollection;
+            }
+            set
+            {
+                powerCollection = value;
+                NotifyOfPropertyChange(() => PowerCollection);
+            }
+        }
+
+        /// <summary>
+        /// 清除电源数据
+        /// </summary>
+        public void ClearPowerData()
+        {
+            PowerCollection = new ObservableCollection<DoublePoint>();
+        }
+
+        /// <summary>
+        /// 追加电源数据
+        /// </summary>
+        public void AppendPowerData(ObservableCollection<DoublePoint> datas)
+        {
+            //将之前的数据转移到临时变量中
+            var tempPower = new ObservableCollection<DoublePoint>();
+            foreach (var item in PowerCollection)
+            {
+                tempPower.Add(item);
+            }
+
+            //追加数据到后面
+            foreach (var item in datas)
+            {
+                tempPower.Add(item);
+            }
+
+            PowerCollection = tempPower;
+        }
+
+        #endregion
+
+        #endregion
+
+        #region 应用
+
+        /// <summary>
+        /// 外部记录的数据
+        /// </summary>
+        public ExternRecordData ExternRecordData { get; set; } = new ExternRecordData();
+
+        /// <summary>
+        /// 将当前数据导出为模板
+        /// </summary>
+        public void ExportTemplate(string file = "temp.json")
+        {
+            //将当前结果设置为模板
+            ExternRecordData.Template = new ObservableCollection<DoublePoint>(ScopeCHACollection);
+
+            //导出模板
+            bool result = JsonSerialization.SerializeObjectToFile(ExternRecordData, file);
+            if (!result)
+            {
+                Console.WriteLine("导出失败");
+            }
+        }
+
+        #endregion
+
     }
 }
