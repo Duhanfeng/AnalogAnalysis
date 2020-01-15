@@ -40,7 +40,7 @@ namespace AnalogSignalAnalysisWpf
             if (ofd.ShowDialog() == true)
             {
                 var model = DataContext as NewIOMeasurementViewModel;
-                //model.ImportConfigFile(ofd.FileName);
+                model.ImportConfigFile(ofd.FileName);
             }
         }
 

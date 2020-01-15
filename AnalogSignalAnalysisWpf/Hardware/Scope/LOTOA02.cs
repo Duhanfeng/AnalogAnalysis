@@ -792,7 +792,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
                             }
                         }
 
-                        OnScopeReadDataCompleted(channelData1, channelData2, currentChannel1, currentChannel2, (int)eventNumber, currentEventID);
+                        OnScopeReadDataCompleted(channelData1, channelData2, currentChannel1, currentChannel2, (int)eventNumber, currentEventID + 1);
 
                         if (currentEventID == (eventNumber - 1))
                         {

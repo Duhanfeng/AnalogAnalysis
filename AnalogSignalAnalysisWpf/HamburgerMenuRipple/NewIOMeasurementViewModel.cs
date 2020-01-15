@@ -169,7 +169,7 @@ namespace AnalogSignalAnalysisWpf
         {
             get
             {
-                if (IsHardwareValid)
+                if (IsHardwareValid && IsConfigParamValid)
                 {
                     return canMeasure;
                 }
@@ -1337,6 +1337,15 @@ namespace AnalogSignalAnalysisWpf
         }
 
         /// <summary>
+        /// 显示模板
+        /// </summary>
+        /// <param name="baseTime"></param>
+        public void ShowTemplate(double baseTime = 0)
+        {
+            ShowTemplate(ExternRecordData?.Template, baseTime);
+        }
+
+        /// <summary>
         /// 清除模板
         /// </summary>
         public void ClearTemplate()
@@ -1395,11 +1404,65 @@ namespace AnalogSignalAnalysisWpf
             PowerCollection = tempPower;
         }
 
+        /// <summary>
+        /// 追加电源数据
+        /// </summary>
+        /// <param name="point"></param>
+        public void AppendPowerData(DoublePoint point)
+        {
+            //将之前的数据转移到临时变量中
+            var tempPower = new ObservableCollection<DoublePoint>();
+            foreach (var item in PowerCollection)
+            {
+                tempPower.Add(item);
+            }
+
+            //追加数据到后面
+            tempPower.Add(point);
+
+            PowerCollection = tempPower;
+        }
+
         #endregion
 
         #endregion
 
         #region 应用
+
+        #region 配置文件
+
+        private string configFile;
+
+        /// <summary>
+        /// 配置文件
+        /// </summary>
+        public string ConfigFile
+        {
+            get { return configFile; }
+            set { configFile = value; NotifyOfPropertyChange(() => ConfigFile); }
+        }
+
+        private bool isConfigParamValid;
+
+        /// <summary>
+        /// 配置参数有效标志
+        /// </summary>
+        public bool IsConfigParamValid
+        {
+            get { return isConfigParamValid; }
+            set { isConfigParamValid = value; NotifyOfPropertyChange(() => IsConfigParamValid); }
+        }
+
+        private bool isTemplateValid;
+
+        /// <summary>
+        /// 模板有效标识
+        /// </summary>
+        public bool IsTemplateValid
+        {
+            get { return isTemplateValid; }
+            set { isTemplateValid = value; NotifyOfPropertyChange(() => IsTemplateValid); }
+        }
 
         /// <summary>
         /// 外部记录的数据
@@ -1407,20 +1470,292 @@ namespace AnalogSignalAnalysisWpf
         public ExternRecordData ExternRecordData { get; set; } = new ExternRecordData();
 
         /// <summary>
+        /// 鼠标记录软件路径
+        /// </summary>
+        private string mouseRecordToolPath = "./Tools/MouseRecordTool/MouseRecordTool.exe";
+
+        /// <summary>
+        /// 执行配置工具
+        /// </summary>
+        public void ExecuteConfigTool()
+        {
+            var fileInfo = new FileInfo(mouseRecordToolPath);
+
+            //如果文件不存在,则直接退出
+            if (!fileInfo.Exists)
+            {
+                return;
+            }
+            
+            //如果没启动鼠标记录软件,则启动软件
+            var process = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(fileInfo.Name));
+            if (process.Length == 0)
+            {
+                Process.Start(fileInfo.FullName);
+            }
+
+        }
+
+        /// <summary>
+        /// 导入配置文件
+        /// </summary>
+        /// <param name="file"></param>
+        public void ImportConfigFile(string file)
+        {
+            //如果文件存在,则设置配置参数
+            if (!string.IsNullOrWhiteSpace(file) && File.Exists(file))
+            {
+                ConfigFile = file;
+                ExternRecordData = JsonSerialization.DeserializeObjectFromFile<ExternRecordData>(file);
+
+                IsConfigParamValid = (ExternRecordData != null);
+                IsTemplateValid = (ExternRecordData?.Template?.Count > 0);
+                CanMeasure = IsConfigParamValid;
+            }
+
+        }
+
+        /// <summary>
+        /// 保存配置参数
+        /// </summary>
+        public void SaveConfigParam()
+        {
+            //保存配置参数
+            if (!string.IsNullOrWhiteSpace(ConfigFile))
+            {
+                JsonSerialization.SerializeObjectToFile(ExternRecordData, ConfigFile);
+            }
+
+        }
+
+        /// <summary>
         /// 将当前数据导出为模板
         /// </summary>
-        public void ExportTemplate(string file = "temp.json")
+        public void ExportTemplate()
         {
-            //将当前结果设置为模板
-            ExternRecordData.Template = new ObservableCollection<DoublePoint>(ScopeCHACollection);
-
-            //导出模板
-            bool result = JsonSerialization.SerializeObjectToFile(ExternRecordData, file);
-            if (!result)
+            if (IsConfigParamValid)
             {
-                Console.WriteLine("导出失败");
+                //将当前结果设置为模板
+                ExternRecordData.Template = new ObservableCollection<DoublePoint>(ScopeCHACollection);
+                IsTemplateValid = (ExternRecordData?.Template?.Count > 0);
+
+                //保存到本地
+                SaveConfigParam();
+            }
+
+        }
+
+        /// <summary>
+        /// 预览模板
+        /// </summary>
+        public void ReviewTemplate()
+        {
+            //判断是否在测量中
+            lock (lockObject)
+            {
+                if (IsMeasuring)
+                {
+                    return;
+                }
+            }
+
+            if (IsTemplateValid)
+            {
+                //清除界面数据
+                ClearScopeData();
+                ClearPowerData();
+                ClearTemplate();
+
+                //显示模板
+                ShowTemplate();
             }
         }
+
+        #endregion
+
+        #region 运行
+
+        /// <summary>
+        /// 测量线程
+        /// </summary>
+        private Thread measureThread;
+
+        /// <summary>
+        /// 开始
+        /// </summary>
+        public void Start()
+        {
+            //判断是否在测量中
+            lock (lockObject)
+            {
+                if (IsMeasuring)
+                {
+                    return;
+                }
+            }
+
+            //检测硬件有效性
+            if (!CanMeasure)
+            {
+                RunningStatus = "硬件无效/配置文件无效";
+                return;
+            }
+
+            if (!(ExternRecordData?.RecordVoltages?.Values?.Count > 0))
+            {
+                RunningStatus = "输出波形无效";
+                return;
+            }
+
+            //总时间为记录的时间+3S
+            TotalTime = (ExternRecordData.RecordVoltages.Values.Count) * ExternRecordData.TimeInterval + 3000;
+            
+            //复位示波器设置
+            Scope.Disconnect();
+            Scope.Connect();
+            Scope.CHAScale = SystemParamManager.SystemParam.GlobalParam.Scale;
+            Scope.CHAVoltageDIV = SystemParamManager.SystemParam.GlobalParam.VoltageDIV;
+            Scope.IsCHBEnable = true;
+            Scope.CHBScale = SystemParamManager.SystemParam.GlobalParam.Scale;
+            Scope.CHBVoltageDIV = SystemParamManager.SystemParam.GlobalParam.VoltageDIV;
+            Scope.SampleRate = ESampleRate.Sps_96K;
+
+            //设置电源模块直通
+            PLC.PWMSwitch = false;
+            PLC.FlowSwitch = true;
+
+            RunningStatus = "运行中";
+
+            //开启测量线程
+            measureThread = new System.Threading.Thread(() =>
+            {
+                //设置测量状态
+                lock (lockObject)
+                {
+                    IsMeasuring = true;
+                }
+
+                //出发开始测量事件
+                OnMeasurementStarted();
+
+                Stopwatch totalStopwatch = new Stopwatch();
+
+                //设置示波器采集
+                Scope.ScopeReadDataCompleted -= Scope_ScopeReadDataCompleted;
+                Scope.ScopeReadDataCompleted += Scope_ScopeReadDataCompleted;
+
+                //清除界面数据
+                ClearScopeData();
+                ClearPowerData();
+                ClearTemplate();
+
+                Power.Voltage = 0;
+                Power.IsEnableOutput = true;
+
+                //开始连续采集
+                Scope.StartSerialSampple(TotalTime);
+
+                //设置电源模块输出数据
+                var collection = new ObservableCollection<DoublePoint>();
+                int totalCount = ExternRecordData.RecordVoltages.Values.Count;
+                int index = 0;
+                double lastVol = 0;
+                totalStopwatch.Start();
+
+                foreach (var item in ExternRecordData.RecordVoltages)
+                {
+                    //等待时间间隔达到,并输出对应的波形
+                    while (true)
+                    {
+                        if (totalStopwatch.Elapsed.TotalMilliseconds >= item.Key)
+                        {
+                            if (item.Value >= 0)
+                            {
+                                //设置当前电压
+                                Power.Voltage = item.Value / 1000;
+
+                                if (lastVol != item.Value)
+                                {
+                                    collection.Add(new DoublePoint() { Value = lastVol / 1000, Data = totalStopwatch.Elapsed.TotalMilliseconds / 1000.0 });
+                                }
+                                collection.Add(new DoublePoint() { Value = item.Value / 1000, Data = totalStopwatch.Elapsed.TotalMilliseconds / 1000.0 });
+                                lastVol = item.Value;
+
+                            }
+
+                            index++;
+                            break;
+                        }
+                    }
+
+                    //追加显示电源输出波形
+                    AppendPowerData(collection);
+                    collection = new ObservableCollection<DoublePoint>();
+                }
+
+                //完成电压波形的输出后,触发相关事件
+                OnMeasurementCompleted();
+
+            });
+
+            measureThread.Start();
+
+        }
+
+        /// <summary>
+        /// 示波器采集完成事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Scope_ScopeReadDataCompleted(object sender, ScopeReadDataCompletedEventArgs e)
+        {
+            double[] globalChannel1;
+            double[] globalChannel2;
+            double[] currentCHannel1;
+            double[] currentCHannel2;
+
+            //获取示波器数据
+            e.GetData(out globalChannel1, out globalChannel2, out currentCHannel1, out currentCHannel2);
+
+            //将数据追加在末尾
+            AppendScopeData(currentCHannel1, currentCHannel2, false);
+
+            //最后一帧
+            if (e.CurrentPacket == e.TotalPacket)
+            {
+                //显示模板
+                ShowTemplate();
+            }
+
+        }
+
+        #endregion
+
+        #region 老化
+
+        private int testTime = 5;
+
+        /// <summary>
+        /// 测试次数
+        /// </summary>
+        public int TestTime
+        {
+            get { return testTime = 5; }
+            set { testTime = value; NotifyOfPropertyChange(() => TestTime); }
+        }
+
+        private int backupInterval = 20;
+
+        /// <summary>
+        /// 备份间隔
+        /// </summary>
+        public int BackupInterval
+        {
+            get { return backupInterval; }
+            set { backupInterval = value; NotifyOfPropertyChange(() => BackupInterval); }
+        }
+
+        #endregion
 
         #endregion
 
