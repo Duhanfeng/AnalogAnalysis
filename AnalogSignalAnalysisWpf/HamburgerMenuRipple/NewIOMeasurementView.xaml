@@ -28,9 +28,9 @@
         </Grid.ColumnDefinitions>
 
         <StackPanel>
-            <DockPanel>
-                
-                <!--<chart:SparrowChart Visibility="Collapsed" Foreground="White" FontFamily="Arial" ContainerBorderStyle="{StaticResource containerStyle}" Margin="5" MinHeight="200">
+            <StackPanel x:Name="IOChartStackPanel" Background="White">
+                <DockPanel  Margin="0,10">
+                    <!--<chart:SparrowChart Visibility="Collapsed" Foreground="White" FontFamily="Arial" ContainerBorderStyle="{StaticResource containerStyle}" Margin="5" MinHeight="200">
                     <chart:SparrowChart.Background>
                         <LinearGradientBrush EndPoint="0.504,1.5" StartPoint="0.504,0.03">
                             <GradientStop Color="#FF00170B" Offset="0"/>
@@ -51,67 +51,69 @@
                     <chart:LineSeries Label="CHB" PointsSource="{Binding ScopeCHBCollection}" Stroke="MediumAquamarine" XPath="Value" YPath="Value1" StrokeThickness="1" UseSinglePart="True"/>
                     <chart:LineSeries Label="模板" PointsSource="{Binding TemplateDataCollection}" Stroke="BlueViolet" XPath="Value" YPath="Value1" StrokeThickness="2" UseSinglePart="True"/>
                 </chart:SparrowChart>-->
-                
-                <chart:SparrowChart Visibility="Visible"  
+
+                    <chart:SparrowChart Visibility="Visible"  
                                     Margin="5" 
                                     RenderingMode="GDIRendering" 
                                     SmoothingMode="HighSpeed" 
                                     CompositingMode="SourceCopy"
                                     CompositingQuality="HighSpeed"
                                     Height="300">
-                    <chart:SparrowChart.XAxis>
-                        <chart:LinearXAxis ShowCrossLines="True"
+                        <chart:SparrowChart.XAxis>
+                            <chart:LinearXAxis ShowCrossLines="True"
                                        Header="时间(S)" 
                                        StringFormat="0.0"/>
-                    </chart:SparrowChart.XAxis>
-                    <chart:SparrowChart.YAxis>
-                        <chart:LinearYAxis MinValue="0"
+                        </chart:SparrowChart.XAxis>
+                        <chart:SparrowChart.YAxis>
+                            <chart:LinearYAxis MinValue="0"
                                        MaxValue="24" 
                                        ShowCrossLines="True" 
                                        Header="电压(V)"
                                        StringFormat="0.0" />
-                    </chart:SparrowChart.YAxis>
-                    <chart:LineSeries Label="CHA" 
+                        </chart:SparrowChart.YAxis>
+                        <chart:LineSeries Label="CHA" 
                                   PointsSource="{Binding ScopeCHACollection}" 
                                   Stroke="Red" 
                                   XPath="Data" 
                                   YPath="Value"
                                   StrokeThickness="1"
                                   UseSinglePart="True"/>
-                    <chart:LineSeries Label="CHB" 
+                        <chart:LineSeries Label="CHB" 
                                   PointsSource="{Binding ScopeCHBCollection}" 
                                   Stroke="Green" 
                                   XPath="Data" 
                                   YPath="Value"
                                   StrokeThickness="1"
                                   UseSinglePart="True"/>
-                    <chart:LineSeries Label="Power" 
+                        <chart:LineSeries Label="Power" 
                                   PointsSource="{Binding PowerCollection}" 
                                   Stroke="Yellow" 
                                   XPath="Data" 
                                   YPath="Value"
                                   StrokeThickness="1"
                                   UseSinglePart="True"/>
-                    <chart:LineSeries Label="Template" 
+                        <chart:LineSeries Label="Template" 
                                   PointsSource="{Binding TemplateCollection}" 
                                   Stroke="Blue" 
                                   XPath="Data" 
                                   YPath="Value"
                                   StrokeThickness="1"
                                   UseSinglePart="True"/>
-                </chart:SparrowChart>
+                    </chart:SparrowChart>
 
-            </DockPanel>
-            <StackPanel Orientation="Horizontal">
-                <Rectangle Margin="10,0" Width="20" Height="20" Fill="Red"/>
-                <TextBlock VerticalAlignment="Center">CHA</TextBlock>
-                <Rectangle Margin="10,0" Width="20" Height="20" Fill="Green"/>
-                <TextBlock VerticalAlignment="Center">CHB</TextBlock>
-                <Rectangle Margin="10,0" Width="20" Height="20" Fill="Yellow"/>
-                <TextBlock VerticalAlignment="Center">电源输出</TextBlock>
-                <Rectangle Margin="10,0" Width="20" Height="20" Fill="Blue"/>
-                <TextBlock VerticalAlignment="Center">模板</TextBlock>
+                </DockPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Rectangle Margin="10,0" Width="20" Height="20" Fill="Red"/>
+                    <TextBlock VerticalAlignment="Center">CHA</TextBlock>
+                    <Rectangle Margin="10,0" Width="20" Height="20" Fill="Green"/>
+                    <TextBlock VerticalAlignment="Center">CHB</TextBlock>
+                    <Rectangle Margin="10,0" Width="20" Height="20" Fill="Yellow"/>
+                    <TextBlock VerticalAlignment="Center">电源输出</TextBlock>
+                    <Rectangle Margin="10,0" Width="20" Height="20" Fill="Blue"/>
+                    <TextBlock VerticalAlignment="Center">模板</TextBlock>
+                </StackPanel>
             </StackPanel>
+            
 
             <StackPanel Margin="10">
                 <StackPanel Orientation="Horizontal" Margin="0,10">
@@ -125,7 +127,7 @@
                     <TextBlock Text="当前状态:" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <Ellipse Width="20" Height="20" Fill="{Binding IsMeasuring, Converter={StaticResource BoolToColorConverter}}" Margin="0,0,10,0"/>
                     <TextBox Text="{Binding RunningStatus}" IsReadOnly="True" MinWidth="150" Margin="0,0,20,0"/>
-                    <Button cal:Message.Attach="Start" IsEnabled="{Binding CanMeasure}" Margin="0,0,20,0" MinWidth="80">运行</Button>
+                    <Button cal:Message.Attach="StartOneShot" IsEnabled="{Binding CanMeasure}" Margin="0,0,20,0" MinWidth="80">运行</Button>
                 </StackPanel>
                 <StackPanel Margin="0,5"/>
                 <StackPanel Orientation="Horizontal">

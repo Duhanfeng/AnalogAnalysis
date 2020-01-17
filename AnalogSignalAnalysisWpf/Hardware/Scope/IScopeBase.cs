@@ -111,7 +111,6 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         /// <param name="channelData2">通道2数据</param>
         void ReadDataBlock(out double[] channelData1, out double[] channelData2);
 
-
         /// <summary>
         /// 开始记录数据
         /// </summary>
@@ -132,6 +131,11 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         void ReadData(out double[] channelData1, out double[] channelData2);
 
         /// <summary>
+        /// 连续采集中标志
+        /// </summary>
+        bool IsSerialSampling { get; set; }
+
+        /// <summary>
         /// 停止采集线程
         /// </summary>
         void StopSampleThread();
@@ -139,7 +143,7 @@ namespace AnalogSignalAnalysisWpf.Hardware.Scope
         /// <summary>
         /// 开始连续采集
         /// </summary>
-        void StartSerialSampple(int serialSampleTime);
+        void StartSerialSample(int serialSampleTime);
 
         #region 属性
 

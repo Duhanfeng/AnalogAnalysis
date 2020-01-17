@@ -766,7 +766,7 @@ namespace AnalogSignalAnalysisWpf
                     Scope.ScopeReadDataCompleted += Scope_ScopeReadDataCompleted;
 
                     //开始连续采集
-                    Scope.StartSerialSampple(15000);
+                    Scope.StartSerialSample(15000);
                 }
                 else
                 {

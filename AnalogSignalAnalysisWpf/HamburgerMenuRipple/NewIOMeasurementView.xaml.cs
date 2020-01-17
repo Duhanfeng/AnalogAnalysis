@@ -64,8 +64,8 @@ namespace AnalogSignalAnalysisWpf
 
             Dispatcher.Invoke(new Action(() =>
             {
-                //var bmp = ToBitmapTool.ToBitmap(SparrowChart);
-                //bmp.Save($"{dir}/{DateTime.Now.ToString("HHmmss")}.bmp");
+                var bmp = ToBitmapTool.ToBitmap(IOChartStackPanel);
+                bmp.Save($"{dir}/{DateTime.Now.ToString("HHmmss")}.bmp");
             }));
 
         }
@@ -154,11 +154,6 @@ namespace AnalogSignalAnalysisWpf
             var rtb = new RenderTargetBitmap(width, height, x, y, System.Windows.Media.PixelFormats.Default);
             rtb.Render(element);
             var bit = BitmapSourceToBitmap(rtb);
-
-            //测试代码
-            DirectoryInfo d = new DirectoryInfo(System.IO.Path.Combine(Directory.GetCurrentDirectory(), "Cache"));
-            if (!d.Exists) d.Create();
-            bit.Save(System.IO.Path.Combine(d.FullName, "控件截图.png"));
 
             return bit;
         }

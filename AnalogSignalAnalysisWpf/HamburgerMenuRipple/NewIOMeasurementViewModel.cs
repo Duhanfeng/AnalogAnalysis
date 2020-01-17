@@ -1111,7 +1111,7 @@ namespace AnalogSignalAnalysisWpf
         /// <summary>
         /// 总时间(S)
         /// </summary>
-        public int TotalTime { get; set; } = 10;
+        public double TotalTime { get; set; } = 10;
 
         /// <summary>
         /// 总数量
@@ -1121,7 +1121,7 @@ namespace AnalogSignalAnalysisWpf
             get
             {
 
-                return IsShowLastValue ? TotalTime * DisplayRate * 2 : TotalTime * DisplayRate;
+                return (int)(TotalTime * DisplayRate * (IsShowLastValue ? 2 : 1));
             }
         }
 
@@ -1177,6 +1177,22 @@ namespace AnalogSignalAnalysisWpf
         }
 
         #endregion
+
+        /// <summary>
+        /// 获取最后的示波器数据时间
+        /// </summary>
+        /// <returns></returns>
+        public double GetLastScopeDataTime()
+        {
+            if (ScopeCHACollection.Count > 0)
+            {
+                return ScopeCHACollection[ScopeCHACollection.Count - 1].Data;
+            }
+            else
+            {
+                return 0;
+            }
+        }
 
         /// <summary>
         /// 清除示波器数据
@@ -1407,7 +1423,6 @@ namespace AnalogSignalAnalysisWpf
         /// <summary>
         /// 追加电源数据
         /// </summary>
-        /// <param name="point"></param>
         public void AppendPowerData(DoublePoint point)
         {
             //将之前的数据转移到临时变量中
@@ -1421,6 +1436,15 @@ namespace AnalogSignalAnalysisWpf
             tempPower.Add(point);
 
             PowerCollection = tempPower;
+        }
+
+        /// <summary>
+        /// 更新电源数据
+        /// </summary>
+        public void UpdatePowerData()
+        {
+            //NotifyOfPropertyChange(() => PowerCollection);
+            PowerCollection = PowerCollection;
         }
 
         #endregion
@@ -1576,14 +1600,29 @@ namespace AnalogSignalAnalysisWpf
         #region 运行
 
         /// <summary>
+        /// 当前基本时间
+        /// </summary>
+        private double currentBaseTime = 0;
+
+        /// <summary>
+        /// 示波器采集完成标志
+        /// </summary>
+        private bool isScopeSampleCompleted = false;
+
+        /// <summary>
         /// 测量线程
         /// </summary>
         private Thread measureThread;
 
+        public void StartOneShot()
+        {
+            Start(1);
+        }
+
         /// <summary>
         /// 开始
         /// </summary>
-        public void Start()
+        public void Start(int testTime, bool isBackup = false, int backupInterval = 5)
         {
             //判断是否在测量中
             lock (lockObject)
@@ -1608,7 +1647,7 @@ namespace AnalogSignalAnalysisWpf
             }
 
             //总时间为记录的时间+3S
-            TotalTime = (ExternRecordData.RecordVoltages.Values.Count) * ExternRecordData.TimeInterval + 3000;
+            TotalTime = ((ExternRecordData.RecordVoltages.Values.Count) * ExternRecordData.TimeInterval) / 1000 + 2;
             
             //复位示波器设置
             Scope.Disconnect();
@@ -1646,51 +1685,86 @@ namespace AnalogSignalAnalysisWpf
 
                 //清除界面数据
                 ClearScopeData();
-                ClearPowerData();
-                ClearTemplate();
-
-                Power.Voltage = 0;
-                Power.IsEnableOutput = true;
-
-                //开始连续采集
-                Scope.StartSerialSampple(TotalTime);
-
-                //设置电源模块输出数据
-                var collection = new ObservableCollection<DoublePoint>();
-                int totalCount = ExternRecordData.RecordVoltages.Values.Count;
-                int index = 0;
-                double lastVol = 0;
-                totalStopwatch.Start();
-
-                foreach (var item in ExternRecordData.RecordVoltages)
+                
+                for (int i = 0; i < testTime; i++)
                 {
-                    //等待时间间隔达到,并输出对应的波形
-                    while (true)
+                    ClearPowerData();
+                    ClearTemplate();
+
+                    double baseTime = GetLastScopeDataTime() + TimeInterval;
+
+                    Power.Voltage = 0;
+                    Power.IsEnableOutput = true;
+
+                    //开始连续采集
+                    Scope.StartSerialSample((int)(TotalTime * 1000));
+                    isScopeSampleCompleted = false;
+
+                    //设置电源模块输出数据
+                    var collection = new ObservableCollection<DoublePoint>();
+                    int totalCount = ExternRecordData.RecordVoltages.Values.Count;
+                    int index = 0;
+                    double lastVol = 0;
+                    totalStopwatch.Restart();
+
+                    foreach (var item in ExternRecordData.RecordVoltages)
                     {
-                        if (totalStopwatch.Elapsed.TotalMilliseconds >= item.Key)
+                        //等待时间间隔达到,并输出对应的波形
+                        while (true)
                         {
-                            if (item.Value >= 0)
+                            if (totalStopwatch.Elapsed.TotalMilliseconds >= item.Key)
                             {
-                                //设置当前电压
-                                Power.Voltage = item.Value / 1000;
-
-                                if (lastVol != item.Value)
+                                if (item.Value >= 0)
                                 {
-                                    collection.Add(new DoublePoint() { Value = lastVol / 1000, Data = totalStopwatch.Elapsed.TotalMilliseconds / 1000.0 });
+                                    //设置当前电压
+                                    Power.Voltage = item.Value / 1000;
+
+                                    if (lastVol != item.Value)
+                                    {
+                                        collection.Add(new DoublePoint() { Value = lastVol / 1000, Data = baseTime + totalStopwatch.Elapsed.TotalMilliseconds / 1000.0 });
+                                    }
+                                    collection.Add(new DoublePoint() { Value = item.Value / 1000, Data = baseTime + totalStopwatch.Elapsed.TotalMilliseconds / 1000.0 });
+                                    lastVol = item.Value;
+
                                 }
-                                collection.Add(new DoublePoint() { Value = item.Value / 1000, Data = totalStopwatch.Elapsed.TotalMilliseconds / 1000.0 });
-                                lastVol = item.Value;
 
+                                index++;
+                                break;
                             }
-
-                            index++;
-                            break;
                         }
+
+                        //追加显示电源输出波形
+                        AppendPowerData(collection);
+                        collection = new ObservableCollection<DoublePoint>();
                     }
 
-                    //追加显示电源输出波形
-                    AppendPowerData(collection);
-                    collection = new ObservableCollection<DoublePoint>();
+                    Power.Voltage = 0;
+
+                    //等待示波器采集完成,并刷新电源输出波形
+                    while (!isScopeSampleCompleted)
+                    {
+                        Thread.Sleep(ExternRecordData.TimeInterval);
+                        if (lastVol != 0)
+                        {
+                            collection.Add(new DoublePoint() { Value = lastVol / 1000, Data = baseTime + totalStopwatch.Elapsed.TotalMilliseconds / 1000.0 });
+                        }
+                        collection.Add(new DoublePoint() { Value = 0, Data = baseTime + totalStopwatch.Elapsed.TotalMilliseconds / 1000.0 });
+                        lastVol = 0;
+                        AppendPowerData(collection);
+                        collection = new ObservableCollection<DoublePoint>();
+                    }
+
+                    //显示模板
+                    ShowTemplate(baseTime);
+
+                    Thread.Sleep(2000);
+
+                    //保存截图
+                    if (isBackup && (i % backupInterval == 0))
+                    {
+                        OnCompared();
+                        Thread.Sleep(1000);
+                    }
                 }
 
                 //完成电压波形的输出后,触发相关事件
@@ -1718,13 +1792,13 @@ namespace AnalogSignalAnalysisWpf
             e.GetData(out globalChannel1, out globalChannel2, out currentCHannel1, out currentCHannel2);
 
             //将数据追加在末尾
-            AppendScopeData(currentCHannel1, currentCHannel2, false);
+            AppendScopeData(currentCHannel1, currentCHannel2, IsBurnIn);
 
             //最后一帧
             if (e.CurrentPacket == e.TotalPacket)
             {
-                //显示模板
-                ShowTemplate();
+                (sender as IScopeBase).StopSampleThread();
+                isScopeSampleCompleted = true;
             }
 
         }
@@ -1740,7 +1814,7 @@ namespace AnalogSignalAnalysisWpf
         /// </summary>
         public int TestTime
         {
-            get { return testTime = 5; }
+            get { return testTime; }
             set { testTime = value; NotifyOfPropertyChange(() => TestTime); }
         }
 
@@ -1753,6 +1827,27 @@ namespace AnalogSignalAnalysisWpf
         {
             get { return backupInterval; }
             set { backupInterval = value; NotifyOfPropertyChange(() => BackupInterval); }
+        }
+
+        private bool isBurnIn;
+
+        /// <summary>
+        /// 老化测试标志
+        /// </summary>
+        public bool IsBurnIn
+        {
+            get { return isBurnIn; }
+            set { isBurnIn = value; NotifyOfPropertyChange(() => IsBurnIn); }
+        }
+
+        /// <summary>
+        /// 老化测试
+        /// </summary>
+        public void BurnIn()
+        {
+            currentBaseTime = 0;
+            IsBurnIn = true;
+            Start(TestTime, true, BackupInterval);
         }
 
         #endregion
